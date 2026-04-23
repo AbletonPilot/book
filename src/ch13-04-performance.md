@@ -2,56 +2,53 @@
 
 <a id="comparing-performance-loops-vs-iterators"></a>
 
-## Performance in Loops vs. Iterators
+## 루프 vs. 이터레이터의 성능
 
-To determine whether to use loops or iterators, you need to know which
-implementation is faster: the version of the `search` function with an explicit
-`for` loop or the version with iterators.
+루프와 이터레이터 중 어느 쪽을 사용할지 결정하려면, 어느 구현이 더 빠른지
+알아야 합니다. 명시적 `for` 루프를 사용한 `search` 함수 버전과 이터레이터를
+사용한 버전 중 말이죠.
 
-We ran a benchmark by loading the entire contents of _The Adventures of
-Sherlock Holmes_ by Sir Arthur Conan Doyle into a `String` and looking for the
-word _the_ in the contents. Here are the results of the benchmark on the
-version of `search` using the `for` loop and the version using iterators:
+아서 코난 도일 경의 _셜록 홈스의 모험(The Adventures of Sherlock Holmes)_ 전체
+내용을 `String`에 로드하고, 그 내용에서 _the_ 라는 단어를 찾는 벤치마크를
+실행했습니다. 다음은 `for` 루프 버전과 이터레이터 버전의 `search`에 대한
+벤치마크 결과입니다.
 
 ```text
 test bench_search_for  ... bench:  19,620,300 ns/iter (+/- 915,700)
 test bench_search_iter ... bench:  19,234,900 ns/iter (+/- 657,200)
 ```
 
-The two implementations have similar performance! We won’t explain the
-benchmark code here because the point is not to prove that the two versions
-are equivalent but to get a general sense of how these two implementations
-compare performance-wise.
+두 구현의 성능은 비슷합니다! 두 버전이 같음을 증명하는 것이 요지가 아니라,
+이 두 구현이 성능 면에서 대략 어떻게 비교되는지 감을 잡는 것이 요지이므로
+벤치마크 코드는 여기서 설명하지 않겠습니다.
 
-For a more comprehensive benchmark, you should check using various texts of
-various sizes as the `contents`, different words and words of different lengths
-as the `query`, and all kinds of other variations. The point is this:
-Iterators, although a high-level abstraction, get compiled down to roughly the
-same code as if you’d written the lower-level code yourself. Iterators are one
-of Rust’s _zero-cost abstractions_, by which we mean that using the abstraction
-imposes no additional runtime overhead. This is analogous to how Bjarne
-Stroustrup, the original designer and implementor of C++, defines
-zero-overhead in his 2012 ETAPS keynote presentation “Foundations of C++”:
+더 종합적인 벤치마크를 위해서는 `contents`로 다양한 크기의 다양한 텍스트를,
+`query`로 다양한 단어와 다양한 길이의 단어를 사용해 보고, 온갖 다른 변형을
+시도해 봐야 합니다. 요점은 이것입니다. 이터레이터는 상위 수준의 추상화이지만,
+여러분이 손수 낮은 수준의 코드를 작성한 것과 대략 같은 코드로 컴파일됩니다.
+이터레이터는 러스트의 _비용 없는 추상화(zero-cost abstractions)_ 중 하나로,
+이 추상화를 사용해도 런타임 오버헤드가 더 들지 않음을 의미합니다. 이는 C++의
+원래 설계자이자 구현자인 비야네 스트롭스트룹(Bjarne Stroustrup)이 2012년
+ETAPS 기조 연설 “Foundations of C++”에서 비용 없음(zero-overhead)을 정의한
+방식과 유사합니다.
 
-> In general, C++ implementations obey the zero-overhead principle: What you
-> don’t use, you don’t pay for. And further: What you do use, you couldn’t hand
-> code any better.
+> 일반적으로 C++ 구현은 비용 없음 원칙을 따른다. 사용하지 않는 것에는 비용을
+> 지불하지 않는다. 그리고 더 나아가: 사용하는 것은 직접 손으로 짜도 더 낫게는
+> 짤 수 없다.
 
-In many cases, Rust code using iterators compiles to the same assembly you’d
-write by hand. Optimizations such as loop unrolling and eliminating bounds
-checking on array access apply and make the resultant code extremely efficient.
-Now that you know this, you can use iterators and closures without fear! They
-make code seem like it’s higher level but don’t impose a runtime performance
-penalty for doing so.
+많은 경우 이터레이터를 사용하는 러스트 코드는 여러분이 손수 작성한 것과 동일
+한 어셈블리로 컴파일됩니다. 루프 펼침(loop unrolling)이나 배열 접근 시 경계
+검사 제거 같은 최적화가 적용되어 결과 코드가 매우 효율적입니다. 이제 이를
+알았으니, 두려움 없이 이터레이터와 클로저를 사용할 수 있습니다! 이들은 코드를
+상위 수준처럼 보이게 하면서도 그러한 이유로 런타임 성능 벌점을 부과하지 않습니다.
 
-## Summary
+## 요약
 
-Closures and iterators are Rust features inspired by functional programming
-language ideas. They contribute to Rust’s capability to clearly express
-high-level ideas at low-level performance. The implementations of closures and
-iterators are such that runtime performance is not affected. This is part of
-Rust’s goal to strive to provide zero-cost abstractions.
+클로저와 이터레이터는 함수형 프로그래밍 언어의 아이디어에서 영감을 받은
+러스트 기능입니다. 이들은 러스트가 낮은 수준의 성능으로 상위 수준의 아이디어를
+명확히 표현할 수 있는 능력에 기여합니다. 클로저와 이터레이터의 구현은 런타임
+성능에 영향을 주지 않도록 되어 있습니다. 이는 비용 없는 추상화를 제공하려는
+러스트의 목표의 일부입니다.
 
-Now that we’ve improved the expressiveness of our I/O project, let’s look at
-some more features of `cargo` that will help us share the project with the
-world.
+이제 I/O 프로젝트의 표현력을 개선했으니, 세상에 프로젝트를 공유하는 데 도움이
+될 `cargo`의 더 많은 기능을 살펴봅시다.

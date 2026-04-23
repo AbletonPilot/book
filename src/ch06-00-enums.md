@@ -1,11 +1,10 @@
-# Enums and Pattern Matching
+# 열거형과 패턴 매칭
 
-In this chapter, we’ll look at enumerations, also referred to as _enums_.
-Enums allow you to define a type by enumerating its possible variants. First
-we’ll define and use an enum to show how an enum can encode meaning along with
-data. Next, we’ll explore a particularly useful enum, called `Option`, which
-expresses that a value can be either something or nothing. Then, we’ll look at
-how pattern matching in the `match` expression makes it easy to run different
-code for different values of an enum. Finally, we’ll cover how the `if let`
-construct is another convenient and concise idiom available to handle enums in
-your code.
+이 장에서는 *열거형(enumerations)*, 흔히 *enum*이라고도 부르는 것을 살펴봅니다.
+열거형은 가능한 배리언트(variant)들을 나열해 타입을 정의할 수 있게 해 줍니다.
+먼저 열거형을 정의하고 사용하면서, 열거형이 데이터와 함께 의미를 어떻게 인코딩할
+수 있는지 보겠습니다. 다음으로, 값이 무언가이거나 아무것도 아닐 수 있음을 표현하는
+특히 유용한 열거형인 `Option`을 탐구합니다. 그런 다음, `match` 표현식의 패턴
+매칭이 어떻게 열거형의 서로 다른 값에 대해 서로 다른 코드를 손쉽게 실행하도록 해
+주는지 살펴봅니다. 마지막으로, 코드에서 열거형을 다루기 위해 사용할 수 있는 또
+하나의 편리하고 간결한 관용 표현인 `if let` 구조를 다룹니다.

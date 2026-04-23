@@ -1,8 +1,8 @@
-# Getting Started
+# 시작하기
 
-Let’s start your Rust journey! There’s a lot to learn, but every journey starts
-somewhere. In this chapter, we’ll discuss:
+러스트 여정을 시작해 봅시다! 배울 것이 많지만, 모든 여정은 어딘가에서 시작됩니다. 이
+장에서는 다음 내용을 다룹니다.
 
-- Installing Rust on Linux, macOS, and Windows
-- Writing a program that prints `Hello, world!`
-- Using `cargo`, Rust’s package manager and build system
+- 리눅스, 맥OS, 윈도우에 러스트 설치하기
+- `Hello, world!`를 출력하는 프로그램 작성하기
+- 러스트의 패키지 관리자이자 빌드 시스템인 `cargo` 사용하기

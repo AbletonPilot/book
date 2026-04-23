@@ -2,37 +2,35 @@
 
 <a id="traits-defining-shared-behavior"></a>
 
-## Defining Shared Behavior with Traits
+## 트레이트로 공유 동작 정의하기
 
-A _trait_ defines the functionality a particular type has and can share with
-other types. We can use traits to define shared behavior in an abstract way. We
-can use _trait bounds_ to specify that a generic type can be any type that has
-certain behavior.
+_트레이트(trait)_ 는 특정 타입이 가지며 다른 타입과 공유할 수 있는 기능을
+정의합니다. 트레이트를 사용하면 공유 동작을 추상적으로 정의할 수 있습니다.
+_트레이트 경계(trait bound)_ 를 사용하면 제네릭 타입이 특정 동작을 가진 임의의
+타입이 될 수 있음을 명시할 수 있습니다.
 
-> Note: Traits are similar to a feature often called _interfaces_ in other
-> languages, although with some differences.
+> 참고: 트레이트는 다른 언어에서 흔히 _인터페이스(interface)_ 라고 부르는 기능과
+> 비슷하지만, 몇 가지 차이점이 있습니다.
 
-### Defining a Trait
+### 트레이트 정의하기
 
-A type’s behavior consists of the methods we can call on that type. Different
-types share the same behavior if we can call the same methods on all of those
-types. Trait definitions are a way to group method signatures together to
-define a set of behaviors necessary to accomplish some purpose.
+어떤 타입의 동작은 그 타입에서 호출할 수 있는 메서드로 구성됩니다. 모든 타입에
+대해 같은 메서드를 호출할 수 있다면, 그 타입들은 같은 동작을 공유하는 셈입니다.
+트레이트 정의는 어떤 목적을 달성하는 데 필요한 동작 집합을 정의하기 위해 메서드
+시그니처를 모아 두는 방법입니다.
 
-For example, let’s say we have multiple structs that hold various kinds and
-amounts of text: a `NewsArticle` struct that holds a news story filed in a
-particular location and a `SocialPost` that can have, at most, 280 characters
-along with metadata that indicates whether it was a new post, a repost, or a
-reply to another post.
+예를 들어 다양한 종류와 분량의 텍스트를 담는 여러 구조체가 있다고 해 봅시다.
+특정 장소에 접수된 뉴스 스토리를 담는 `NewsArticle` 구조체와, 최대 280자까지
+가질 수 있고 그것이 새 글인지, 리포스트인지, 다른 글에 대한 답글인지 나타내는
+메타데이터가 있는 `SocialPost`가 있다고 해 봅시다.
 
-We want to make a media aggregator library crate named `aggregator` that can
-display summaries of data that might be stored in a `NewsArticle` or
-`SocialPost` instance. To do this, we need a summary from each type, and we’ll
-request that summary by calling a `summarize` method on an instance. Listing
-10-12 shows the definition of a public `Summary` trait that expresses this
-behavior.
+우리는 `NewsArticle`이나 `SocialPost` 인스턴스에 저장된 데이터를 요약해서 보여
+줄 수 있는 `aggregator`라는 미디어 애그리게이터 라이브러리 크레이트를 만들고
+싶습니다. 이를 위해 각 타입에서 요약을 얻어야 하고, 인스턴스에서 `summarize`
+메서드를 호출해 그 요약을 요청할 것입니다. Listing 10-12는 이 동작을 표현하는
+공개 `Summary` 트레이트의 정의를 보여 줍니다.
 
-<Listing number="10-12" file-name="src/lib.rs" caption="A `Summary` trait that consists of the behavior provided by a `summarize` method">
+<Listing number="10-12" file-name="src/lib.rs" caption="`summarize` 메서드가 제공하는 동작으로 구성된 `Summary` 트레이트">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-12/src/lib.rs}}
@@ -40,33 +38,30 @@ behavior.
 
 </Listing>
 
-Here, we declare a trait using the `trait` keyword and then the trait’s name,
-which is `Summary` in this case. We also declare the trait as `pub` so that
-crates depending on this crate can make use of this trait too, as we’ll see in
-a few examples. Inside the curly brackets, we declare the method signatures
-that describe the behaviors of the types that implement this trait, which in
-this case is `fn summarize(&self) -> String`.
+여기서는 `trait` 키워드 다음에 트레이트 이름을 적어 트레이트를 선언하고 있으며,
+이 경우 이름은 `Summary`입니다. 또한 몇 가지 예제에서 볼 예정처럼 이 크레이트에
+의존하는 다른 크레이트도 이 트레이트를 사용할 수 있도록 트레이트를 `pub`으로
+선언합니다. 중괄호 안에는 이 트레이트를 구현하는 타입의 동작을 기술하는 메서드
+시그니처를 선언합니다. 이 경우에는 `fn summarize(&self) -> String`입니다.
 
-After the method signature, instead of providing an implementation within curly
-brackets, we use a semicolon. Each type implementing this trait must provide
-its own custom behavior for the body of the method. The compiler will enforce
-that any type that has the `Summary` trait will have the method `summarize`
-defined with this signature exactly.
+메서드 시그니처 뒤에 중괄호로 구현을 제공하는 대신 세미콜론을 사용합니다. 이
+트레이트를 구현하는 각 타입은 메서드 본문에 대한 자체 동작을 제공해야 합니다.
+컴파일러는 `Summary` 트레이트를 가진 모든 타입이 정확히 이 시그니처로 정의된
+`summarize` 메서드를 가지도록 강제합니다.
 
-A trait can have multiple methods in its body: The method signatures are listed
-one per line, and each line ends in a semicolon.
+트레이트 본문에는 여러 메서드가 있을 수 있습니다. 메서드 시그니처는 한 줄에
+하나씩 나열되며, 각 줄은 세미콜론으로 끝납니다.
 
-### Implementing a Trait on a Type
+### 타입에 트레이트 구현하기
 
-Now that we’ve defined the desired signatures of the `Summary` trait’s methods,
-we can implement it on the types in our media aggregator. Listing 10-13 shows
-an implementation of the `Summary` trait on the `NewsArticle` struct that uses
-the headline, the author, and the location to create the return value of
-`summarize`. For the `SocialPost` struct, we define `summarize` as the username
-followed by the entire text of the post, assuming that the post content is
-already limited to 280 characters.
+이제 `Summary` 트레이트 메서드의 원하는 시그니처를 정의했으므로, 미디어
+애그리게이터의 타입들에 이를 구현할 수 있습니다. Listing 10-13은 `NewsArticle`
+구조체에 `Summary` 트레이트를 구현한 예를 보여 줍니다. 이 구현은 표제, 저자,
+장소를 사용해 `summarize`의 반환 값을 만듭니다. `SocialPost` 구조체의 경우에는
+게시물 내용이 이미 280자로 제한되어 있다고 가정하고, 사용자 이름에 이어 게시물
+전체 텍스트를 붙여 `summarize`를 정의합니다.
 
-<Listing number="10-13" file-name="src/lib.rs" caption="Implementing the `Summary` trait on the `NewsArticle` and `SocialPost` types">
+<Listing number="10-13" file-name="src/lib.rs" caption="`NewsArticle`과 `SocialPost` 타입에 `Summary` 트레이트 구현하기">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-13/src/lib.rs:here}}
@@ -74,64 +69,59 @@ already limited to 280 characters.
 
 </Listing>
 
-Implementing a trait on a type is similar to implementing regular methods. The
-difference is that after `impl`, we put the trait name we want to implement,
-then use the `for` keyword, and then specify the name of the type we want to
-implement the trait for. Within the `impl` block, we put the method signatures
-that the trait definition has defined. Instead of adding a semicolon after each
-signature, we use curly brackets and fill in the method body with the specific
-behavior that we want the methods of the trait to have for the particular type.
+타입에 트레이트를 구현하는 것은 일반 메서드를 구현하는 것과 비슷합니다. 차이점은
+`impl` 뒤에 구현하려는 트레이트 이름을 쓰고, 그다음 `for` 키워드를 사용하며,
+그다음 트레이트를 구현할 타입의 이름을 명시한다는 것입니다. `impl` 블록 안에는
+트레이트 정의에서 정의한 메서드 시그니처를 둡니다. 각 시그니처 뒤에 세미콜론을
+붙이는 대신 중괄호를 사용하고, 특정 타입에 대해 트레이트의 메서드가 가져야 할
+구체적 동작으로 메서드 본문을 채웁니다.
 
-Now that the library has implemented the `Summary` trait on `NewsArticle` and
-`SocialPost`, users of the crate can call the trait methods on instances of
-`NewsArticle` and `SocialPost` in the same way we call regular methods. The only
-difference is that the user must bring the trait into scope as well as the
-types. Here’s an example of how a binary crate could use our `aggregator`
-library crate:
+이제 라이브러리가 `NewsArticle`과 `SocialPost`에 `Summary` 트레이트를 구현했으므로,
+크레이트 사용자는 일반 메서드를 호출하듯이 `NewsArticle`과 `SocialPost`
+인스턴스에서 트레이트 메서드를 호출할 수 있습니다. 다른 점은 사용자가 타입뿐
+아니라 트레이트도 스코프로 가져와야 한다는 것입니다. 다음은 바이너리 크레이트가
+우리의 `aggregator` 라이브러리 크레이트를 사용하는 예입니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-01-calling-trait-method/src/main.rs}}
 ```
 
-This code prints `1 new post: horse_ebooks: of course, as you probably already
-know, people`.
+이 코드는 `1 new post: horse_ebooks: of course, as you probably already know, people`을
+출력합니다.
 
-Other crates that depend on the `aggregator` crate can also bring the `Summary`
-trait into scope to implement `Summary` on their own types. One restriction to
-note is that we can implement a trait on a type only if either the trait or the
-type, or both, are local to our crate. For example, we can implement standard
-library traits like `Display` on a custom type like `SocialPost` as part of our
-`aggregator` crate functionality because the type `SocialPost` is local to our
-`aggregator` crate. We can also implement `Summary` on `Vec<T>` in our
-`aggregator` crate because the trait `Summary` is local to our `aggregator`
-crate.
+`aggregator` 크레이트에 의존하는 다른 크레이트도 `Summary` 트레이트를 스코프로
+가져와 자신의 타입에 `Summary`를 구현할 수 있습니다. 한 가지 유의할 제약은,
+트레이트를 타입에 구현하려면 트레이트 또는 타입 중 적어도 하나(혹은 둘 다)가 우리
+크레이트 내에 정의되어 있어야 한다는 점입니다. 예를 들어 `SocialPost`는 우리
+`aggregator` 크레이트의 로컬 타입이므로, `Display` 같은 표준 라이브러리
+트레이트를 `aggregator` 크레이트 기능의 일부로 `SocialPost` 같은 사용자 정의
+타입에 구현할 수 있습니다. 또한 `Summary` 트레이트가 `aggregator` 크레이트의
+로컬이므로 `aggregator` 크레이트 내에서 `Vec<T>`에 `Summary`를 구현할 수도
+있습니다.
 
-But we can’t implement external traits on external types. For example, we can’t
-implement the `Display` trait on `Vec<T>` within our `aggregator` crate,
-because `Display` and `Vec<T>` are both defined in the standard library and
-aren’t local to our `aggregator` crate. This restriction is part of a property
-called _coherence_, and more specifically the _orphan rule_, so named because
-the parent type is not present. This rule ensures that other people’s code
-can’t break your code and vice versa. Without the rule, two crates could
-implement the same trait for the same type, and Rust wouldn’t know which
-implementation to use.
+그러나 외부 트레이트를 외부 타입에 구현할 수는 없습니다. 예를 들어 `Display`와
+`Vec<T>`가 모두 표준 라이브러리에 정의되어 있고 `aggregator` 크레이트의 로컬이
+아니므로, `aggregator` 크레이트 내에서 `Vec<T>`에 `Display` 트레이트를 구현할 수
+없습니다. 이 제약은 _일관성(coherence)_ 이라는 속성의 일부이며, 더 구체적으로는
+부모 타입이 존재하지 않아 이름 지어진 _고아 규칙(orphan rule)_ 에 해당합니다.
+이 규칙은 다른 사람의 코드가 내 코드를 망가뜨리지 못하게 하고, 그 반대도
+마찬가지가 되도록 보장합니다. 이 규칙이 없다면 두 크레이트가 동일 타입에 동일
+트레이트를 구현할 수 있고, 러스트는 어느 구현을 써야 할지 알 수 없을 것입니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="default-implementations"></a>
 
-### Using Default Implementations
+### 기본 구현 사용하기
 
-Sometimes it’s useful to have default behavior for some or all of the methods
-in a trait instead of requiring implementations for all methods on every type.
-Then, as we implement the trait on a particular type, we can keep or override
-each method’s default behavior.
+때때로 모든 타입에 모든 메서드 구현을 요구하지 않고, 트레이트의 일부 또는 모든
+메서드에 기본 동작을 두는 것이 유용할 때가 있습니다. 그런 다음 특정 타입에
+트레이트를 구현할 때, 각 메서드의 기본 동작을 유지하거나 재정의할 수 있습니다.
 
-In Listing 10-14, we specify a default string for the `summarize` method of the
-`Summary` trait instead of only defining the method signature, as we did in
-Listing 10-12.
+Listing 10-14에서는 Listing 10-12처럼 메서드 시그니처만 정의하는 대신,
+`Summary` 트레이트의 `summarize` 메서드에 기본 문자열을 지정합니다.
 
-<Listing number="10-14" file-name="src/lib.rs" caption="Defining a `Summary` trait with a default implementation of the `summarize` method">
+<Listing number="10-14" file-name="src/lib.rs" caption="`summarize` 메서드의 기본 구현을 가진 `Summary` 트레이트 정의하기">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-14/src/lib.rs:here}}
@@ -139,94 +129,88 @@ Listing 10-12.
 
 </Listing>
 
-To use a default implementation to summarize instances of `NewsArticle`, we
-specify an empty `impl` block with `impl Summary for NewsArticle {}`.
+기본 구현을 사용해 `NewsArticle` 인스턴스를 요약하려면 `impl Summary for NewsArticle {}`
+처럼 빈 `impl` 블록을 지정합니다.
 
-Even though we’re no longer defining the `summarize` method on `NewsArticle`
-directly, we’ve provided a default implementation and specified that
-`NewsArticle` implements the `Summary` trait. As a result, we can still call
-the `summarize` method on an instance of `NewsArticle`, like this:
+더 이상 `NewsArticle`에 `summarize` 메서드를 직접 정의하지 않더라도, 우리는
+기본 구현을 제공했고 `NewsArticle`이 `Summary` 트레이트를 구현함을 명시했습니다.
+그 결과 다음과 같이 여전히 `NewsArticle` 인스턴스에서 `summarize` 메서드를 호출할
+수 있습니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-02-calling-default-impl/src/main.rs:here}}
 ```
 
-This code prints `New article available! (Read more...)`.
+이 코드는 `New article available! (Read more...)`을 출력합니다.
 
-Creating a default implementation doesn’t require us to change anything about
-the implementation of `Summary` on `SocialPost` in Listing 10-13. The reason is
-that the syntax for overriding a default implementation is the same as the
-syntax for implementing a trait method that doesn’t have a default
-implementation.
+기본 구현을 만든다고 해서 Listing 10-13의 `SocialPost`에 대한 `Summary` 구현을
+바꿀 필요는 없습니다. 그 이유는 기본 구현을 재정의하는 문법이 기본 구현이 없는
+트레이트 메서드를 구현하는 문법과 같기 때문입니다.
 
-Default implementations can call other methods in the same trait, even if those
-other methods don’t have a default implementation. In this way, a trait can
-provide a lot of useful functionality and only require implementors to specify
-a small part of it. For example, we could define the `Summary` trait to have a
-`summarize_author` method whose implementation is required, and then define a
-`summarize` method that has a default implementation that calls the
-`summarize_author` method:
+기본 구현은, 설령 같은 트레이트의 다른 메서드에 기본 구현이 없더라도 그 메서드를
+호출할 수 있습니다. 이런 방식으로 트레이트는 많은 유용한 기능을 제공하고
+구현자에게는 그중 일부만 지정하도록 요구할 수 있습니다. 예를 들어 `Summary`
+트레이트에 구현이 필수인 `summarize_author` 메서드를 두고, `summarize_author`를
+호출하는 기본 구현을 가진 `summarize` 메서드를 정의할 수 있습니다.
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:here}}
 ```
 
-To use this version of `Summary`, we only need to define `summarize_author`
-when we implement the trait on a type:
+이 버전의 `Summary`를 사용하려면, 타입에 트레이트를 구현할 때 `summarize_author`만
+정의해 주면 됩니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/lib.rs:impl}}
 ```
 
-After we define `summarize_author`, we can call `summarize` on instances of the
-`SocialPost` struct, and the default implementation of `summarize` will call the
-definition of `summarize_author` that we’ve provided. Because we’ve implemented
-`summarize_author`, the `Summary` trait has given us the behavior of the
-`summarize` method without requiring us to write any more code. Here’s what
-that looks like:
+`summarize_author`를 정의한 뒤에는 `SocialPost` 구조체 인스턴스에서 `summarize`를
+호출할 수 있고, `summarize`의 기본 구현이 우리가 제공한 `summarize_author`의
+정의를 호출합니다. 우리는 `summarize_author`를 구현했기 때문에, 추가 코드를
+작성하지 않고도 `Summary` 트레이트가 `summarize` 메서드의 동작을 제공해 준
+셈입니다. 다음은 그 모습입니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-03-default-impl-calls-other-methods/src/main.rs:here}}
 ```
 
-This code prints `1 new post: (Read more from @horse_ebooks...)`.
+이 코드는 `1 new post: (Read more from @horse_ebooks...)`를 출력합니다.
 
-Note that it isn’t possible to call the default implementation from an
-overriding implementation of that same method.
+같은 메서드의 재정의 구현에서 기본 구현을 호출하는 것은 불가능함에 유의하세요.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="traits-as-parameters"></a>
 
-### Using Traits as Parameters
+### 매개변수로서의 트레이트
 
-Now that you know how to define and implement traits, we can explore how to use
-traits to define functions that accept many different types. We’ll use the
-`Summary` trait we implemented on the `NewsArticle` and `SocialPost` types in
-Listing 10-13 to define a `notify` function that calls the `summarize` method
-on its `item` parameter, which is of some type that implements the `Summary`
-trait. To do this, we use the `impl Trait` syntax, like this:
+이제 트레이트를 정의하고 구현하는 방법을 알게 되었으니, 트레이트를 사용해 여러
+타입을 받는 함수를 정의하는 방법을 살펴봅시다. Listing 10-13에서 `NewsArticle`과
+`SocialPost` 타입에 구현한 `Summary` 트레이트를 사용하여, `item` 매개변수에서
+`summarize` 메서드를 호출하는 `notify` 함수를 정의할 것입니다. 이때 `item`은
+`Summary` 트레이트를 구현하는 어떤 타입입니다. 이를 위해 다음과 같이 `impl Trait`
+문법을 사용합니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-04-traits-as-parameters/src/lib.rs:here}}
 ```
 
-Instead of a concrete type for the `item` parameter, we specify the `impl`
-keyword and the trait name. This parameter accepts any type that implements the
-specified trait. In the body of `notify`, we can call any methods on `item`
-that come from the `Summary` trait, such as `summarize`. We can call `notify`
-and pass in any instance of `NewsArticle` or `SocialPost`. Code that calls the
-function with any other type, such as a `String` or an `i32`, won’t compile,
-because those types don’t implement `Summary`.
+`item` 매개변수의 구체적 타입 대신 `impl` 키워드와 트레이트 이름을 명시합니다.
+이 매개변수는 지정된 트레이트를 구현하는 모든 타입을 받아들입니다. `notify`의
+본문에서는 `Summary` 트레이트에서 온 `summarize` 같은 메서드라면 `item`에 호출할
+수 있습니다. `notify`에 `NewsArticle`이나 `SocialPost` 인스턴스를 전달할 수
+있습니다. `String`이나 `i32` 같은 다른 타입으로 이 함수를 호출하는 코드는
+`Summary`를 구현하지 않으므로 컴파일되지 않습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="fixing-the-largest-function-with-trait-bounds"></a>
 
-#### Trait Bound Syntax
+#### 트레이트 경계 문법
 
-The `impl Trait` syntax works for straightforward cases but is actually syntax
-sugar for a longer form known as a _trait bound_; it looks like this:
+`impl Trait` 문법은 간단한 경우에 잘 동작하지만, 사실 _트레이트 경계(trait
+bound)_ 라는 더 긴 형식의 문법 설탕(syntax sugar)입니다. 이는 다음과 같은 모습을
+하고 있습니다.
 
 ```rust,ignore
 pub fn notify<T: Summary>(item: &T) {
@@ -234,128 +218,119 @@ pub fn notify<T: Summary>(item: &T) {
 }
 ```
 
-This longer form is equivalent to the example in the previous section but is
-more verbose. We place trait bounds with the declaration of the generic type
-parameter after a colon and inside angle brackets.
+이 더 긴 형식은 이전 절의 예제와 동일하지만 좀 더 장황합니다. 트레이트 경계는
+제네릭 타입 매개변수 선언과 함께 꺾쇠괄호 안, 콜론 뒤에 배치합니다.
 
-The `impl Trait` syntax is convenient and makes for more concise code in simple
-cases, while the fuller trait bound syntax can express more complexity in other
-cases. For example, we can have two parameters that implement `Summary`. Doing
-so with the `impl Trait` syntax looks like this:
+`impl Trait` 문법은 간단한 경우 편리하고 코드를 간결하게 해 주지만, 더 완전한
+트레이트 경계 문법은 다른 경우에 더 복잡한 표현을 가능하게 합니다. 예를 들어
+`Summary`를 구현하는 두 매개변수를 가질 수 있습니다. `impl Trait` 문법으로
+표현하면 다음과 같습니다.
 
 ```rust,ignore
 pub fn notify(item1: &impl Summary, item2: &impl Summary) {
 ```
 
-Using `impl Trait` is appropriate if we want this function to allow `item1` and
-`item2` to have different types (as long as both types implement `Summary`). If
-we want to force both parameters to have the same type, however, we must use a
-trait bound, like this:
+`item1`과 `item2`가 서로 다른 타입(단, 둘 다 `Summary`를 구현)이 되는 것을 허용
+하고 싶다면 `impl Trait`을 사용하는 것이 적절합니다. 그러나 두 매개변수가 반드시
+같은 타입이어야 하도록 강제하려면, 다음과 같이 트레이트 경계를 사용해야 합니다.
 
 ```rust,ignore
 pub fn notify<T: Summary>(item1: &T, item2: &T) {
 ```
 
-The generic type `T` specified as the type of the `item1` and `item2`
-parameters constrains the function such that the concrete type of the value
-passed as an argument for `item1` and `item2` must be the same.
+`item1`과 `item2` 매개변수의 타입으로 지정된 제네릭 타입 `T`는, `item1`과
+`item2`의 인수로 전달된 값의 구체적 타입이 반드시 같아야 하도록 함수를 제약합니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="specifying-multiple-trait-bounds-with-the--syntax"></a>
 
-#### Multiple Trait Bounds with the `+` Syntax
+#### `+` 문법으로 여러 트레이트 경계 지정하기
 
-We can also specify more than one trait bound. Say we wanted `notify` to use
-display formatting as well as `summarize` on `item`: We specify in the `notify`
-definition that `item` must implement both `Display` and `Summary`. We can do
-so using the `+` syntax:
+여러 개의 트레이트 경계를 지정할 수도 있습니다. `notify`가 `item`에 대해
+`summarize`뿐 아니라 디스플레이 포매팅까지 사용하도록 하고 싶다고 해 봅시다.
+`notify` 정의에서 `item`은 `Display`와 `Summary` 둘 다를 구현해야 함을
+명시합니다. `+` 문법을 사용해 다음과 같이 할 수 있습니다.
 
 ```rust,ignore
 pub fn notify(item: &(impl Summary + Display)) {
 ```
 
-The `+` syntax is also valid with trait bounds on generic types:
+`+` 문법은 제네릭 타입의 트레이트 경계에도 유효합니다.
 
 ```rust,ignore
 pub fn notify<T: Summary + Display>(item: &T) {
 ```
 
-With the two trait bounds specified, the body of `notify` can call `summarize`
-and use `{}` to format `item`.
+두 트레이트 경계가 지정되면, `notify`의 본문에서는 `summarize`를 호출하고 `{}`로
+`item`을 포매팅할 수 있습니다.
 
-#### Clearer Trait Bounds with `where` Clauses
+#### `where` 절로 트레이트 경계 명확하게 하기
 
-Using too many trait bounds has its downsides. Each generic has its own trait
-bounds, so functions with multiple generic type parameters can contain lots of
-trait bound information between the function’s name and its parameter list,
-making the function signature hard to read. For this reason, Rust has alternate
-syntax for specifying trait bounds inside a `where` clause after the function
-signature. So, instead of writing this:
+너무 많은 트레이트 경계를 사용하는 데에는 단점이 있습니다. 각 제네릭에는 자신만의
+트레이트 경계가 있어서, 제네릭 타입 매개변수가 여러 개인 함수에서는 함수 이름과
+매개변수 목록 사이에 많은 트레이트 경계 정보가 들어가 함수 시그니처를 읽기
+어렵게 만들 수 있습니다. 이 때문에 러스트는 함수 시그니처 뒤 `where` 절 안에
+트레이트 경계를 지정하는 대체 문법을 제공합니다. 그래서 다음 대신,
 
 ```rust,ignore
 fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
 ```
 
-we can use a `where` clause, like this:
+다음과 같이 `where` 절을 사용할 수 있습니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-07-where-clause/src/lib.rs:here}}
 ```
 
-This function’s signature is less cluttered: The function name, parameter list,
-and return type are close together, similar to a function without lots of trait
-bounds.
+이 함수의 시그니처는 덜 어지럽습니다. 많은 트레이트 경계가 없는 함수처럼, 함수
+이름, 매개변수 목록, 반환 타입이 서로 가깝게 붙어 있습니다.
 
-### Returning Types That Implement Traits
+### 트레이트를 구현하는 타입 반환하기
 
-We can also use the `impl Trait` syntax in the return position to return a
-value of some type that implements a trait, as shown here:
+다음과 같이 반환 위치에서도 `impl Trait` 문법을 사용해 어떤 트레이트를 구현하는
+타입의 값을 반환할 수 있습니다.
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-05-returning-impl-trait/src/lib.rs:here}}
 ```
 
-By using `impl Summary` for the return type, we specify that the
-`returns_summarizable` function returns some type that implements the `Summary`
-trait without naming the concrete type. In this case, `returns_summarizable`
-returns a `SocialPost`, but the code calling this function doesn’t need to know
-that.
+반환 타입으로 `impl Summary`를 사용함으로써, `returns_summarizable` 함수가
+구체적 타입을 명시하지 않고 `Summary` 트레이트를 구현하는 어떤 타입을 반환한다는
+것을 명시합니다. 여기서 `returns_summarizable`은 `SocialPost`를 반환하지만, 이
+함수를 호출하는 코드는 그것을 알 필요가 없습니다.
 
-The ability to specify a return type only by the trait it implements is
-especially useful in the context of closures and iterators, which we cover in
-Chapter 13. Closures and iterators create types that only the compiler knows or
-types that are very long to specify. The `impl Trait` syntax lets you concisely
-specify that a function returns some type that implements the `Iterator` trait
-without needing to write out a very long type.
+반환 타입을 그것이 구현하는 트레이트만으로 지정할 수 있는 능력은, 13장에서
+다루는 클로저와 이터레이터의 맥락에서 특히 유용합니다. 클로저와 이터레이터는
+컴파일러만 아는 타입이나 매우 긴 이름을 갖는 타입을 만들어 냅니다. `impl Trait`
+문법을 사용하면 긴 타입 이름을 적지 않고도, 함수가 `Iterator` 트레이트를 구현하는
+어떤 타입을 반환함을 간결하게 명시할 수 있습니다.
 
-However, you can only use `impl Trait` if you’re returning a single type. For
-example, this code that returns either a `NewsArticle` or a `SocialPost` with
-the return type specified as `impl Summary` wouldn’t work:
+그러나 `impl Trait`은 단일 타입을 반환할 때만 사용할 수 있습니다. 예를 들어
+반환 타입을 `impl Summary`로 지정하고 `NewsArticle`이나 `SocialPost` 중 하나를
+반환하는 다음 코드는 동작하지 않습니다.
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/no-listing-06-impl-trait-returns-one-type/src/lib.rs:here}}
 ```
 
-Returning either a `NewsArticle` or a `SocialPost` isn’t allowed due to
-restrictions around how the `impl Trait` syntax is implemented in the compiler.
-We’ll cover how to write a function with this behavior in the [“Using Trait
-Objects to Abstract over Shared Behavior”][trait-objects]<!-- ignore -->
-section of Chapter 18.
+`impl Trait` 문법이 컴파일러에서 구현되는 방식의 제약 때문에, `NewsArticle` 또는
+`SocialPost` 중 하나를 반환하는 것은 허용되지 않습니다. 이러한 동작을 가진 함수를
+작성하는 방법은 18장의 [“트레이트 객체로 공유 동작 추상화하기”][trait-objects]<!-- ignore -->
+절에서 다룹니다.
 
-### Using Trait Bounds to Conditionally Implement Methods
+### 트레이트 경계로 메서드를 조건부로 구현하기
 
-By using a trait bound with an `impl` block that uses generic type parameters,
-we can implement methods conditionally for types that implement the specified
-traits. For example, the type `Pair<T>` in Listing 10-15 always implements the
-`new` function to return a new instance of `Pair<T>` (recall from the [“Method
-Syntax”][methods]<!-- ignore --> section of Chapter 5 that `Self` is a type
-alias for the type of the `impl` block, which in this case is `Pair<T>`). But
-in the next `impl` block, `Pair<T>` only implements the `cmp_display` method if
-its inner type `T` implements the `PartialOrd` trait that enables comparison
-_and_ the `Display` trait that enables printing.
+제네릭 타입 매개변수를 사용하는 `impl` 블록에 트레이트 경계를 두면, 지정된
+트레이트를 구현하는 타입에 대해 메서드를 조건부로 구현할 수 있습니다. 예를 들어
+Listing 10-15의 `Pair<T>` 타입은 항상 `Pair<T>`의 새 인스턴스를 반환하는 `new`
+함수를 구현합니다(5장의 [“메서드 문법”][methods]<!-- ignore --> 절에서 `Self`가
+`impl` 블록의 타입에 대한 타입 별칭임을 떠올려 보세요. 이 경우에는 `Pair<T>`
+입니다). 그러나 다음 `impl` 블록에서는, 내부 타입 `T`가 비교를 가능하게 하는
+`PartialOrd` 트레이트 _와_ 출력을 가능하게 하는 `Display` 트레이트를 둘 다 구현할
+때만 `Pair<T>`에 `cmp_display` 메서드를 구현합니다.
 
-<Listing number="10-15" file-name="src/lib.rs" caption="Conditionally implementing methods on a generic type depending on trait bounds">
+<Listing number="10-15" file-name="src/lib.rs" caption="트레이트 경계에 따라 제네릭 타입에 메서드를 조건부로 구현하기">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch10-generic-types-traits-and-lifetimes/listing-10-15/src/lib.rs}}
@@ -363,12 +338,12 @@ _and_ the `Display` trait that enables printing.
 
 </Listing>
 
-We can also conditionally implement a trait for any type that implements
-another trait. Implementations of a trait on any type that satisfies the trait
-bounds are called _blanket implementations_ and are used extensively in the
-Rust standard library. For example, the standard library implements the
-`ToString` trait on any type that implements the `Display` trait. The `impl`
-block in the standard library looks similar to this code:
+다른 트레이트를 구현하는 어떤 타입에 대해서도 트레이트를 조건부로 구현할 수
+있습니다. 트레이트 경계를 만족하는 어떤 타입에든 트레이트를 구현하는 것을
+_블랭킷 구현(blanket implementation)_ 이라고 부르며, 이는 러스트 표준
+라이브러리에서 광범위하게 사용됩니다. 예를 들어 표준 라이브러리는 `Display`
+트레이트를 구현하는 어떤 타입에든 `ToString` 트레이트를 구현합니다. 표준
+라이브러리의 `impl` 블록은 다음 코드와 비슷한 모습입니다.
 
 ```rust,ignore
 impl<T: Display> ToString for T {
@@ -376,29 +351,26 @@ impl<T: Display> ToString for T {
 }
 ```
 
-Because the standard library has this blanket implementation, we can call the
-`to_string` method defined by the `ToString` trait on any type that implements
-the `Display` trait. For example, we can turn integers into their corresponding
-`String` values like this because integers implement `Display`:
+표준 라이브러리에 이 블랭킷 구현이 있기 때문에, `Display`를 구현하는 어떤
+타입에서든 `ToString` 트레이트가 정의한 `to_string` 메서드를 호출할 수 있습니다.
+예를 들어 정수는 `Display`를 구현하므로 다음처럼 정수를 대응되는 `String` 값으로
+바꿀 수 있습니다.
 
 ```rust
 let s = 3.to_string();
 ```
 
-Blanket implementations appear in the documentation for the trait in the
-“Implementors” section.
+블랭킷 구현은 트레이트 문서의 “Implementors” 섹션에 표시됩니다.
 
-Traits and trait bounds let us write code that uses generic type parameters to
-reduce duplication but also specify to the compiler that we want the generic
-type to have particular behavior. The compiler can then use the trait bound
-information to check that all the concrete types used with our code provide the
-correct behavior. In dynamically typed languages, we would get an error at
-runtime if we called a method on a type that didn’t define the method. But Rust
-moves these errors to compile time so that we’re forced to fix the problems
-before our code is even able to run. Additionally, we don’t have to write code
-that checks for behavior at runtime, because we’ve already checked at compile
-time. Doing so improves performance without having to give up the flexibility
-of generics.
+트레이트와 트레이트 경계 덕분에 우리는 제네릭 타입 매개변수를 사용해 중복을
+줄이면서도, 그 제네릭 타입이 특정 동작을 갖도록 컴파일러에 명시하는 코드를
+작성할 수 있습니다. 그러면 컴파일러는 트레이트 경계 정보를 사용해 코드와 함께
+사용되는 모든 구체적 타입이 올바른 동작을 제공하는지 검사할 수 있습니다. 동적
+타입 언어에서는 메서드를 정의하지 않은 타입에서 메서드를 호출하면 런타임 오류가
+날 것입니다. 그러나 러스트는 이러한 오류를 컴파일 타임으로 옮겨, 코드가 실행되기
+전에 문제를 고치도록 강제합니다. 또한 런타임에 동작을 검사하는 코드를 작성할
+필요도 없습니다. 컴파일 타임에 이미 검사했기 때문입니다. 그렇게 해도 제네릭의
+유연성은 포기하지 않은 채 성능이 개선됩니다.
 
 [trait-objects]: ch18-02-trait-objects.html#using-trait-objects-to-abstract-over-shared-behavior
 [methods]: ch05-03-method-syntax.html#method-syntax

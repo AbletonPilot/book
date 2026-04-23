@@ -1,46 +1,45 @@
-# Smart Pointers
+# 스마트 포인터
 
-A pointer is a general concept for a variable that contains an address in
-memory. This address refers to, or “points at,” some other data. The most
-common kind of pointer in Rust is a reference, which you learned about in
-Chapter 4. References are indicated by the `&` symbol and borrow the value they
-point to. They don’t have any special capabilities other than referring to
-data, and they have no overhead.
+포인터는 메모리의 주소를 담고 있는 변수에 대한 일반적인 개념입니다. 이 주소는
+다른 데이터를 참조하거나 “가리킵니다”. 러스트에서 가장 흔한 종류의 포인터는
+4장에서 배운 참조입니다. 참조는 `&` 기호로 표시되며, 자신이 가리키는 값을
+빌립니다. 참조는 데이터를 가리키는 것 외에는 특별한 기능이 없고, 어떤 오버헤드
+도 없습니다.
 
-_Smart pointers_, on the other hand, are data structures that act like a
-pointer but also have additional metadata and capabilities. The concept of
-smart pointers isn’t unique to Rust: Smart pointers originated in C++ and exist
-in other languages as well. Rust has a variety of smart pointers defined in the
-standard library that provide functionality beyond that provided by references.
-To explore the general concept, we’ll look at a couple of different examples of
-smart pointers, including a _reference counting_ smart pointer type. This
-pointer enables you to allow data to have multiple owners by keeping track of
-the number of owners and, when no owners remain, cleaning up the data.
+반면 _스마트 포인터(smart pointer)_ 는 포인터처럼 동작하면서도 추가적인
+메타데이터와 기능을 가지는 자료 구조입니다. 스마트 포인터의 개념은 러스트
+고유의 것이 아닙니다. 스마트 포인터는 C++에서 비롯되었으며 다른 언어에도
+존재합니다. 러스트는 참조가 제공하는 것 이상의 기능을 제공하는 다양한 스마트
+포인터를 표준 라이브러리에 정의해 두고 있습니다. 일반 개념을 탐색하기 위해,
+_참조 카운팅(reference counting)_ 스마트 포인터 타입을 비롯해 몇 가지 서로
+다른 스마트 포인터 예를 살펴보겠습니다. 이 포인터는 소유자의 수를 추적하고,
+소유자가 남지 않으면 데이터를 정리함으로써 데이터에 여러 소유자가 있을 수
+있게 해 줍니다.
 
-In Rust, with its concept of ownership and borrowing, there is an additional
-difference between references and smart pointers: While references only borrow
-data, in many cases smart pointers _own_ the data they point to.
+러스트는 소유권과 빌림의 개념 때문에 참조와 스마트 포인터 사이에 또 다른
+차이가 있습니다. 참조는 데이터를 빌리기만 하지만, 많은 경우 스마트 포인터는
+자신이 가리키는 데이터를 _소유_ 합니다.
 
-Smart pointers are usually implemented using structs. Unlike an ordinary
-struct, smart pointers implement the `Deref` and `Drop` traits. The `Deref`
-trait allows an instance of the smart pointer struct to behave like a reference
-so that you can write your code to work with either references or smart
-pointers. The `Drop` trait allows you to customize the code that’s run when an
-instance of the smart pointer goes out of scope. In this chapter, we’ll discuss
-both of these traits and demonstrate why they’re important to smart pointers.
+스마트 포인터는 보통 구조체로 구현됩니다. 일반 구조체와 달리, 스마트 포인터는
+`Deref`와 `Drop` 트레이트를 구현합니다. `Deref` 트레이트는 스마트 포인터 구조체
+인스턴스가 참조처럼 동작할 수 있게 해 주어, 여러분이 참조와 스마트 포인터
+모두에 대해 동작하는 코드를 작성할 수 있게 해 줍니다. `Drop` 트레이트는 스마트
+포인터의 인스턴스가 스코프를 벗어날 때 실행되는 코드를 커스터마이즈할 수
+있게 해 줍니다. 이 장에서는 이 두 트레이트를 모두 논의하고, 왜 그것들이 스마트
+포인터에 중요한지 보여 드리겠습니다.
 
-Given that the smart pointer pattern is a general design pattern used
-frequently in Rust, this chapter won’t cover every existing smart pointer. Many
-libraries have their own smart pointers, and you can even write your own. We’ll
-cover the most common smart pointers in the standard library:
+스마트 포인터 패턴은 러스트에서 자주 사용되는 일반적인 디자인 패턴이므로,
+이 장에서는 존재하는 모든 스마트 포인터를 다루지 않습니다. 많은 라이브러리가
+자체 스마트 포인터를 가지고 있으며, 여러분도 직접 만들 수 있습니다. 표준
+라이브러리의 가장 흔한 스마트 포인터를 다룹니다.
 
-- `Box<T>`, for allocating values on the heap
-- `Rc<T>`, a reference counting type that enables multiple ownership
-- `Ref<T>` and `RefMut<T>`, accessed through `RefCell<T>`, a type that enforces
-  the borrowing rules at runtime instead of compile time
+- 힙에 값을 할당하는 `Box<T>`
+- 여러 소유권을 가능하게 하는 참조 카운팅 타입인 `Rc<T>`
+- 컴파일 타임이 아니라 런타임에 빌림 규칙을 강제하는 타입인 `RefCell<T>`를
+  통해 접근되는 `Ref<T>`와 `RefMut<T>`
 
-In addition, we’ll cover the _interior mutability_ pattern where an immutable
-type exposes an API for mutating an interior value. We’ll also discuss
-reference cycles: how they can leak memory and how to prevent them.
+또한 불변 타입이 내부 값을 변경하기 위한 API를 노출하는 _내부 가변성(interior
+mutability)_ 패턴도 다룹니다. 참조 순환도 논의합니다. 참조 순환이 어떻게
+메모리 누수를 일으키는지, 그리고 어떻게 방지하는지 살펴봅니다.
 
-Let’s dive in!
+시작해 봅시다!

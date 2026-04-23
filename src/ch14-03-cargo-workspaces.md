@@ -1,43 +1,41 @@
-## Cargo Workspaces
+## 카고 워크스페이스
 
-In Chapter 12, we built a package that included a binary crate and a library
-crate. As your project develops, you might find that the library crate
-continues to get bigger and you want to split your package further into
-multiple library crates. Cargo offers a feature called _workspaces_ that can
-help manage multiple related packages that are developed in tandem.
+12장에서 바이너리 크레이트와 라이브러리 크레이트를 포함하는 패키지를 만들었
+습니다. 프로젝트가 발전하면서 라이브러리 크레이트가 계속 커지고, 패키지를 여러
+라이브러리 크레이트로 더 분리하고 싶어질 수 있습니다. 카고는 함께 개발되는
+여러 관련 패키지를 관리하는 데 도움이 되는 _워크스페이스(workspaces)_ 라는
+기능을 제공합니다.
 
-### Creating a Workspace
+### 워크스페이스 만들기
 
-A _workspace_ is a set of packages that share the same _Cargo.lock_ and output
-directory. Let’s make a project using a workspace—we’ll use trivial code so
-that we can concentrate on the structure of the workspace. There are multiple
-ways to structure a workspace, so we'll just show one common way. We’ll have a
-workspace containing a binary and two libraries. The binary, which will provide
-the main functionality, will depend on the two libraries. One library will
-provide an `add_one` function and the other library an `add_two` function.
-These three crates will be part of the same workspace. We’ll start by creating
-a new directory for the workspace:
+_워크스페이스_ 는 같은 _Cargo.lock_ 과 출력 디렉터리를 공유하는 패키지들의
+집합입니다. 워크스페이스를 사용해 프로젝트를 만들어 봅시다 — 사소한 코드를
+사용해 워크스페이스의 구조에 집중할 수 있게 하겠습니다. 워크스페이스를 구조화
+하는 방법은 여러 가지이지만, 흔한 방법 한 가지만 보여 주겠습니다. 바이너리
+하나와 라이브러리 두 개를 포함하는 워크스페이스를 만들 것입니다. 주요 기능을
+제공할 바이너리는 두 라이브러리에 의존할 것입니다. 한 라이브러리는 `add_one`
+함수를, 다른 라이브러리는 `add_two` 함수를 제공할 것입니다. 이 세 크레이트는
+모두 같은 워크스페이스의 일부가 됩니다. 워크스페이스를 위한 새 디렉터리를
+만드는 것부터 시작합시다.
 
 ```console
 $ mkdir add
 $ cd add
 ```
 
-Next, in the _add_ directory, we create the _Cargo.toml_ file that will
-configure the entire workspace. This file won’t have a `[package]` section.
-Instead, it will start with a `[workspace]` section that will allow us to add
-members to the workspace. We also make a point to use the latest and greatest
-version of Cargo’s resolver algorithm in our workspace by setting the
-`resolver` value to `"3"`:
+다음으로, _add_ 디렉터리에 워크스페이스 전체를 구성할 _Cargo.toml_ 파일을
+만듭니다. 이 파일에는 `[package]` 섹션이 없습니다. 대신 워크스페이스에 멤버를
+추가할 수 있게 해 주는 `[workspace]` 섹션으로 시작합니다. 또한 워크스페이스에서
+카고의 최신 리졸버 알고리즘을 사용하기 위해 `resolver` 값을 `"3"`으로 설정합니다.
 
-<span class="filename">Filename: Cargo.toml</span>
+<span class="filename">파일명: Cargo.toml</span>
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/no-listing-01-workspace/add/Cargo.toml}}
 ```
 
-Next, we’ll create the `adder` binary crate by running `cargo new` within the
-_add_ directory:
+다음으로 _add_ 디렉터리 안에서 `cargo new`를 실행해 `adder` 바이너리 크레이트를
+만듭니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-01-adder-crate/add
@@ -53,16 +51,16 @@ $ cargo new adder
       Adding `adder` as member of workspace at `file:///projects/add`
 ```
 
-Running `cargo new` inside a workspace also automatically adds the newly created
-package to the `members` key in the `[workspace]` definition in the workspace
-_Cargo.toml_, like this:
+워크스페이스 안에서 `cargo new`를 실행하면 새로 만들어진 패키지가 다음처럼
+워크스페이스 _Cargo.toml_ 의 `[workspace]` 정의의 `members` 키에 자동으로
+추가됩니다.
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/output-only-01-adder-crate/add/Cargo.toml}}
 ```
 
-At this point, we can build the workspace by running `cargo build`. The files
-in your _add_ directory should look like this:
+이 시점에 `cargo build`를 실행해 워크스페이스를 빌드할 수 있습니다. _add_
+디렉터리의 파일은 다음과 같이 생겼을 것입니다.
 
 ```text
 ├── Cargo.lock
@@ -74,21 +72,20 @@ in your _add_ directory should look like this:
 └── target
 ```
 
-The workspace has one _target_ directory at the top level that the compiled
-artifacts will be placed into; the `adder` package doesn’t have its own
-_target_ directory. Even if we were to run `cargo build` from inside the
-_adder_ directory, the compiled artifacts would still end up in _add/target_
-rather than _add/adder/target_. Cargo structures the _target_ directory in a
-workspace like this because the crates in a workspace are meant to depend on
-each other. If each crate had its own _target_ directory, each crate would have
-to recompile each of the other crates in the workspace to place the artifacts
-in its own _target_ directory. By sharing one _target_ directory, the crates
-can avoid unnecessary rebuilding.
+워크스페이스는 최상위 수준에 컴파일된 산출물이 놓일 _target_ 디렉터리 하나를
+가집니다. `adder` 패키지는 자체 _target_ 디렉터리를 가지지 않습니다. _adder_
+디렉터리 안에서 `cargo build`를 실행하더라도, 컴파일된 산출물은 _add/adder/target_
+이 아니라 여전히 _add/target_ 에 놓입니다. 카고는 워크스페이스의 크레이트들이
+서로 의존하도록 되어 있기 때문에 워크스페이스의 _target_ 디렉터리를 이렇게
+구조화합니다. 각 크레이트가 자체 _target_ 디렉터리를 가진다면, 각 크레이트가
+자체 _target_ 디렉터리에 산출물을 놓기 위해 워크스페이스의 다른 크레이트
+각각을 다시 컴파일해야 할 것입니다. 하나의 _target_ 디렉터리를 공유함으로써
+크레이트들은 불필요한 재빌드를 피할 수 있습니다.
 
-### Creating the Second Package in the Workspace
+### 워크스페이스에 두 번째 패키지 만들기
 
-Next, let’s create another member package in the workspace and call it
-`add_one`. Generate a new library crate named `add_one`:
+다음으로 워크스페이스에 또 다른 멤버 패키지를 만들어 `add_one`이라고 부르겠
+습니다. `add_one`이라는 새 라이브러리 크레이트를 생성하세요.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-02-add-one/add
@@ -104,16 +101,15 @@ $ cargo new add_one --lib
       Adding `add_one` as member of workspace at `file:///projects/add`
 ```
 
-The top-level _Cargo.toml_ will now include the _add_one_ path in the `members`
-list:
+최상위 _Cargo.toml_ 의 `members` 목록에 이제 _add_one_ 경로가 포함됩니다.
 
-<span class="filename">Filename: Cargo.toml</span>
+<span class="filename">파일명: Cargo.toml</span>
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/Cargo.toml}}
 ```
 
-Your _add_ directory should now have these directories and files:
+_add_ 디렉터리에는 이제 다음 디렉터리와 파일들이 있어야 합니다.
 
 ```text
 ├── Cargo.lock
@@ -129,32 +125,32 @@ Your _add_ directory should now have these directories and files:
 └── target
 ```
 
-In the _add_one/src/lib.rs_ file, let’s add an `add_one` function:
+_add_one/src/lib.rs_ 파일에 `add_one` 함수를 추가하겠습니다.
 
-<span class="filename">Filename: add_one/src/lib.rs</span>
+<span class="filename">파일명: add_one/src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/add_one/src/lib.rs}}
 ```
 
-Now we can have the `adder` package with our binary depend on the `add_one`
-package that has our library. First, we’ll need to add a path dependency on
-`add_one` to _adder/Cargo.toml_.
+이제 바이너리를 가진 `adder` 패키지가 라이브러리를 가진 `add_one` 패키지에
+의존하도록 할 수 있습니다. 먼저 _adder/Cargo.toml_ 에 `add_one`에 대한 경로
+의존성을 추가해야 합니다.
 
-<span class="filename">Filename: adder/Cargo.toml</span>
+<span class="filename">파일명: adder/Cargo.toml</span>
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/no-listing-02-workspace-with-two-crates/add/adder/Cargo.toml:6:7}}
 ```
 
-Cargo doesn’t assume that crates in a workspace will depend on each other, so
-we need to be explicit about the dependency relationships.
+카고는 워크스페이스의 크레이트들이 서로 의존한다고 가정하지 않으므로, 의존
+관계에 대해 명시적이어야 합니다.
 
-Next, let’s use the `add_one` function (from the `add_one` crate) in the
-`adder` crate. Open the _adder/src/main.rs_ file and change the `main`
-function to call the `add_one` function, as in Listing 14-7.
+다음으로 `adder` 크레이트에서 (`add_one` 크레이트의) `add_one` 함수를 사용해
+봅시다. _adder/src/main.rs_ 파일을 열고 Listing 14-7처럼 `add_one` 함수를
+호출하도록 `main` 함수를 바꾸세요.
 
-<Listing number="14-7" file-name="adder/src/main.rs" caption="Using the `add_one` library crate from the `adder` crate">
+<Listing number="14-7" file-name="adder/src/main.rs" caption="`adder` 크레이트에서 `add_one` 라이브러리 크레이트 사용하기">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch14-more-about-cargo/listing-14-07/add/adder/src/main.rs}}
@@ -162,8 +158,7 @@ function to call the `add_one` function, as in Listing 14-7.
 
 </Listing>
 
-Let’s build the workspace by running `cargo build` in the top-level _add_
-directory!
+최상위 _add_ 디렉터리에서 `cargo build`를 실행해 워크스페이스를 빌드해 봅시다!
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -178,9 +173,8 @@ $ cargo build
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
 ```
 
-To run the binary crate from the _add_ directory, we can specify which package
-in the workspace we want to run by using the `-p` argument and the package name
-with `cargo run`:
+_add_ 디렉터리에서 바이너리 크레이트를 실행하려면, `-p` 인수와 패키지 이름으로
+실행할 워크스페이스의 패키지를 `cargo run`에 지정할 수 있습니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/listing-14-07/add
@@ -195,23 +189,23 @@ $ cargo run -p adder
 Hello, world! 10 plus one is 11!
 ```
 
-This runs the code in _adder/src/main.rs_, which depends on the `add_one` crate.
+이는 `add_one` 크레이트에 의존하는 _adder/src/main.rs_ 의 코드를 실행합니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="depending-on-an-external-package-in-a-workspace"></a>
 
-### Depending on an External Package
+### 외부 패키지에 의존하기
 
-Notice that the workspace has only one _Cargo.lock_ file at the top level,
-rather than having a _Cargo.lock_ in each crate’s directory. This ensures that
-all crates are using the same version of all dependencies. If we add the `rand`
-package to the _adder/Cargo.toml_ and _add_one/Cargo.toml_ files, Cargo will
-resolve both of those to one version of `rand` and record that in the one
-_Cargo.lock_. Making all crates in the workspace use the same dependencies
-means the crates will always be compatible with each other. Let’s add the
-`rand` crate to the `[dependencies]` section in the _add_one/Cargo.toml_ file
-so that we can use the `rand` crate in the `add_one` crate:
+워크스페이스에는 각 크레이트 디렉터리에 _Cargo.lock_ 이 있는 것이 아니라
+최상위에 단 하나의 _Cargo.lock_ 파일만 있다는 점에 유의하세요. 이는 모든
+크레이트가 모든 의존성의 같은 버전을 사용하도록 보장합니다. _adder/Cargo.toml_
+과 _add_one/Cargo.toml_ 파일에 `rand` 패키지를 추가하면, 카고는 그 둘을
+`rand`의 한 버전으로 해결하고 하나의 _Cargo.lock_ 에 기록합니다. 워크스페이스
+의 모든 크레이트가 같은 의존성을 사용하도록 하면 크레이트들이 항상 서로
+호환됨을 의미합니다. `add_one` 크레이트에서 `rand` 크레이트를 사용할 수 있도록
+_add_one/Cargo.toml_ 파일의 `[dependencies]` 섹션에 `rand` 크레이트를
+추가합시다.
 
 <!-- When updating the version of `rand` used, also update the version of
 `rand` used in these files so they all match:
@@ -219,16 +213,16 @@ so that we can use the `rand` crate in the `add_one` crate:
 * ch07-04-bringing-paths-into-scope-with-the-use-keyword.md
 -->
 
-<span class="filename">Filename: add_one/Cargo.toml</span>
+<span class="filename">파일명: add_one/Cargo.toml</span>
 
 ```toml
 {{#include ../listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add/add_one/Cargo.toml:6:7}}
 ```
 
-We can now add `use rand;` to the _add_one/src/lib.rs_ file, and building the
-whole workspace by running `cargo build` in the _add_ directory will bring in
-and compile the `rand` crate. We will get one warning because we aren’t
-referring to the `rand` we brought into scope:
+이제 _add_one/src/lib.rs_ 파일에 `use rand;`를 추가할 수 있고, _add_ 디렉터리
+에서 `cargo build`를 실행해 전체 워크스페이스를 빌드하면 `rand` 크레이트를
+가져와 컴파일합니다. 스코프로 가져온 `rand`를 참조하지 않으므로 경고가 하나
+나올 것입니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-03-workspace-with-external-dependency/add
@@ -256,11 +250,11 @@ warning: `add_one` (lib) generated 1 warning (run `cargo fix --lib -p add_one` t
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
 ```
 
-The top-level _Cargo.lock_ now contains information about the dependency of
-`add_one` on `rand`. However, even though `rand` is used somewhere in the
-workspace, we can’t use it in other crates in the workspace unless we add
-`rand` to their _Cargo.toml_ files as well. For example, if we add `use rand;`
-to the _adder/src/main.rs_ file for the `adder` package, we’ll get an error:
+최상위 _Cargo.lock_ 은 이제 `add_one`이 `rand`에 의존한다는 정보를 포함합니다.
+그러나 `rand`가 워크스페이스 어딘가에서 사용되더라도, 다른 크레이트들의
+_Cargo.toml_ 에도 `rand`를 추가하지 않으면 그 크레이트들에서는 사용할 수
+없습니다. 예를 들어 `adder` 패키지의 _adder/src/main.rs_ 파일에 `use rand;`를
+추가하면 오류가 납니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/output-only-03-use-rand/add
@@ -279,33 +273,30 @@ error[E0432]: unresolved import `rand`
   |     ^^^^ no external crate `rand`
 ```
 
-To fix this, edit the _Cargo.toml_ file for the `adder` package and indicate
-that `rand` is a dependency for it as well. Building the `adder` package will
-add `rand` to the list of dependencies for `adder` in _Cargo.lock_, but no
-additional copies of `rand` will be downloaded. Cargo will ensure that every
-crate in every package in the workspace using the `rand` package will use the
-same version as long as they specify compatible versions of `rand`, saving us
-space and ensuring that the crates in the workspace will be compatible with
-each other.
+이를 고치려면 `adder` 패키지의 _Cargo.toml_ 파일을 편집해 `rand`가 의존성
+임을 표시하세요. `adder` 패키지를 빌드하면 _Cargo.lock_ 의 `adder` 의존성
+목록에 `rand`가 추가되지만, `rand`의 추가 사본은 다운로드되지 않습니다. 카고
+는 워크스페이스의 어떤 패키지의 어떤 크레이트든 `rand`의 호환되는 버전을
+지정하기만 하면 모두 같은 버전을 사용하도록 보장해, 공간을 절약하고 워크스
+페이스의 크레이트들이 서로 호환됨을 보장합니다.
 
-If crates in the workspace specify incompatible versions of the same
-dependency, Cargo will resolve each of them but will still try to resolve as
-few versions as possible.
+워크스페이스의 크레이트들이 같은 의존성의 호환되지 않는 버전을 지정하면,
+카고는 각각을 해결하지만 가능한 한 적은 버전을 해결하려고 시도합니다.
 
-### Adding a Test to a Workspace
+### 워크스페이스에 테스트 추가하기
 
-For another enhancement, let’s add a test of the `add_one::add_one` function
-within the `add_one` crate:
+또 다른 개선으로, `add_one` 크레이트 내에서 `add_one::add_one` 함수의 테스트를
+추가합시다.
 
-<span class="filename">Filename: add_one/src/lib.rs</span>
+<span class="filename">파일명: add_one/src/lib.rs</span>
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add/add_one/src/lib.rs}}
 ```
 
-Now run `cargo test` in the top-level _add_ directory. Running `cargo test` in
-a workspace structured like this one will run the tests for all the crates in
-the workspace:
+이제 최상위 _add_ 디렉터리에서 `cargo test`를 실행하세요. 이렇게 구조화된
+워크스페이스에서 `cargo test`를 실행하면 워크스페이스의 모든 크레이트에 대한
+테스트가 실행됩니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -339,14 +330,13 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-The first section of the output shows that the `it_works` test in the `add_one`
-crate passed. The next section shows that zero tests were found in the `adder`
-crate, and then the last section shows that zero documentation tests were found
-in the `add_one` crate.
+출력의 첫 번째 섹션은 `add_one` 크레이트의 `it_works` 테스트가 통과했음을
+보여 줍니다. 다음 섹션은 `adder` 크레이트에서 0개의 테스트가 발견됐음을
+보여 주고, 마지막 섹션은 `add_one` 크레이트에서 0개의 문서 테스트가 발견
+됐음을 보여 줍니다.
 
-We can also run tests for one particular crate in a workspace from the
-top-level directory by using the `-p` flag and specifying the name of the crate
-we want to test:
+최상위 디렉터리에서 `-p` 플래그와 테스트하려는 크레이트의 이름을 지정해
+워크스페이스의 특정 한 크레이트만 테스트할 수도 있습니다.
 
 <!-- manual-regeneration
 cd listings/ch14-more-about-cargo/no-listing-04-workspace-with-tests/add
@@ -371,19 +361,18 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-This output shows `cargo test` only ran the tests for the `add_one` crate and
-didn’t run the `adder` crate tests.
+이 출력은 `cargo test`가 `add_one` 크레이트에 대한 테스트만 실행하고 `adder`
+크레이트 테스트는 실행하지 않았음을 보여 줍니다.
 
-If you publish the crates in the workspace to
-[crates.io](https://crates.io/)<!-- ignore -->, each crate in the workspace
-will need to be published separately. Like `cargo test`, we can publish a
-particular crate in our workspace by using the `-p` flag and specifying the
-name of the crate we want to publish.
+워크스페이스의 크레이트들을 [crates.io](https://crates.io/)<!-- ignore -->에
+게시하려면 워크스페이스의 각 크레이트를 따로 게시해야 합니다. `cargo test`와
+마찬가지로, `-p` 플래그와 게시하려는 크레이트의 이름을 지정해 워크스페이스의
+특정 크레이트를 게시할 수 있습니다.
 
-For additional practice, add an `add_two` crate to this workspace in a similar
-way as the `add_one` crate!
+추가 연습으로, `add_one` 크레이트와 비슷한 방식으로 이 워크스페이스에
+`add_two` 크레이트를 추가해 보세요!
 
-As your project grows, consider using a workspace: It enables you to work with
-smaller, easier-to-understand components than one big blob of code.
-Furthermore, keeping the crates in a workspace can make coordination between
-crates easier if they are often changed at the same time.
+프로젝트가 커지면 워크스페이스 사용을 고려해 보세요. 하나의 큰 덩어리 코드보다
+더 작고 이해하기 쉬운 구성 요소로 작업할 수 있게 해 줍니다. 또한 크레이트들이
+같이 자주 바뀐다면 워크스페이스에 크레이트들을 두면 크레이트 간 조율이 더
+쉬워질 수 있습니다.

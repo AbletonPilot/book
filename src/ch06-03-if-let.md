@@ -1,12 +1,11 @@
-## Concise Control Flow with `if let` and `let...else`
+## `if let`과 `let...else`로 간결한 흐름 제어
 
-The `if let` syntax lets you combine `if` and `let` into a less verbose way to
-handle values that match one pattern while ignoring the rest. Consider the
-program in Listing 6-6 that matches on an `Option<u8>` value in the
-`config_max` variable but only wants to execute code if the value is the `Some`
-variant.
+`if let` 문법은 `if`와 `let`을 결합해서, 하나의 패턴에 매칭되는 값을 처리하고
+나머지는 무시하는 덜 장황한 방법을 제공합니다. Listing 6-6의 프로그램은 `config_max`
+변수의 `Option<u8>` 값에 대해 `match`를 수행하지만, 값이 `Some` 배리언트일 때에만
+코드를 실행하고 싶어 합니다.
 
-<Listing number="6-6" caption="A `match` that only cares about executing code when the value is `Some`">
+<Listing number="6-6" caption="값이 `Some`일 때에만 코드를 실행하고 싶은 `match`">
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-06/src/main.rs:here}}
@@ -14,70 +13,65 @@ variant.
 
 </Listing>
 
-If the value is `Some`, we print out the value in the `Some` variant by binding
-the value to the variable `max` in the pattern. We don’t want to do anything
-with the `None` value. To satisfy the `match` expression, we have to add `_ =>
-()` after processing just one variant, which is annoying boilerplate code to
-add.
+값이 `Some`이라면, 패턴에서 값을 변수 `max`에 바인딩해 `Some` 배리언트 안의 값을
+출력합니다. `None` 값에 대해서는 아무것도 하고 싶지 않습니다. 그런데 `match`
+표현식을 만족시키기 위해 하나의 배리언트만 처리한 뒤에도 `_ => ()`를 추가해야
+하는데, 이는 성가신 보일러플레이트 코드입니다.
 
-Instead, we could write this in a shorter way using `if let`. The following
-code behaves the same as the `match` in Listing 6-6:
+대신 `if let`을 사용하면 더 짧게 쓸 수 있습니다. 다음 코드는 Listing 6-6의 `match`
+와 같은 동작을 합니다.
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-12-if-let/src/main.rs:here}}
 ```
 
-The syntax `if let` takes a pattern and an expression separated by an equal
-sign. It works the same way as a `match`, where the expression is given to the
-`match` and the pattern is its first arm. In this case, the pattern is
-`Some(max)`, and the `max` binds to the value inside the `Some`. We can then
-use `max` in the body of the `if let` block in the same way we used `max` in
-the corresponding `match` arm. The code in the `if let` block only runs if the
-value matches the pattern.
+`if let` 문법은 등호를 사이에 두고 패턴과 표현식을 받습니다. 동작 방식은 `match`
+와 같습니다. 표현식은 `match`에 주어지고, 패턴은 그 첫 번째 갈래입니다. 이 경우
+패턴은 `Some(max)`이고, `max`는 `Some` 안의 값에 바인딩됩니다. 그런 다음 대응하는
+`match` 갈래에서 `max`를 사용했던 것과 똑같은 방식으로 `if let` 블록 본문에서
+`max`를 사용할 수 있습니다. `if let` 블록의 코드는 값이 패턴과 매칭될 때에만 실행
+됩니다.
 
-Using `if let` means less typing, less indentation, and less boilerplate code.
-However, you lose the exhaustive checking `match` enforces that ensures that
-you aren’t forgetting to handle any cases. Choosing between `match` and `if
-let` depends on what you’re doing in your particular situation and whether
-gaining conciseness is an appropriate trade-off for losing exhaustive checking.
+`if let`을 사용하면 타이핑과 들여쓰기가 줄고 보일러플레이트 코드가 줄어듭니다.
+그러나 `match`가 강제해 주는 철저성 검사는 잃습니다. 철저성 검사는 우리가 어떤
+경우를 처리하는 것을 잊지 않도록 해 주는 기능이죠. `match`와 `if let` 중 무엇을
+선택할지는 여러분의 특정 상황에서 무엇을 하려는지, 그리고 간결함을 얻는 대신
+철저성 검사를 잃는 것이 적절한 절충인지에 달려 있습니다.
 
-In other words, you can think of `if let` as syntax sugar for a `match` that
-runs code when the value matches one pattern and then ignores all other values.
+다시 말해, `if let`을 값이 하나의 패턴에 매칭될 때 코드를 실행하고 다른 모든
+값은 무시하는 `match`의 구문 설탕(syntax sugar)으로 생각할 수 있습니다.
 
-We can include an `else` with an `if let`. The block of code that goes with the
-`else` is the same as the block of code that would go with the `_` case in the
-`match` expression that is equivalent to the `if let` and `else`. Recall the
-`Coin` enum definition in Listing 6-4, where the `Quarter` variant also held a
-`UsState` value. If we wanted to count all non-quarter coins we see while also
-announcing the state of the quarters, we could do that with a `match`
-expression, like this:
+`if let`에는 `else`를 포함할 수도 있습니다. `else`와 함께 가는 코드 블록은,
+`if let`과 `else`에 상응하는 `match` 표현식에서 `_` 경우에 갔을 코드 블록과 같은
+역할을 합니다. Listing 6-4의 `Coin` 열거형 정의를 떠올려 보세요. `Quarter` 배리
+언트가 `UsState` 값도 담고 있었습니다. 쿼터의 주를 외치는 동시에 쿼터가 아닌 동전의
+개수를 모두 세고 싶다면, 다음과 같이 `match` 표현식으로 할 수 있습니다.
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-13-count-and-announce-match/src/main.rs:here}}
 ```
 
-Or we could use an `if let` and `else` expression, like this:
+또는 다음처럼 `if let`과 `else` 표현식을 쓸 수도 있습니다.
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/no-listing-14-count-and-announce-if-let-else/src/main.rs:here}}
 ```
 
-## Staying on the “Happy Path” with `let...else`
+## `let...else`로 “행복 경로(Happy Path)”에 머무르기
 
-The common pattern is to perform some computation when a value is present and
-return a default value otherwise. Continuing with our example of coins with a
-`UsState` value, if we wanted to say something funny depending on how old the
-state on the quarter was, we might introduce a method on `UsState` to check the
-age of a state, like so:
+흔한 패턴은, 값이 존재할 때 어떤 계산을 수행하고 그렇지 않을 때에는 기본값을
+반환하는 것입니다. `UsState` 값을 가진 동전 예제를 이어서, 쿼터에 새겨진 주가
+얼마나 오래된 주인지에 따라 재미있는 말을 하고 싶다면, `UsState`에 주의 연식을
+확인하는 메서드를 다음과 같이 도입할 수 있습니다.
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-07/src/main.rs:state}}
 ```
 
-Then, we might use `if let` to match on the type of coin, introducing a `state`
-variable within the body of the condition, as in Listing 6-7.
+그런 다음, Listing 6-7처럼 `if let`을 사용해 동전의 종류에 매칭하고, 조건 본문
+안에 `state` 변수를 도입할 수 있습니다.
 
-<Listing number="6-7" caption="Checking whether a state existed in 1900 by using conditionals nested inside an `if let`">
+<Listing number="6-7" caption="`if let` 안에 중첩된 조건문으로 주가 1900년에 존재했는지 확인하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-07/src/main.rs:describe}}
@@ -85,14 +79,13 @@ variable within the body of the condition, as in Listing 6-7.
 
 </Listing>
 
-That gets the job done, but it has pushed the work into the body of the `if
-let` statement, and if the work to be done is more complicated, it might be
-hard to follow exactly how the top-level branches relate. We could also take
-advantage of the fact that expressions produce a value either to produce the
-`state` from the `if let` or to return early, as in Listing 6-8. (You could do
-something similar with a `match`, too.)
+이것도 일은 해내지만, 일을 `if let` 문의 본문 안으로 밀어 넣었고, 수행해야 할
+일이 더 복잡하다면 최상위 분기들이 어떻게 관련되는지 정확히 따라가기 어려울 수
+있습니다. Listing 6-8처럼, 표현식이 값을 만들어 낸다는 사실을 이용해 `if let`에서
+`state`를 만들거나, 일찍 반환하도록 할 수도 있습니다. (`match`로도 비슷하게 할
+수 있습니다.)
 
-<Listing number="6-8" caption="Using `if let` to produce a value or return early">
+<Listing number="6-8" caption="`if let`으로 값을 만들거나 일찍 반환하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-08/src/main.rs:describe}}
@@ -100,20 +93,19 @@ something similar with a `match`, too.)
 
 </Listing>
 
-This is a bit annoying to follow in its own way, though! One branch of the `if
-let` produces a value, and the other one returns from the function entirely.
+이것 또한 나름대로 따라가기가 조금 성가십니다! `if let`의 한 분기는 값을 만들어
+내고, 다른 분기는 함수에서 아예 반환해 버립니다.
 
-To make this common pattern nicer to express, Rust has `let...else`. The
-`let...else` syntax takes a pattern on the left side and an expression on the
-right, very similar to `if let`, but it does not have an `if` branch, only an
-`else` branch. If the pattern matches, it will bind the value from the pattern
-in the outer scope. If the pattern does _not_ match, the program will flow into
-the `else` arm, which must return from the function.
+이 흔한 패턴을 더 보기 좋게 표현하기 위해, 러스트에는 `let...else`가 있습니다.
+`let...else` 문법은 `if let`과 아주 비슷하게 왼쪽에 패턴을, 오른쪽에 표현식을
+받지만 `if` 분기가 없고 오직 `else` 분기만 있습니다. 패턴이 매칭되면 패턴의 값이
+바깥 스코프의 변수에 바인딩됩니다. 패턴이 매칭되지 *않으면* 프로그램은 `else`
+갈래로 흘러가며, 이 갈래는 반드시 함수에서 반환해야 합니다.
 
-In Listing 6-9, you can see how Listing 6-8 looks when using `let...else` in
-place of `if let`.
+Listing 6-9에서 Listing 6-8을 `if let` 대신 `let...else`를 사용해 표현하면 어떻게
+보이는지 확인할 수 있습니다.
 
-<Listing number="6-9" caption="Using `let...else` to clarify the flow through the function">
+<Listing number="6-9" caption="`let...else`로 함수를 흐르는 경로를 명확히 하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch06-enums-and-pattern-matching/listing-06-09/src/main.rs:describe}}
@@ -121,27 +113,23 @@ place of `if let`.
 
 </Listing>
 
-Notice that it stays on the “happy path” in the main body of the function this
-way, without having significantly different control flow for two branches the
-way the `if let` did.
+이 방식으로 함수의 메인 본문이 “행복 경로(happy path)”에 머무른다는 점에 유의
+하세요. `if let`처럼 두 분기 사이에 흐름 제어가 크게 달라지지 않습니다.
 
-If you have a situation in which your program has logic that is too verbose to
-express using a `match`, remember that `if let` and `let...else` are in your
-Rust toolbox as well.
+프로그램의 로직이 `match`로 표현하기에 너무 장황한 상황이라면, `if let`과
+`let...else`도 러스트 도구 상자에 있다는 것을 기억하세요.
 
-## Summary
+## 요약
 
-We’ve now covered how to use enums to create custom types that can be one of a
-set of enumerated values. We’ve shown how the standard library’s `Option<T>`
-type helps you use the type system to prevent errors. When enum values have
-data inside them, you can use `match` or `if let` to extract and use those
-values, depending on how many cases you need to handle.
+지금까지 열거된 값들의 집합 중 하나가 될 수 있는 커스텀 타입을 만들기 위해
+열거형을 사용하는 방법을 다뤘습니다. 표준 라이브러리의 `Option<T>` 타입이 에러를
+막기 위해 타입 시스템을 활용하는 데 어떻게 도움이 되는지 보여 드렸습니다. 열거형
+값이 안에 데이터를 담을 때, 다뤄야 하는 경우가 몇 개인지에 따라 `match` 또는
+`if let`을 사용해 그 값을 꺼내고 사용할 수 있습니다.
 
-Your Rust programs can now express concepts in your domain using structs and
-enums. Creating custom types to use in your API ensures type safety: The
-compiler will make certain your functions only get values of the type each
-function expects.
+이제 여러분의 러스트 프로그램은 구조체와 열거형으로 도메인의 개념을 표현할 수
+있습니다. API에서 사용할 커스텀 타입을 만드는 일은 타입 안전성을 보장해 줍니다.
+컴파일러는 여러분의 함수가 기대하는 타입의 값만 받도록 확실히 해 줄 것입니다.
 
-In order to provide a well-organized API to your users that is straightforward
-to use and only exposes exactly what your users will need, let’s now turn to
-Rust’s modules.
+잘 조직화되어 있고 사용하기 직관적이며 사용자가 필요한 것만 정확히 노출하는
+API를 제공하기 위해, 이제 러스트의 모듈로 넘어가 봅시다.

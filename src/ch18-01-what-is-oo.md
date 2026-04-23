@@ -1,50 +1,22 @@
-## Characteristics of Object-Oriented Languages
+## 객체 지향 언어의 특성
 
-There is no consensus in the programming community about what features a
-language must have to be considered object oriented. Rust is influenced by many
-programming paradigms, including OOP; for example, we explored the features
-that came from functional programming in Chapter 13. Arguably, OOP languages
-share certain common characteristics—namely, objects, encapsulation, and
-inheritance. Let’s look at what each of those characteristics means and whether
-Rust supports it.
+객체 지향이라고 간주되기 위해 어떤 기능을 갖추어야 하는지에 대해 프로그래밍 커뮤니티 내에서 합의된 바는 없습니다. 러스트는 OOP를 포함하여 많은 프로그래밍 패러다임의 영향을 받았습니다. 예를 들어 13장에서는 함수형 프로그래밍에서 비롯된 기능들을 살펴보았습니다. 논쟁의 여지는 있지만 OOP 언어들은 객체, 캡슐화, 상속이라는 몇 가지 공통적인 특성을 공유합니다. 이 각각의 특성이 무엇을 의미하는지, 그리고 러스트가 이를 지원하는지 살펴봅시다.
 
-### Objects Contain Data and Behavior
+### 객체는 데이터와 동작을 포함한다
 
-The book _Design Patterns: Elements of Reusable Object-Oriented Software_ by
-Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides (Addison-Wesley,
-1994), colloquially referred to as _The Gang of Four_ book, is a catalog of
-object-oriented design patterns. It defines OOP in this way:
+Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides가 쓴 _Design Patterns: Elements of Reusable Object-Oriented Software_(Addison-Wesley, 1994), 흔히 _Gang of Four_ 책이라고 불리는 이 책은 객체 지향 디자인 패턴의 카탈로그입니다. 이 책은 OOP를 다음과 같이 정의합니다.
 
-> Object-oriented programs are made up of objects. An **object** packages both
-> data and the procedures that operate on that data. The procedures are
-> typically called **methods** or **operations**.
+> 객체 지향 프로그램은 객체로 구성됩니다. **객체**는 데이터와 그 데이터를 다루는 절차를 함께 묶습니다. 이 절차들은 일반적으로 **메서드** 또는 **연산**이라 불립니다.
 
-Using this definition, Rust is object oriented: Structs and enums have data,
-and `impl` blocks provide methods on structs and enums. Even though structs and
-enums with methods aren’t _called_ objects, they provide the same
-functionality, according to the Gang of Four’s definition of objects.
+이 정의를 따른다면 러스트는 객체 지향입니다. 구조체와 열거형은 데이터를 가지고 있고, `impl` 블록은 구조체와 열거형에 메서드를 제공합니다. 메서드를 가진 구조체와 열거형이 _객체_ 라고 불리지는 않지만, Gang of Four의 객체 정의에 따르면 동일한 기능을 제공합니다.
 
-### Encapsulation That Hides Implementation Details
+### 구현 세부 사항을 숨기는 캡슐화
 
-Another aspect commonly associated with OOP is the idea of _encapsulation_,
-which means that the implementation details of an object aren’t accessible to
-code using that object. Therefore, the only way to interact with an object is
-through its public API; code using the object shouldn’t be able to reach into
-the object’s internals and change data or behavior directly. This enables the
-programmer to change and refactor an object’s internals without needing to
-change the code that uses the object.
+OOP와 흔히 연관되는 또 다른 측면은 _캡슐화_ 라는 개념입니다. 캡슐화란 객체의 구현 세부 사항이 그 객체를 사용하는 코드에서 접근할 수 없다는 뜻입니다. 따라서 객체와 상호작용할 수 있는 유일한 방법은 객체의 공개 API를 통하는 것입니다. 객체를 사용하는 코드는 객체의 내부에 손을 뻗어 데이터나 동작을 직접 변경할 수 있어서는 안 됩니다. 이렇게 하면 프로그래머는 객체를 사용하는 코드를 변경할 필요 없이 객체의 내부를 바꾸고 리팩터링할 수 있습니다.
 
-We discussed how to control encapsulation in Chapter 7: We can use the `pub`
-keyword to decide which modules, types, functions, and methods in our code
-should be public, and by default everything else is private. For example, we
-can define a struct `AveragedCollection` that has a field containing a vector
-of `i32` values. The struct can also have a field that contains the average of
-the values in the vector, meaning the average doesn’t have to be computed on
-demand whenever anyone needs it. In other words, `AveragedCollection` will
-cache the calculated average for us. Listing 18-1 has the definition of the
-`AveragedCollection` struct.
+7장에서 캡슐화를 어떻게 제어하는지 논의했습니다. `pub` 키워드를 사용해 코드의 어떤 모듈, 타입, 함수, 메서드를 공개로 할지 결정할 수 있고, 기본적으로 그 외의 모든 것은 비공개입니다. 예를 들어 `i32` 값들의 벡터를 담는 필드를 가진 `AveragedCollection` 구조체를 정의할 수 있습니다. 이 구조체는 벡터에 들어 있는 값들의 평균을 담는 필드도 가질 수 있는데, 그러면 누군가 평균이 필요할 때마다 매번 계산할 필요가 없어집니다. 다시 말해 `AveragedCollection`이 계산된 평균을 캐시해 줍니다. Listing 18-1은 `AveragedCollection` 구조체의 정의입니다.
 
-<Listing number="18-1" file-name="src/lib.rs" caption="An `AveragedCollection` struct that maintains a list of integers and the average of the items in the collection">
+<Listing number="18-1" file-name="src/lib.rs" caption="정수 목록과 그 컬렉션 항목들의 평균을 유지하는 `AveragedCollection` 구조체">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch18-oop/listing-18-01/src/lib.rs}}
@@ -52,13 +24,9 @@ cache the calculated average for us. Listing 18-1 has the definition of the
 
 </Listing>
 
-The struct is marked `pub` so that other code can use it, but the fields within
-the struct remain private. This is important in this case because we want to
-ensure that whenever a value is added or removed from the list, the average is
-also updated. We do this by implementing `add`, `remove`, and `average` methods
-on the struct, as shown in Listing 18-2.
+구조체 자체는 다른 코드가 사용할 수 있도록 `pub`으로 표시되어 있지만, 구조체 안의 필드들은 비공개로 유지됩니다. 이 경우에는 이 점이 중요합니다. 목록에서 값이 추가되거나 제거될 때마다 평균도 함께 갱신되도록 보장하고 싶기 때문입니다. 이를 위해 Listing 18-2처럼 구조체에 `add`, `remove`, `average` 메서드를 구현합니다.
 
-<Listing number="18-2" file-name="src/lib.rs" caption="Implementations of the public methods `add`, `remove`, and `average` on `AveragedCollection`">
+<Listing number="18-2" file-name="src/lib.rs" caption="`AveragedCollection`에 구현된 공개 메서드 `add`, `remove`, `average`">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch18-oop/listing-18-02/src/lib.rs:here}}
@@ -66,84 +34,32 @@ on the struct, as shown in Listing 18-2.
 
 </Listing>
 
-The public methods `add`, `remove`, and `average` are the only ways to access
-or modify data in an instance of `AveragedCollection`. When an item is added to
-`list` using the `add` method or removed using the `remove` method, the
-implementations of each call the private `update_average` method that handles
-updating the `average` field as well.
+공개 메서드인 `add`, `remove`, `average`는 `AveragedCollection` 인스턴스의 데이터에 접근하거나 이를 수정할 수 있는 유일한 방법입니다. `add` 메서드를 사용해 `list`에 항목이 추가되거나 `remove` 메서드를 사용해 제거될 때, 각 메서드의 구현은 비공개 메서드인 `update_average`를 호출하여 `average` 필드의 갱신도 함께 처리합니다.
 
-We leave the `list` and `average` fields private so that there is no way for
-external code to add or remove items to or from the `list` field directly;
-otherwise, the `average` field might become out of sync when the `list`
-changes. The `average` method returns the value in the `average` field,
-allowing external code to read the `average` but not modify it.
+`list`와 `average` 필드를 비공개로 두는 이유는 외부 코드가 `list` 필드에 항목을 직접 추가하거나 제거할 수 없도록 하기 위해서입니다. 그렇지 않으면 `list`가 변경될 때 `average` 필드가 동기화되지 않을 수 있습니다. `average` 메서드는 `average` 필드의 값을 반환하므로, 외부 코드는 `average`를 읽을 수는 있어도 수정할 수는 없습니다.
 
-Because we’ve encapsulated the implementation details of the struct
-`AveragedCollection`, we can easily change aspects, such as the data structure,
-in the future. For instance, we could use a `HashSet<i32>` instead of a
-`Vec<i32>` for the `list` field. As long as the signatures of the `add`,
-`remove`, and `average` public methods stayed the same, code using
-`AveragedCollection` wouldn’t need to change. If we made `list` public instead,
-this wouldn’t necessarily be the case: `HashSet<i32>` and `Vec<i32>` have
-different methods for adding and removing items, so the external code would
-likely have to change if it were modifying `list` directly.
+`AveragedCollection` 구조체의 구현 세부 사항을 캡슐화했기 때문에, 향후 자료 구조 같은 측면을 손쉽게 변경할 수 있습니다. 예를 들어 `list` 필드에 `Vec<i32>` 대신 `HashSet<i32>`를 사용할 수도 있습니다. `add`, `remove`, `average` 공개 메서드의 시그니처가 동일하게 유지되는 한, `AveragedCollection`을 사용하는 코드는 변경할 필요가 없습니다. 만약 대신 `list`를 공개로 했다면 반드시 그렇지는 않을 것입니다. `HashSet<i32>`와 `Vec<i32>`는 항목을 추가하고 제거하는 메서드가 다르므로, `list`를 직접 수정하는 외부 코드는 십중팔구 변경되어야 할 것입니다.
 
-If encapsulation is a required aspect for a language to be considered object
-oriented, then Rust meets that requirement. The option to use `pub` or not for
-different parts of code enables encapsulation of implementation details.
+캡슐화가 객체 지향이라고 여겨지기 위해 필수적인 측면이라면, 러스트는 그 요건을 충족합니다. 코드의 다양한 부분에 대해 `pub`을 사용할지 말지 선택할 수 있다는 점이 구현 세부 사항의 캡슐화를 가능하게 합니다.
 
-### Inheritance as a Type System and as Code Sharing
+### 타입 시스템과 코드 공유로서의 상속
 
-_Inheritance_ is a mechanism whereby an object can inherit elements from
-another object’s definition, thus gaining the parent object’s data and behavior
-without you having to define them again.
+_상속_ 은 어떤 객체가 다른 객체의 정의로부터 요소들을 물려받을 수 있는 메커니즘으로, 부모 객체의 데이터와 동작을 다시 정의하지 않고도 얻을 수 있게 해 줍니다.
 
-If a language must have inheritance to be object oriented, then Rust is not
-such a language. There is no way to define a struct that inherits the parent
-struct’s fields and method implementations without using a macro.
+객체 지향이라고 간주되기 위해 반드시 상속이 있어야 한다면 러스트는 그러한 언어가 아닙니다. 매크로를 사용하지 않고는 부모 구조체의 필드와 메서드 구현을 상속하는 구조체를 정의할 방법이 없습니다.
 
-However, if you’re used to having inheritance in your programming toolbox, you
-can use other solutions in Rust, depending on your reason for reaching for
-inheritance in the first place.
+그러나 프로그래밍 도구함에 상속이 있는 데 익숙하다면, 애초에 상속을 원했던 이유에 따라 러스트에서 다른 해법을 사용할 수 있습니다.
 
-You would choose inheritance for two main reasons. One is for reuse of code:
-You can implement particular behavior for one type, and inheritance enables you
-to reuse that implementation for a different type. You can do this in a limited
-way in Rust code using default trait method implementations, which you saw in
-Listing 10-14 when we added a default implementation of the `summarize` method
-on the `Summary` trait. Any type implementing the `Summary` trait would have
-the `summarize` method available on it without any further code. This is
-similar to a parent class having an implementation of a method and an
-inheriting child class also having the implementation of the method. We can
-also override the default implementation of the `summarize` method when we
-implement the `Summary` trait, which is similar to a child class overriding the
-implementation of a method inherited from a parent class.
+상속을 선택하는 주된 이유는 두 가지입니다. 하나는 코드 재사용입니다. 한 타입에 특정 동작을 구현하면, 상속을 통해 그 구현을 다른 타입에서도 재사용할 수 있습니다. 러스트에서는 트레이트의 기본 메서드 구현을 사용해 제한적인 방식으로 이를 할 수 있는데, 10장의 Listing 10-14에서 `Summary` 트레이트의 `summarize` 메서드에 기본 구현을 추가할 때 보았습니다. `Summary` 트레이트를 구현하는 어떤 타입이든 추가 코드 없이 `summarize` 메서드를 사용할 수 있게 됩니다. 이는 부모 클래스가 메서드 구현을 가지고 있고, 상속하는 자식 클래스도 그 메서드의 구현을 가지는 것과 비슷합니다. 또한 `Summary` 트레이트를 구현할 때 `summarize` 메서드의 기본 구현을 재정의할 수도 있는데, 이는 자식 클래스가 부모 클래스로부터 상속받은 메서드의 구현을 재정의하는 것과 비슷합니다.
 
-The other reason to use inheritance relates to the type system: to enable a
-child type to be used in the same places as the parent type. This is also
-called _polymorphism_, which means that you can substitute multiple objects for
-each other at runtime if they share certain characteristics.
+상속을 사용하는 또 다른 이유는 타입 시스템과 관련이 있습니다. 자식 타입을 부모 타입과 같은 자리에서 사용할 수 있게 하기 위해서입니다. 이를 _다형성(polymorphism)_ 이라고도 부르는데, 이는 여러 객체가 어떤 특정 특성을 공유한다면 런타임에 서로 대체될 수 있다는 뜻입니다.
 
-> ### Polymorphism
+> ### 다형성
 >
-> To many people, polymorphism is synonymous with inheritance. But it’s
-> actually a more general concept that refers to code that can work with data of
-> multiple types. For inheritance, those types are generally subclasses.
+> 많은 사람에게 다형성은 상속과 동의어입니다. 그러나 실제로 다형성은 여러 타입의 데이터로 동작할 수 있는 코드를 가리키는 더 일반적인 개념입니다. 상속에서는 그 타입들이 일반적으로 자식 클래스입니다.
 >
-> Rust instead uses generics to abstract over different possible types and
-> trait bounds to impose constraints on what those types must provide. This is
-> sometimes called _bounded parametric polymorphism_.
+> 러스트는 대신 가능한 여러 타입을 추상화하기 위해 제네릭을 사용하고, 그 타입들이 무엇을 제공해야 하는지 제약을 주기 위해 트레이트 바운드를 사용합니다. 이를 때로는 _경계 매개변수 다형성(bounded parametric polymorphism)_ 이라고 부릅니다.
 
-Rust has chosen a different set of trade-offs by not offering inheritance.
-Inheritance is often at risk of sharing more code than necessary. Subclasses
-shouldn’t always share all characteristics of their parent class but will do so
-with inheritance. This can make a program’s design less flexible. It also
-introduces the possibility of calling methods on subclasses that don’t make
-sense or that cause errors because the methods don’t apply to the subclass. In
-addition, some languages will only allow _single inheritance_ (meaning a
-subclass can only inherit from one class), further restricting the flexibility
-of a program’s design.
+러스트는 상속을 제공하지 않음으로써 다른 트레이드오프를 선택했습니다. 상속은 종종 필요 이상으로 많은 코드를 공유하게 될 위험이 있습니다. 자식 클래스가 부모 클래스의 모든 특성을 항상 공유해야 하는 것은 아니지만, 상속을 사용하면 그렇게 됩니다. 이는 프로그램 설계의 유연성을 떨어뜨릴 수 있습니다. 또한 자식 클래스에는 의미가 없거나 적용되지 않아 오류를 일으키는 메서드가 호출될 가능성도 생깁니다. 게다가 일부 언어는 _단일 상속_(자식 클래스가 단 하나의 클래스에서만 상속할 수 있다는 뜻)만 허용하므로 프로그램 설계의 유연성을 더욱 제약합니다.
 
-For these reasons, Rust takes the different approach of using trait objects
-instead of inheritance to achieve polymorphism at runtime. Let’s look at how
-trait objects work.
+이러한 이유들로 러스트는 런타임에 다형성을 달성하기 위해 상속 대신 트레이트 객체를 사용하는 다른 접근법을 취합니다. 트레이트 객체가 어떻게 동작하는지 살펴봅시다.

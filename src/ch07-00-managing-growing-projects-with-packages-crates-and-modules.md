@@ -2,51 +2,50 @@
 
 <a id="managing-growing-projects-with-packages-crates-and-modules"></a>
 
-# Packages, Crates, and Modules
+# 패키지, 크레이트, 모듈
 
-As you write large programs, organizing your code will become increasingly
-important. By grouping related functionality and separating code with distinct
-features, you’ll clarify where to find code that implements a particular
-feature and where to go to change how a feature works.
+큰 프로그램을 작성할수록 코드를 조직화하는 일이 점점 더 중요해집니다. 관련 기능을
+묶고 서로 다른 특징을 가진 코드를 분리함으로써, 특정 기능을 구현하는 코드를 어디서
+찾아야 하는지, 기능의 동작 방식을 바꾸려면 어디로 가야 하는지가 분명해집니다.
 
-The programs we’ve written so far have been in one module in one file. As a
-project grows, you should organize code by splitting it into multiple modules
-and then multiple files. A package can contain multiple binary crates and
-optionally one library crate. As a package grows, you can extract parts into
-separate crates that become external dependencies. This chapter covers all
-these techniques. For very large projects comprising a set of interrelated
-packages that evolve together, Cargo provides workspaces, which we’ll cover in
-[“Cargo Workspaces”][workspaces]<!-- ignore --> in Chapter 14.
+지금까지 우리가 작성한 프로그램들은 하나의 파일, 하나의 모듈에 있었습니다. 프로젝트
+가 커지면 코드를 여러 모듈로, 그다음에는 여러 파일로 나눠 조직화해야 합니다.
+패키지는 여러 바이너리 크레이트와 선택적으로 하나의 라이브러리 크레이트를 담을 수
+있습니다. 패키지가 커지면 일부를 외부 의존성이 되는 별도의 크레이트로 추출할 수
+있습니다. 이 장에서는 이 모든 기법을 다룹니다. 서로 관련된 패키지들이 함께 발전해
+가는 아주 큰 프로젝트의 경우, Cargo는 워크스페이스(workspaces)를 제공하며 이는
+14장의 [“Cargo 워크스페이스”][workspaces]<!-- ignore -->에서 다룹니다.
 
-We’ll also discuss encapsulating implementation details, which lets you reuse
-code at a higher level: Once you’ve implemented an operation, other code can
-call your code via its public interface without having to know how the
-implementation works. The way you write code defines which parts are public for
-other code to use and which parts are private implementation details that you
-reserve the right to change. This is another way to limit the amount of detail
-you have to keep in your head.
+구현 세부 사항을 캡슐화하는 것에 대해서도 이야기하겠습니다. 이를 통해 코드를 더
+높은 수준에서 재사용할 수 있습니다. 어떤 연산을 한 번 구현해 두면, 다른 코드는
+구현이 어떻게 동작하는지 알 필요 없이 공개 인터페이스를 통해 여러분의 코드를
+호출할 수 있습니다. 코드를 작성하는 방식이, 어느 부분이 다른 코드가 사용할 수
+있는 공개(public) 부분이고, 어느 부분이 여러분이 바꿀 권리를 남겨 둔 비공개(private)
+구현 세부 사항인지를 정의합니다. 이는 머릿속에 담고 있어야 할 세부 사항의 양을
+제한하는 또 다른 방법이기도 합니다.
 
-A related concept is scope: The nested context in which code is written has a
-set of names that are defined as “in scope.” When reading, writing, and
-compiling code, programmers and compilers need to know whether a particular
-name at a particular spot refers to a variable, function, struct, enum, module,
-constant, or other item and what that item means. You can create scopes and
-change which names are in or out of scope. You can’t have two items with the
-same name in the same scope; tools are available to resolve name conflicts.
+관련된 개념으로 스코프(scope)가 있습니다. 코드가 작성되는 중첩된 맥락은 “스코프
+안”으로 정의된 이름들의 집합을 가집니다. 코드를 읽고 쓰고 컴파일할 때, 프로그래머와
+컴파일러는 특정 지점의 특정 이름이 변수, 함수, 구조체, 열거형, 모듈, 상수 또는
+다른 아이템을 가리키는지, 그리고 그 아이템이 무엇을 의미하는지 알아야 합니다. 스코
+프를 만들고 어떤 이름이 스코프 안이나 밖에 있을지 바꿀 수 있습니다. 같은 스코프에
+같은 이름의 아이템 두 개를 둘 수는 없습니다. 이름 충돌을 해결할 수 있는 도구들이
+있습니다.
 
-Rust has a number of features that allow you to manage your code’s
-organization, including which details are exposed, which details are private,
-and what names are in each scope in your programs. These features, sometimes
-collectively referred to as the _module system_, include:
+러스트에는 코드 조직화를 관리할 수 있게 해 주는 여러 기능이 있습니다. 어떤 세부
+사항을 공개하고 어떤 세부 사항을 비공개로 할지, 프로그램의 각 스코프에 어떤 이름이
+들어가 있는지 등을 관리하죠. 때로 집합적으로 *모듈 시스템(module system)*이라고
+불리는 이 기능들에는 다음이 포함됩니다.
 
-* **Packages**: A Cargo feature that lets you build, test, and share crates
-* **Crates**: A tree of modules that produces a library or executable
-* **Modules and use**: Let you control the organization, scope, and privacy of
-paths
-* **Paths**: A way of naming an item, such as a struct, function, or module
+* **패키지(Packages)**: 크레이트를 빌드하고 테스트하고 공유할 수 있게 해 주는
+  Cargo 기능
+* **크레이트(Crates)**: 라이브러리나 실행 파일을 만들어 내는 모듈들의 트리
+* **모듈과 `use`(Modules and use)**: 경로의 조직화, 스코프, 비공개성을 제어할 수
+  있게 해 줌
+* **경로(Paths)**: 구조체, 함수, 모듈 등 아이템의 이름을 붙이는 방법
 
-In this chapter, we’ll cover all these features, discuss how they interact, and
-explain how to use them to manage scope. By the end, you should have a solid
-understanding of the module system and be able to work with scopes like a pro!
+이 장에서는 이 모든 기능을 다루고, 그것들이 어떻게 상호작용하는지 이야기하며, 이를
+사용해 스코프를 관리하는 방법을 설명하겠습니다. 이 장이 끝날 즈음에는 모듈 시스템을
+탄탄히 이해하고, 프로처럼 스코프를 다룰 수 있을 것입니다!
 
 [workspaces]: ch14-03-cargo-workspaces.html

@@ -1,34 +1,34 @@
-# Style Guide
+# 스타일 가이드
 
-## Prose
+## 본문
 
-- Prefer title case for chapter/section headings, ex: `## Generating a Secret
-  Number` rather than `## Generating a secret number`.
-- Prefer italics over single quotes when calling out a term, ex: `is an
-  *associated function* of` rather than `is an ‘associated function’ of`.
-- When talking about a method in prose, DO NOT include the parentheses, ex:
-  `read_line` rather than `read_line()`.
-- Hard wrap at 80 chars
-- Prefer not mixing code and not-code in one word, ex: ``Remember when we wrote
-  `use std::io`?`` rather than ``Remember when we `use`d `std::io`?``
+- 장/절 제목은 영어 기준으로 타이틀 케이스(title case)를 선호합니다. 예: `##
+  Generating a secret number`보다는 `## Generating a Secret Number`.
+- 특정 용어를 강조할 때에는 작은따옴표보다 *이탤릭*을 선호합니다. 예: `is an
+  ‘associated function’ of`보다는 `is an *associated function* of`.
+- 본문에서 메서드를 언급할 때에는 괄호를 포함하지 않습니다. 예: `read_line()`이
+  아니라 `read_line`.
+- 80자 기준으로 줄을 강제 개행(hard wrap)합니다.
+- 한 단어 안에서 코드와 일반 텍스트를 섞지 않도록 합니다. 예: ``Remember when we
+  `use`d `std::io`?``보다는 ``Remember when we wrote `use std::io`?``.
 
-## Code
+## 코드
 
-- Add the file name before markdown blocks to make it clear which file we're
-  talking about, when applicable.
-- When making changes to code, make it clear which parts of the code changed
-  and which stayed the same... not sure how to do this yet
-- Split up long lines as appropriate to keep them under 80 chars if possible
-- Use `bash` syntax highlighting for command line output code blocks
+- 어떤 파일을 다루는지 명확히 하기 위해, 해당되는 경우 마크다운 코드 블록 앞에
+  파일명을 표기합니다.
+- 코드를 수정할 때에는 어느 부분이 바뀌었고 어느 부분이 그대로인지 분명히 드러나도록
+  합니다(아직 구체적인 방법은 확정되지 않았습니다).
+- 긴 줄은 가능한 한 80자 이하가 되도록 적절히 나눕니다.
+- 명령줄 출력 코드 블록에는 `bash` 문법 강조를 사용합니다.
 
-## Links
+## 링크
 
-Once all the scripts are done:
+모든 스크립트 작업이 완료되면 다음을 적용합니다.
 
-- If a link shouldn't be printed, mark it to be ignored
-  - This includes all "Chapter XX" intra-book links, which _should_ be links
-    for the HTML version
-- Make intra-book links and stdlib API doc links relative so they work whether
-  the book is read offline or on docs.rust-lang.org
-- Use markdown links and keep in mind that they will be changed into `text at
-  *url*` in print, so word them in a way that it reads well in that format
+- 인쇄하면 안 되는 링크는 무시하도록 표시합니다.
+  - 여기에는 모든 "Chapter XX" 형태의 책 내부 상호 참조가 포함되며, HTML 버전에서는
+    이 링크들이 *유지*되어야 합니다.
+- 책 내부 링크와 표준 라이브러리 API 문서 링크는 상대 경로로 작성하여, 책을
+  오프라인에서 읽든 docs.rust-lang.org에서 읽든 모두 동작하도록 합니다.
+- 마크다운 링크를 사용하되, 인쇄판에서는 `text at *url*` 형태로 변환된다는 점을
+  염두에 두고 해당 형식으로도 자연스럽게 읽히도록 문장을 구성합니다.

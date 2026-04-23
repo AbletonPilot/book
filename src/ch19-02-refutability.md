@@ -1,33 +1,14 @@
-## Refutability: Whether a Pattern Might Fail to Match
+## 반박 가능성: 패턴이 매칭에 실패할 수 있는지 여부
 
-Patterns come in two forms: refutable and irrefutable. Patterns that will match
-for any possible value passed are _irrefutable_. An example would be `x` in the
-statement `let x = 5;` because `x` matches anything and therefore cannot fail
-to match. Patterns that can fail to match for some possible value are
-_refutable_. An example would be `Some(x)` in the expression `if let Some(x) =
-a_value` because if the value in the `a_value` variable is `None` rather than
-`Some`, the `Some(x)` pattern will not match.
+패턴은 반박 가능(refutable)과 반박 불가(irrefutable)의 두 가지 형태로 나뉩니다. 전달된 어떤 가능한 값에 대해서도 매칭되는 패턴은 _반박 불가_ 입니다. `let x = 5;` 문에서의 `x`가 그 예인데, `x`는 무엇이든 매칭되므로 매칭에 실패할 수 없습니다. 어떤 가능한 값에 대해 매칭에 실패할 수 있는 패턴은 _반박 가능_ 입니다. `if let Some(x) = a_value` 표현식에서의 `Some(x)`가 그 예인데, `a_value` 변수의 값이 `Some`이 아니라 `None`이라면 `Some(x)` 패턴은 매칭되지 않을 것입니다.
 
-Function parameters, `let` statements, and `for` loops can only accept
-irrefutable patterns because the program cannot do anything meaningful when
-values don’t match. The `if let` and `while let` expressions and the
-`let...else` statement accept refutable and irrefutable patterns, but the
-compiler warns against irrefutable patterns because, by definition, they’re
-intended to handle possible failure: The functionality of a conditional is in
-its ability to perform differently depending on success or failure.
+함수 매개변수, `let` 문, `for` 반복은 값이 매칭되지 않을 때 프로그램이 의미 있는 일을 할 수 없으므로 반박 불가 패턴만 받을 수 있습니다. `if let`과 `while let` 표현식, `let...else` 문은 반박 가능 패턴과 반박 불가 패턴 모두를 받지만, 컴파일러는 반박 불가 패턴에 대해 경고합니다. 정의상 이런 구문들은 가능한 실패를 처리하기 위한 것이기 때문입니다. 조건문의 기능은 성공이나 실패에 따라 다르게 동작하는 능력에 있습니다.
 
-In general, you shouldn’t have to worry about the distinction between refutable
-and irrefutable patterns; however, you do need to be familiar with the concept
-of refutability so that you can respond when you see it in an error message. In
-those cases, you’ll need to change either the pattern or the construct you’re
-using the pattern with, depending on the intended behavior of the code.
+일반적으로 반박 가능 패턴과 반박 불가 패턴의 구분에 대해 걱정할 필요는 없습니다. 그러나 오류 메시지에서 그 개념이 등장했을 때 대응할 수 있도록 반박 가능성이라는 개념에 익숙해질 필요는 있습니다. 그런 경우에는 의도한 코드의 동작에 따라 패턴이나 패턴을 사용하는 구문 중 하나를 변경해야 할 것입니다.
 
-Let’s look at an example of what happens when we try to use a refutable pattern
-where Rust requires an irrefutable pattern and vice versa. Listing 19-8 shows a
-`let` statement, but for the pattern, we’ve specified `Some(x)`, a refutable
-pattern. As you might expect, this code will not compile.
+러스트가 반박 불가 패턴을 요구하는 곳에 반박 가능 패턴을 사용하려고 시도할 때, 또는 그 반대로 시도할 때 무슨 일이 일어나는지 예시를 살펴봅시다. Listing 19-8은 `let` 문을 보여 주지만, 패턴으로는 반박 가능 패턴인 `Some(x)`를 지정했습니다. 예상대로 이 코드는 컴파일되지 않습니다.
 
-<Listing number="19-8" caption="Attempting to use a refutable pattern with `let`">
+<Listing number="19-8" caption="`let`과 함께 반박 가능 패턴을 사용하려는 시도">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch19-patterns-and-matching/listing-19-08/src/main.rs:here}}
@@ -35,26 +16,17 @@ pattern. As you might expect, this code will not compile.
 
 </Listing>
 
-If `some_option_value` were a `None` value, it would fail to match the pattern
-`Some(x)`, meaning the pattern is refutable. However, the `let` statement can
-only accept an irrefutable pattern because there is nothing valid the code can
-do with a `None` value. At compile time, Rust will complain that we’ve tried to
-use a refutable pattern where an irrefutable pattern is required:
+`some_option_value`가 `None` 값이면 패턴 `Some(x)`와 매칭에 실패할 것이므로, 이 패턴은 반박 가능합니다. 그러나 `let` 문은 반박 불가 패턴만 받을 수 있습니다. 코드가 `None` 값으로 할 수 있는 유효한 일이 없기 때문입니다. 컴파일 시점에 러스트는 반박 불가 패턴이 필요한 곳에 반박 가능 패턴을 사용하려 했다고 다음과 같이 불평할 것입니다.
 
 ```console
 {{#include ../listings/ch19-patterns-and-matching/listing-19-08/output.txt}}
 ```
 
-Because we didn’t cover (and couldn’t cover!) every valid value with the
-pattern `Some(x)`, Rust rightfully produces a compiler error.
+`Some(x)` 패턴으로는 모든 유효한 값을 다루지 않았기에(다룰 수도 없으므로!), 러스트는 마땅히 컴파일 오류를 발생시킵니다.
 
-If we have a refutable pattern where an irrefutable pattern is needed, we can
-fix it by changing the code that uses the pattern: Instead of using `let`, we
-can use `let...else`. Then, if the pattern doesn’t match, the code in the curly
-brackets will handle the value. Listing 19-9 shows how to fix the code in
-Listing 19-8.
+반박 불가 패턴이 필요한 곳에 반박 가능 패턴이 있다면, 패턴을 사용하는 코드를 바꿔서 고칠 수 있습니다. `let` 대신 `let...else`를 사용할 수 있습니다. 그러면 패턴이 매칭되지 않을 때 중괄호 안의 코드가 그 값을 처리할 것입니다. Listing 19-9는 Listing 19-8의 코드를 어떻게 고치는지 보여 줍니다.
 
-<Listing number="19-9" caption="Using `let...else` and a block with refutable patterns instead of `let`">
+<Listing number="19-9" caption="`let` 대신 `let...else`와 블록을 사용한 반박 가능 패턴 처리">
 
 ```rust
 {{#rustdoc_include ../listings/ch19-patterns-and-matching/listing-19-09/src/main.rs:here}}
@@ -62,12 +34,9 @@ Listing 19-8.
 
 </Listing>
 
-We’ve given the code an out! This code is perfectly valid, although it means we
-cannot use an irrefutable pattern without receiving a warning. If we give
-`let...else` a pattern that will always match, such as `x`, as shown in Listing
-19-10, the compiler will give a warning.
+코드에 빠져나갈 길을 마련해 주었습니다! 이 코드는 완전히 유효하지만, 반박 불가 패턴을 사용하면 경고를 받게 된다는 의미이기도 합니다. Listing 19-10에서 보이듯 `x`처럼 항상 매칭되는 패턴을 `let...else`에 주면 컴파일러는 경고를 줄 것입니다.
 
-<Listing number="19-10" caption="Attempting to use an irrefutable pattern with `let...else`">
+<Listing number="19-10" caption="`let...else`와 함께 반박 불가 패턴을 사용하려는 시도">
 
 ```rust
 {{#rustdoc_include ../listings/ch19-patterns-and-matching/listing-19-10/src/main.rs:here}}
@@ -75,19 +44,12 @@ cannot use an irrefutable pattern without receiving a warning. If we give
 
 </Listing>
 
-Rust complains that it doesn’t make sense to use `let...else` with an
-irrefutable pattern:
+러스트는 `let...else`에 반박 불가 패턴을 사용하는 것은 의미가 없다고 불평합니다.
 
 ```console
 {{#include ../listings/ch19-patterns-and-matching/listing-19-10/output.txt}}
 ```
 
-For this reason, match arms must use refutable patterns, except for the last
-arm, which should match any remaining values with an irrefutable pattern. Rust
-allows us to use an irrefutable pattern in a `match` with only one arm, but
-this syntax isn’t particularly useful and could be replaced with a simpler
-`let` statement.
+이런 이유로, 매치 갈래는 반박 가능 패턴을 사용해야 합니다. 다만 마지막 갈래만은 남은 모든 값을 매칭하기 위해 반박 불가 패턴이어야 합니다. 러스트는 갈래가 하나뿐인 `match`에서 반박 불가 패턴을 사용하는 것을 허용하지만, 이 문법은 특별히 유용하지 않으며 더 단순한 `let` 문으로 대체할 수 있습니다.
 
-Now that you know where to use patterns and the difference between refutable
-and irrefutable patterns, let’s cover all the syntax we can use to create
-patterns.
+이제 패턴을 어디에 사용하는지, 그리고 반박 가능 패턴과 반박 불가 패턴의 차이를 알았으니, 패턴을 만드는 데 사용할 수 있는 모든 문법을 다뤄 봅시다.

@@ -1,7 +1,6 @@
-## Appendix F: Translations of the Book
+## 부록 F: 책의 번역
 
-For resources in languages other than English. Most are still in progress; see
-[the Translations label][label] to help or let us know about a new translation!
+영어 외 언어의 자료들입니다. 대부분은 아직 진행 중입니다. 도움을 주거나 새 번역을 알리려면 [번역 레이블][label]을 확인하세요!
 
 [label]: https://github.com/rust-lang/book/issues?q=is%3Aopen+is%3Aissue+label%3ATranslations
 

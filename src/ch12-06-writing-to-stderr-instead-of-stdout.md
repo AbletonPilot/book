@@ -2,64 +2,59 @@
 
 <a id="writing-error-messages-to-standard-error-instead-of-standard-output"></a>
 
-## Redirecting Errors to Standard Error
+## 오류를 표준 오류로 리다이렉트하기
 
-At the moment, we’re writing all of our output to the terminal using the
-`println!` macro. In most terminals, there are two kinds of output: _standard
-output_ (`stdout`) for general information and _standard error_ (`stderr`) for
-error messages. This distinction enables users to choose to direct the
-successful output of a program to a file but still print error messages to the
-screen.
+지금은 모든 출력을 `println!` 매크로로 터미널에 쓰고 있습니다. 대부분의
+터미널에는 두 종류의 출력이 있습니다. 일반 정보를 위한 _표준 출력(standard
+output)_(`stdout`)과, 오류 메시지를 위한 _표준 오류(standard error)_(`stderr`)
+입니다. 이 구분 덕분에 사용자는 프로그램의 성공 출력을 파일로 보내면서도
+오류 메시지는 화면에 계속 출력하도록 선택할 수 있습니다.
 
-The `println!` macro is only capable of printing to standard output, so we have
-to use something else to print to standard error.
+`println!` 매크로는 표준 출력으로만 출력할 수 있으므로, 표준 오류로 출력하려면
+다른 것을 사용해야 합니다.
 
-### Checking Where Errors Are Written
+### 오류가 어디에 쓰이는지 확인하기
 
-First, let’s observe how the content printed by `minigrep` is currently being
-written to standard output, including any error messages we want to write to
-standard error instead. We’ll do that by redirecting the standard output stream
-to a file while intentionally causing an error. We won’t redirect the standard
-error stream, so any content sent to standard error will continue to display on
-the screen.
+먼저 `minigrep`이 출력하는 내용이 현재 어떻게 표준 출력에 쓰이는지, 그리고
+대신 표준 오류로 쓰고 싶은 오류 메시지도 포함된다는 점을 관찰해 봅시다.
+표준 출력 스트림을 파일로 리다이렉트하면서 의도적으로 오류를 일으키는 방식
+으로 확인하겠습니다. 표준 오류 스트림은 리다이렉트하지 않을 것이므로, 표준
+오류로 보낸 내용은 계속 화면에 표시됩니다.
 
-Command line programs are expected to send error messages to the standard error
-stream so that we can still see error messages on the screen even if we
-redirect the standard output stream to a file. Our program is not currently
-well behaved: We’re about to see that it saves the error message output to a
-file instead!
+명령행 프로그램은 표준 오류 스트림으로 오류 메시지를 보내도록 기대되므로,
+표준 출력 스트림을 파일로 리다이렉트하더라도 화면에서 오류 메시지를 계속 볼
+수 있습니다. 우리 프로그램은 현재 잘 동작하지 않습니다. 곧 보겠지만 오류
+메시지 출력도 파일에 저장되는 것을 보게 될 것입니다!
 
-To demonstrate this behavior, we’ll run the program with `>` and the file path,
-_output.txt_, that we want to redirect the standard output stream to. We won’t
-pass any arguments, which should cause an error:
+이 동작을 시연하기 위해, 표준 출력 스트림을 리다이렉트하고 싶은 파일 경로
+_output.txt_ 와 `>`로 프로그램을 실행하겠습니다. 아무 인수도 전달하지 않아
+오류를 일으킵니다.
 
 ```console
 $ cargo run > output.txt
 ```
 
-The `>` syntax tells the shell to write the contents of standard output to
-_output.txt_ instead of the screen. We didn’t see the error message we were
-expecting printed to the screen, so that means it must have ended up in the
-file. This is what _output.txt_ contains:
+`>` 문법은 셸에게 표준 출력의 내용을 화면 대신 _output.txt_ 에 쓰라고 지시
+합니다. 기대했던 오류 메시지가 화면에 출력되지 않았다는 것은 결국 파일에
+들어갔다는 뜻입니다. _output.txt_ 의 내용은 다음과 같습니다.
 
 ```text
 Problem parsing arguments: not enough arguments
 ```
 
-Yup, our error message is being printed to standard output. It’s much more
-useful for error messages like this to be printed to standard error so that
-only data from a successful run ends up in the file. We’ll change that.
+네, 우리 오류 메시지가 표준 출력에 출력되고 있습니다. 이런 오류 메시지는 표준
+오류로 출력되는 편이 훨씬 유용합니다. 그래야 성공적인 실행의 데이터만 파일에
+들어가기 때문입니다. 바꿔 보겠습니다.
 
-### Printing Errors to Standard Error
+### 표준 오류로 오류 출력하기
 
-We’ll use the code in Listing 12-24 to change how error messages are printed.
-Because of the refactoring we did earlier in this chapter, all the code that
-prints error messages is in one function, `main`. The standard library provides
-the `eprintln!` macro that prints to the standard error stream, so let’s change
-the two places we were calling `println!` to print errors to use `eprintln!`
-instead.
+Listing 12-24의 코드를 사용해 오류 메시지가 출력되는 방식을 바꾸겠습니다. 이
+장 앞부분에서 한 리팩터링 덕분에, 오류 메시지를 출력하는 모든 코드가 `main`
+이라는 한 함수에 있습니다. 표준 라이브러리는 표준 오류 스트림으로 출력하는
+`eprintln!` 매크로를 제공하므로, 오류를 출력하기 위해 `println!`을 호출하던
+두 곳을 `eprintln!`을 사용하도록 바꿉시다.
 
-<Listing number="12-24" file-name="src/main.rs" caption="Writing error messages to standard error instead of standard output using `eprintln!`">
+<Listing number="12-24" file-name="src/main.rs" caption="`eprintln!`을 사용해 오류 메시지를 표준 출력 대신 표준 오류로 쓰기">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-24/src/main.rs:here}}
@@ -67,46 +62,44 @@ instead.
 
 </Listing>
 
-Let’s now run the program again in the same way, without any arguments and
-redirecting standard output with `>`:
+이제 같은 방식으로, 인수 없이 표준 출력을 `>`로 리다이렉트하면서 프로그램을
+다시 실행해 봅시다.
 
 ```console
 $ cargo run > output.txt
 Problem parsing arguments: not enough arguments
 ```
 
-Now we see the error onscreen and _output.txt_ contains nothing, which is the
-behavior we expect of command line programs.
+이제 화면에서 오류를 볼 수 있고, _output.txt_ 에는 아무것도 없습니다. 명령행
+프로그램에 기대하는 동작입니다.
 
-Let’s run the program again with arguments that don’t cause an error but still
-redirect standard output to a file, like so:
+오류를 일으키지는 않지만 여전히 표준 출력을 파일로 리다이렉트하는 인수로
+프로그램을 다시 실행해 봅시다.
 
 ```console
 $ cargo run -- to poem.txt > output.txt
 ```
 
-We won’t see any output to the terminal, and _output.txt_ will contain our
-results:
+터미널에는 아무 출력이 보이지 않고, _output.txt_ 에는 우리 결과가 담깁니다.
 
-<span class="filename">Filename: output.txt</span>
+<span class="filename">파일명: output.txt</span>
 
 ```text
 Are you nobody, too?
 How dreary to be somebody!
 ```
 
-This demonstrates that we’re now using standard output for successful output
-and standard error for error output as appropriate.
+이는 이제 성공적인 출력에는 표준 출력을, 오류 출력에는 표준 오류를 적절하게
+사용하고 있음을 보여 줍니다.
 
-## Summary
+## 요약
 
-This chapter recapped some of the major concepts you’ve learned so far and
-covered how to perform common I/O operations in Rust. By using command line
-arguments, files, environment variables, and the `eprintln!` macro for printing
-errors, you’re now prepared to write command line applications. Combined with
-the concepts in previous chapters, your code will be well organized, store data
-effectively in the appropriate data structures, handle errors nicely, and be
-well tested.
+이 장은 지금까지 배운 주요 개념 몇 가지를 복습했고, 러스트에서 일반적인 I/O
+작업을 수행하는 방법을 다뤘습니다. 명령행 인수, 파일, 환경 변수, 오류 출력용
+`eprintln!` 매크로를 사용해, 이제 명령행 애플리케이션을 작성할 준비가
+되었습니다. 이전 장들의 개념과 결합하면, 여러분의 코드는 잘 구성되고, 데이터
+를 적절한 데이터 구조에 효과적으로 저장하고, 오류를 깔끔하게 처리하며, 테스트
+가 잘 되어 있을 것입니다.
 
-Next, we’ll explore some Rust features that were influenced by functional
-languages: closures and iterators.
+다음으로, 함수형 언어에서 영향을 받은 몇 가지 러스트 기능인 클로저와 이터레이터
+를 살펴보겠습니다.

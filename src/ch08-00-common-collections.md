@@ -1,25 +1,24 @@
-# Common Collections
+# 일반적인 컬렉션
 
-Rust’s standard library includes a number of very useful data structures called
-_collections_. Most other data types represent one specific value, but
-collections can contain multiple values. Unlike the built-in array and tuple
-types, the data that these collections point to is stored on the heap, which
-means the amount of data does not need to be known at compile time and can grow
-or shrink as the program runs. Each kind of collection has different
-capabilities and costs, and choosing an appropriate one for your current
-situation is a skill you’ll develop over time. In this chapter, we’ll discuss
-three collections that are used very often in Rust programs:
+러스트의 표준 라이브러리에는 *컬렉션(collections)*이라고 불리는 아주 유용한 자료
+구조들이 여럿 포함되어 있습니다. 대부분의 다른 데이터 타입은 하나의 특정 값을
+나타내지만, 컬렉션은 여러 값을 담을 수 있습니다. 내장된 배열과 튜플 타입과 달리,
+이 컬렉션들이 가리키는 데이터는 힙에 저장됩니다. 즉, 데이터의 양을 컴파일 타임에
+알 필요가 없으며 프로그램이 실행되는 동안 늘어나거나 줄어들 수 있습니다. 각 종류의
+컬렉션은 서로 다른 기능과 비용을 가지며, 현재 상황에 적절한 것을 고르는 것은
+시간이 지나면서 발전시키게 될 능력입니다. 이 장에서는 러스트 프로그램에서 아주
+자주 쓰이는 세 가지 컬렉션을 다룹니다.
 
-- A _vector_ allows you to store a variable number of values next to each other.
-- A _string_ is a collection of characters. We’ve mentioned the `String` type
-  previously, but in this chapter, we’ll talk about it in depth.
-- A _hash map_ allows you to associate a value with a specific key. It’s a
-  particular implementation of the more general data structure called a _map_.
+- *벡터(vector)*는 가변 개수의 값을 서로 이웃하여 저장할 수 있게 해 줍니다.
+- *문자열(string)*은 문자들의 컬렉션입니다. 앞서 `String` 타입을 언급했지만, 이
+  장에서는 그것을 심도 있게 다룹니다.
+- *해시 맵(hash map)*은 특정 키에 값을 연관 지을 수 있게 해 줍니다. 더 일반적인
+  자료 구조인 *맵(map)*의 특정 구현입니다.
 
-To learn about the other kinds of collections provided by the standard library,
-see [the documentation][collections].
+표준 라이브러리가 제공하는 다른 종류의 컬렉션에 대해 배우려면 [해당
+문서][collections]를 참고하세요.
 
-We’ll discuss how to create and update vectors, strings, and hash maps, as well
-as what makes each special.
+벡터, 문자열, 해시 맵을 생성하고 갱신하는 방법, 그리고 각각을 특별하게 만드는
+점에 대해 이야기하겠습니다.
 
 [collections]: ../std/collections/index.html

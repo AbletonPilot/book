@@ -1,70 +1,58 @@
-## Appendix A: Keywords
+## 부록 A: 키워드
 
-The following lists contain keywords that are reserved for current or future
-use by the Rust language. As such, they cannot be used as identifiers (except
-as raw identifiers, as we discuss in the [“Raw
-Identifiers”][raw-identifiers]<!-- ignore --> section). _Identifiers_ are names
-of functions, variables, parameters, struct fields, modules, crates, constants,
-macros, static values, attributes, types, traits, or lifetimes.
+다음 목록은 현재 또는 미래에 러스트 언어에 의해 예약된 키워드를 담고 있습니다. 따라서 이 키워드들은 ([“Raw Identifiers”][raw-identifiers]<!-- ignore --> 절에서 논의하는 대로 raw 식별자로 쓸 때를 제외하고는) 식별자로 사용할 수 없습니다. _식별자(identifiers)_ 란 함수, 변수, 매개변수, 구조체 필드, 모듈, 크레이트, 상수, 매크로, 정적 값, 어트리뷰트, 타입, 트레이트, 라이프타임의 이름을 말합니다.
 
 [raw-identifiers]: #raw-identifiers
 
-### Keywords Currently in Use
+### 현재 사용 중인 키워드
 
-The following is a list of keywords currently in use, with their functionality
-described.
+다음은 현재 사용 중인 키워드와 그 기능을 설명한 목록입니다.
 
-- **`as`**: Perform primitive casting, disambiguate the specific trait
-  containing an item, or rename items in `use` statements.
-- **`async`**: Return a `Future` instead of blocking the current thread.
-- **`await`**: Suspend execution until the result of a `Future` is ready.
-- **`break`**: Exit a loop immediately.
-- **`const`**: Define constant items or constant raw pointers.
-- **`continue`**: Continue to the next loop iteration.
-- **`crate`**: In a module path, refers to the crate root.
-- **`dyn`**: Dynamic dispatch to a trait object.
-- **`else`**: Fallback for `if` and `if let` control flow constructs.
-- **`enum`**: Define an enumeration.
-- **`extern`**: Link an external function or variable.
-- **`false`**: Boolean false literal.
-- **`fn`**: Define a function or the function pointer type.
-- **`for`**: Loop over items from an iterator, implement a trait, or specify a
-  higher ranked lifetime.
-- **`if`**: Branch based on the result of a conditional expression.
-- **`impl`**: Implement inherent or trait functionality.
-- **`in`**: Part of `for` loop syntax.
-- **`let`**: Bind a variable.
-- **`loop`**: Loop unconditionally.
-- **`match`**: Match a value to patterns.
-- **`mod`**: Define a module.
-- **`move`**: Make a closure take ownership of all its captures.
-- **`mut`**: Denote mutability in references, raw pointers, or pattern bindings.
-- **`pub`**: Denote public visibility in struct fields, `impl` blocks, or
-  modules.
-- **`ref`**: Bind by reference.
-- **`return`**: Return from function.
-- **`Self`**: A type alias for the type we are defining or implementing.
-- **`self`**: Method subject or current module.
-- **`static`**: Global variable or lifetime lasting the entire program
-  execution.
-- **`struct`**: Define a structure.
-- **`super`**: Parent module of the current module.
-- **`trait`**: Define a trait.
-- **`true`**: Boolean true literal.
-- **`type`**: Define a type alias or associated type.
-- **`union`**: Define a [union][union]<!-- ignore -->; is a keyword only when
-  used in a union declaration.
-- **`unsafe`**: Denote unsafe code, functions, traits, or implementations.
-- **`use`**: Bring symbols into scope.
-- **`where`**: Denote clauses that constrain a type.
-- **`while`**: Loop conditionally based on the result of an expression.
+- **`as`**: 원시 타입 캐스팅을 수행하거나, 어떤 항목을 포함하는 특정 트레이트의 모호함을 해소하거나, `use` 문에서 항목의 이름을 바꿉니다.
+- **`async`**: 현재 스레드를 블록하는 대신 `Future`를 반환합니다.
+- **`await`**: `Future`의 결과가 준비될 때까지 실행을 일시 중단합니다.
+- **`break`**: 반복문을 즉시 빠져나갑니다.
+- **`const`**: 상수 항목이나 상수 원시 포인터를 정의합니다.
+- **`continue`**: 다음 반복 회차로 계속합니다.
+- **`crate`**: 모듈 경로에서, 크레이트 루트를 가리킵니다.
+- **`dyn`**: 트레이트 객체로의 동적 디스패치.
+- **`else`**: `if`와 `if let` 제어 흐름 구문의 대체 분기.
+- **`enum`**: 열거형을 정의합니다.
+- **`extern`**: 외부 함수나 변수를 링크합니다.
+- **`false`**: 불리언 거짓 리터럴.
+- **`fn`**: 함수나 함수 포인터 타입을 정의합니다.
+- **`for`**: 이터레이터의 항목을 반복하거나, 트레이트를 구현하거나, 더 고차의 라이프타임을 명시합니다.
+- **`if`**: 조건 표현식의 결과에 따라 분기합니다.
+- **`impl`**: 고유 기능이나 트레이트 기능을 구현합니다.
+- **`in`**: `for` 반복 문법의 일부.
+- **`let`**: 변수를 바인딩합니다.
+- **`loop`**: 조건 없이 반복합니다.
+- **`match`**: 값을 패턴에 매치시킵니다.
+- **`mod`**: 모듈을 정의합니다.
+- **`move`**: 클로저가 자신의 모든 캡처에 대한 소유권을 가져가게 합니다.
+- **`mut`**: 참조, 원시 포인터, 패턴 바인딩에서 가변성을 나타냅니다.
+- **`pub`**: 구조체 필드, `impl` 블록, 모듈에서 공개 가시성을 나타냅니다.
+- **`ref`**: 참조로 바인딩합니다.
+- **`return`**: 함수에서 반환합니다.
+- **`Self`**: 우리가 정의 또는 구현하고 있는 타입에 대한 타입 별칭.
+- **`self`**: 메서드의 대상이나 현재 모듈.
+- **`static`**: 전역 변수나 프로그램 실행 내내 지속되는 라이프타임.
+- **`struct`**: 구조체를 정의합니다.
+- **`super`**: 현재 모듈의 부모 모듈.
+- **`trait`**: 트레이트를 정의합니다.
+- **`true`**: 불리언 참 리터럴.
+- **`type`**: 타입 별칭이나 연관 타입을 정의합니다.
+- **`union`**: [union][union]<!-- ignore -->을 정의합니다. 유니언 선언에 쓰일 때만 키워드입니다.
+- **`unsafe`**: 안전하지 않은 코드, 함수, 트레이트, 구현을 나타냅니다.
+- **`use`**: 심볼을 스코프로 가져옵니다.
+- **`where`**: 타입을 제약하는 절을 나타냅니다.
+- **`while`**: 표현식 결과에 따라 조건적으로 반복합니다.
 
 [union]: ../reference/items/unions.html
 
-### Keywords Reserved for Future Use
+### 미래 사용을 위해 예약된 키워드
 
-The following keywords do not yet have any functionality but are reserved by
-Rust for potential future use:
+다음 키워드들은 아직 기능이 없지만 잠재적 미래 사용을 위해 러스트가 예약하고 있습니다.
 
 - `abstract`
 - `become`
@@ -81,15 +69,13 @@ Rust for potential future use:
 - `virtual`
 - `yield`
 
-### Raw Identifiers
+### Raw 식별자
 
-_Raw identifiers_ are the syntax that lets you use keywords where they wouldn’t
-normally be allowed. You use a raw identifier by prefixing a keyword with `r#`.
+_Raw 식별자(raw identifiers)_ 는 키워드를 일반적으로 허용되지 않는 곳에서 사용할 수 있게 해 주는 문법입니다. 키워드 앞에 `r#`을 붙여 raw 식별자를 사용합니다.
 
-For example, `match` is a keyword. If you try to compile the following function
-that uses `match` as its name:
+예를 들어 `match`는 키워드입니다. 다음처럼 `match`를 이름으로 사용하는 함수를 컴파일하려고 하면
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">파일명: src/main.rs</span>
 
 ```rust,ignore,does_not_compile
 fn match(needle: &str, haystack: &str) -> bool {
@@ -97,7 +83,7 @@ fn match(needle: &str, haystack: &str) -> bool {
 }
 ```
 
-you’ll get this error:
+다음과 같은 오류를 받게 됩니다.
 
 ```text
 error: expected identifier, found keyword `match`
@@ -107,11 +93,9 @@ error: expected identifier, found keyword `match`
   |    ^^^^^ expected identifier, found keyword
 ```
 
-The error shows that you can’t use the keyword `match` as the function
-identifier. To use `match` as a function name, you need to use the raw
-identifier syntax, like this:
+오류는 함수 식별자로 키워드 `match`를 사용할 수 없음을 보여 줍니다. `match`를 함수 이름으로 사용하려면 다음처럼 raw 식별자 문법을 사용해야 합니다.
 
-<span class="filename">Filename: src/main.rs</span>
+<span class="filename">파일명: src/main.rs</span>
 
 ```rust
 fn r#match(needle: &str, haystack: &str) -> bool {
@@ -123,18 +107,8 @@ fn main() {
 }
 ```
 
-This code will compile without any errors. Note the `r#` prefix on the function
-name in its definition as well as where the function is called in `main`.
+이 코드는 오류 없이 컴파일됩니다. 함수 정의의 이름뿐 아니라 `main`에서 함수가 호출되는 곳에도 `r#` 접두사가 붙은 점을 주목하세요.
 
-Raw identifiers allow you to use any word you choose as an identifier, even if
-that word happens to be a reserved keyword. This gives us more freedom to choose
-identifier names, as well as lets us integrate with programs written in a
-language where these words aren’t keywords. In addition, raw identifiers allow
-you to use libraries written in a different Rust edition than your crate uses.
-For example, `try` isn’t a keyword in the 2015 edition but is in the 2018, 2021,
-and 2024 editions. If you depend on a library that is written using the 2015
-edition and has a `try` function, you’ll need to use the raw identifier syntax,
-`r#try` in this case, to call that function from your code on later editions.
-See [Appendix E][appendix-e]<!-- ignore --> for more information on editions.
+Raw 식별자를 사용하면 선택한 어떤 단어라도, 그것이 예약 키워드라 할지라도 식별자로 사용할 수 있습니다. 이는 식별자 이름을 선택할 때 더 많은 자유를 주고, 그 단어들이 키워드가 아닌 언어로 작성된 프로그램과의 통합도 가능하게 해 줍니다. 또한 raw 식별자는 여러분의 크레이트가 사용하는 것과 다른 러스트 에디션으로 작성된 라이브러리를 사용할 수 있게 해 줍니다. 예를 들어, `try`는 2015 에디션에서는 키워드가 아니지만 2018, 2021, 2024 에디션에서는 키워드입니다. 2015 에디션을 사용해 작성된 라이브러리에 의존하고 있고 그 라이브러리에 `try` 함수가 있다면, 더 나중의 에디션의 코드에서 그 함수를 호출하기 위해 이 경우 `r#try`라는 raw 식별자 문법을 사용해야 합니다. 에디션에 대한 더 자세한 내용은 [부록 E][appendix-e]<!-- ignore -->를 참고하세요.
 
 [appendix-e]: appendix-05-editions.html

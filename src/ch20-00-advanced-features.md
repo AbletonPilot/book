@@ -1,22 +1,13 @@
-# Advanced Features
+# 고급 기능
 
-By now, you’ve learned the most commonly used parts of the Rust programming
-language. Before we do one more project, in Chapter 21, we’ll look at a few
-aspects of the language you might run into every once in a while but may not
-use every day. You can use this chapter as a reference for when you encounter
-any unknowns. The features covered here are useful in very specific situations.
-Although you might not reach for them often, we want to make sure you have a
-grasp of all the features Rust has to offer.
+지금까지 러스트 프로그래밍 언어의 가장 흔히 쓰이는 부분을 배웠습니다. 21장에서 또 한 번 프로젝트를 진행하기 전에, 가끔 마주칠 수 있지만 매일 사용하지는 않을 수도 있는 언어의 몇 가지 측면을 살펴봅니다. 모르는 무언가를 만났을 때 이 장을 참고 자료로 사용할 수 있습니다. 여기에서 다루는 기능들은 매우 특정한 상황에서 유용합니다. 자주 손이 가지 않을 수도 있지만, 러스트가 제공하는 모든 기능을 한 번씩 짚고 넘어가도록 하겠습니다.
 
-In this chapter, we’ll cover:
+이 장에서 다룰 내용은 다음과 같습니다.
 
-- Unsafe Rust: How to opt out of some of Rust’s guarantees and take
-  responsibility for manually upholding those guarantees
-- Advanced traits: Associated types, default type parameters, fully qualified
-  syntax, supertraits, and the newtype pattern in relation to traits
-- Advanced types: More about the newtype pattern, type aliases, the never type,
-  and dynamically sized types
-- Advanced functions and closures: Function pointers and returning closures
-- Macros: Ways to define code that defines more code at compile time
+- 안전하지 않은 러스트(Unsafe Rust): 러스트의 일부 보장에서 빠져나오는 방법과 그 보장을 수동으로 지킬 책임을 지는 방법
+- 고급 트레이트: 연관 타입, 기본 타입 매개변수, 완전 한정 문법, 슈퍼트레이트, 트레이트와 관련된 newtype 패턴
+- 고급 타입: newtype 패턴 더 자세히, 타입 별칭, never 타입, 동적 크기 타입
+- 고급 함수와 클로저: 함수 포인터와 클로저 반환
+- 매크로: 컴파일 시점에 더 많은 코드를 정의하는 코드를 작성하는 방법
 
-It’s a panoply of Rust features with something for everyone! Let’s dive in!
+모두를 위한 무언가가 들어 있는 러스트 기능들의 향연입니다! 시작합시다!

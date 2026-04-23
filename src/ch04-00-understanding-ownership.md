@@ -1,7 +1,8 @@
-# Understanding Ownership
+# 소유권 이해하기
 
-Ownership is Rust’s most unique feature and has deep implications for the rest
-of the language. It enables Rust to make memory safety guarantees without
-needing a garbage collector, so it’s important to understand how ownership
-works. In this chapter, we’ll talk about ownership as well as several related
-features: borrowing, slices, and how Rust lays data out in memory.
+소유권(ownership)은 러스트에서 가장 독특한 기능이며, 언어의 나머지 부분에도 깊은
+영향을 미칩니다. 소유권 덕분에 러스트는 가비지 컬렉터(garbage collector) 없이도
+메모리 안전성을 보장할 수 있기 때문에, 소유권이 어떻게 동작하는지 이해하는 것이
+중요합니다. 이 장에서는 소유권과 함께, 관련된 여러 기능인 빌림(borrowing)과
+슬라이스(slice), 그리고 러스트가 메모리에 데이터를 어떻게 배치하는지에 대해서도
+이야기하겠습니다.

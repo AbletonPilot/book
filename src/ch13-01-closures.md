@@ -3,14 +3,13 @@
 <a id="closures-anonymous-functions-that-can-capture-their-environment"></a>
 <a id="closures-anonymous-functions-that-capture-their-environment"></a>
 
-## Closures
+## 클로저
 
-Rust’s closures are anonymous functions you can save in a variable or pass as
-arguments to other functions. You can create the closure in one place and then
-call the closure elsewhere to evaluate it in a different context. Unlike
-functions, closures can capture values from the scope in which they’re defined.
-We’ll demonstrate how these closure features allow for code reuse and behavior
-customization.
+러스트의 클로저는 변수에 저장하거나 다른 함수에 인수로 전달할 수 있는 익명
+함수입니다. 클로저를 한 곳에서 만들어 두고, 다른 곳에서 다른 맥락으로 평가하기
+위해 호출할 수 있습니다. 함수와 달리 클로저는 자신이 정의된 스코프에서 값을
+캡처할 수 있습니다. 이러한 클로저 기능이 어떻게 코드 재사용과 동작 사용자화를
+가능하게 하는지 보여 드리겠습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
@@ -19,27 +18,25 @@ customization.
 <a id="refactoring-with-closures-to-store-code"></a>
 <a id="capturing-the-environment-with-closures"></a>
 
-### Capturing the Environment
+### 환경 캡처하기
 
-We’ll first examine how we can use closures to capture values from the
-environment they’re defined in for later use. Here’s the scenario: Every so
-often, our T-shirt company gives away an exclusive, limited-edition shirt to
-someone on our mailing list as a promotion. People on the mailing list can
-optionally add their favorite color to their profile. If the person chosen for
-a free shirt has their favorite color set, they get that color shirt. If the
-person hasn’t specified a favorite color, they get whatever color the company
-currently has the most of.
+먼저 클로저가 자신이 정의된 환경의 값을 캡처해 나중에 사용할 수 있도록 하는
+방법을 살펴보겠습니다. 시나리오는 다음과 같습니다. 가끔 우리 티셔츠 회사는
+프로모션으로 메일링 리스트에 있는 누군가에게 한정판 셔츠를 무료로 증정합니다.
+메일링 리스트의 사람들은 선택적으로 자신의 프로필에 좋아하는 색을 추가할 수
+있습니다. 무료 셔츠 당첨자가 좋아하는 색을 설정해 두었다면 그 색의 셔츠를
+받습니다. 좋아하는 색을 지정하지 않았다면, 회사가 현재 가장 많이 보유하고 있는
+색의 셔츠를 받습니다.
 
-There are many ways to implement this. For this example, we’re going to use an
-enum called `ShirtColor` that has the variants `Red` and `Blue` (limiting the
-number of colors available for simplicity). We represent the company’s
-inventory with an `Inventory` struct that has a field named `shirts` that
-contains a `Vec<ShirtColor>` representing the shirt colors currently in stock.
-The method `giveaway` defined on `Inventory` gets the optional shirt color
-preference of the free-shirt winner, and it returns the shirt color the
-person will get. This setup is shown in Listing 13-1.
+이를 구현하는 방법은 여러 가지입니다. 이 예제에서는 단순화를 위해 사용 가능한
+색의 수를 제한해, 배리언트로 `Red`와 `Blue`를 가진 `ShirtColor`라는 열거형을
+사용합니다. 회사의 재고는 `shirts`라는 필드를 가지는 `Inventory` 구조체로
+표현합니다. `shirts` 필드는 현재 재고인 셔츠 색들을 나타내는 `Vec<ShirtColor>`
+를 담습니다. `Inventory`에 정의된 `giveaway` 메서드는 무료 셔츠 당첨자의
+선택적 셔츠 색 선호도를 받아 그 사람이 받을 셔츠 색을 반환합니다. 이 구성은
+Listing 13-1에 나와 있습니다.
 
-<Listing number="13-1" file-name="src/main.rs" caption="Shirt company giveaway situation">
+<Listing number="13-1" file-name="src/main.rs" caption="셔츠 회사의 증정 상황">
 
 ```rust,noplayground
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-01/src/main.rs}}
@@ -47,73 +44,66 @@ person will get. This setup is shown in Listing 13-1.
 
 </Listing>
 
-The `store` defined in `main` has two blue shirts and one red shirt remaining
-to distribute for this limited-edition promotion. We call the `giveaway` method
-for a user with a preference for a red shirt and a user without any preference.
+`main`에 정의된 `store`는 이 한정판 프로모션을 위해 분배할 수 있는 파란 셔츠
+두 장과 빨간 셔츠 한 장을 남겨 두고 있습니다. 빨간 셔츠를 선호하는 사용자와
+선호가 없는 사용자 각각에 대해 `giveaway` 메서드를 호출합니다.
 
-Again, this code could be implemented in many ways, and here, to focus on
-closures, we’ve stuck to concepts you’ve already learned, except for the body of
-the `giveaway` method that uses a closure. In the `giveaway` method, we get the
-user preference as a parameter of type `Option<ShirtColor>` and call the
-`unwrap_or_else` method on `user_preference`. The [`unwrap_or_else` method on
-`Option<T>`][unwrap-or-else]<!-- ignore --> is defined by the standard library.
-It takes one argument: a closure without any arguments that returns a value `T`
-(the same type stored in the `Some` variant of the `Option<T>`, in this case
-`ShirtColor`). If the `Option<T>` is the `Some` variant, `unwrap_or_else`
-returns the value from within the `Some`. If the `Option<T>` is the `None`
-variant, `unwrap_or_else` calls the closure and returns the value returned by
-the closure.
+다시 말하지만, 이 코드는 여러 방식으로 구현될 수 있습니다. 여기서는 클로저에
+집중하기 위해, 클로저를 사용하는 `giveaway` 메서드 본문을 제외하고는 이미 배운
+개념들에 충실했습니다. `giveaway` 메서드에서는 사용자 선호를 `Option<ShirtColor>`
+타입의 매개변수로 받고, `user_preference`에 `unwrap_or_else` 메서드를 호출합니다.
+[`Option<T>`의 `unwrap_or_else` 메서드][unwrap-or-else]<!-- ignore -->는 표준
+라이브러리에 정의되어 있습니다. 이 메서드는 인수 하나를 받습니다. 인수는
+아무 인수도 받지 않고 `T` 값(`Option<T>`의 `Some` 배리언트에 저장되는 것과
+같은 타입, 여기서는 `ShirtColor`)을 반환하는 클로저입니다. `Option<T>`가 `Some`
+배리언트이면 `unwrap_or_else`는 `Some` 안의 값을 반환합니다. `Option<T>`가
+`None` 배리언트이면 `unwrap_or_else`는 클로저를 호출하고 클로저가 반환한 값을
+반환합니다.
 
-We specify the closure expression `|| self.most_stocked()` as the argument to
-`unwrap_or_else`. This is a closure that takes no parameters itself (if the
-closure had parameters, they would appear between the two vertical pipes). The
-body of the closure calls `self.most_stocked()`. We’re defining the closure
-here, and the implementation of `unwrap_or_else` will evaluate the closure
-later if the result is needed.
+`unwrap_or_else`의 인수로 클로저 식 `|| self.most_stocked()`를 지정합니다. 이는
+매개변수가 없는 클로저입니다(클로저에 매개변수가 있다면 두 수직 파이프 사이에
+나타납니다). 클로저의 본문은 `self.most_stocked()`를 호출합니다. 여기서
+클로저를 정의만 해 두고, 결과가 필요하면 `unwrap_or_else`의 구현이 나중에
+클로저를 평가하게 됩니다.
 
-Running this code prints the following:
+이 코드를 실행하면 다음이 출력됩니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-01/output.txt}}
 ```
 
-One interesting aspect here is that we’ve passed a closure that calls
-`self.most_stocked()` on the current `Inventory` instance. The standard library
-didn’t need to know anything about the `Inventory` or `ShirtColor` types we
-defined, or the logic we want to use in this scenario. The closure captures an
-immutable reference to the `self` `Inventory` instance and passes it with the
-code we specify to the `unwrap_or_else` method. Functions, on the other hand,
-are not able to capture their environment in this way.
+여기서 흥미로운 점 하나는, 현재 `Inventory` 인스턴스에서 `self.most_stocked()`
+를 호출하는 클로저를 전달했다는 것입니다. 표준 라이브러리는 우리가 정의한
+`Inventory`나 `ShirtColor` 타입, 또는 이 시나리오에서 사용하려는 로직에 대해
+아무것도 알 필요가 없었습니다. 클로저는 `self` `Inventory` 인스턴스에 대한
+불변 참조를 캡처하고, 우리가 지정한 코드와 함께 `unwrap_or_else` 메서드에
+전달합니다. 반면 함수는 이런 방식으로 환경을 캡처할 수 없습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="closure-type-inference-and-annotation"></a>
 
-### Inferring and Annotating Closure Types
+### 클로저 타입 추론과 명시
 
-There are more differences between functions and closures. Closures don’t
-usually require you to annotate the types of the parameters or the return value
-like `fn` functions do. Type annotations are required on functions because the
-types are part of an explicit interface exposed to your users. Defining this
-interface rigidly is important for ensuring that everyone agrees on what types
-of values a function uses and returns. Closures, on the other hand, aren’t used
-in an exposed interface like this: They’re stored in variables, and they’re
-used without naming them and exposing them to users of our library.
+함수와 클로저에는 더 많은 차이가 있습니다. 클로저는 보통 `fn` 함수처럼 매개변수
+나 반환 값의 타입을 명시하도록 요구하지 않습니다. 타입 명시는 함수에 필요한데,
+타입이 사용자에게 노출되는 명시적 인터페이스의 일부이기 때문입니다. 이
+인터페이스를 엄격하게 정의하는 것은 함수가 사용하고 반환하는 값의 타입에 대해
+모두가 동의하도록 보장하는 데 중요합니다. 반면 클로저는 그런 식으로 노출된
+인터페이스에 사용되지 않습니다. 변수에 저장되며, 라이브러리 사용자에게 이름을
+붙여 노출하지 않고 사용됩니다.
 
-Closures are typically short and relevant only within a narrow context rather
-than in any arbitrary scenario. Within these limited contexts, the compiler can
-infer the types of the parameters and the return type, similar to how it’s able
-to infer the types of most variables (there are rare cases where the compiler
-needs closure type annotations too).
+클로저는 전형적으로 짧고, 임의의 시나리오가 아니라 좁은 맥락 안에서만
+관련됩니다. 이러한 제한된 맥락 안에서 컴파일러는 대부분의 변수 타입을 추론할
+수 있는 것과 비슷하게 매개변수와 반환 값의 타입을 추론할 수 있습니다(컴파일러
+가 클로저 타입 명시를 필요로 하는 드문 경우도 있습니다).
 
-As with variables, we can add type annotations if we want to increase
-explicitness and clarity at the cost of being more verbose than is strictly
-necessary. Annotating the types for a closure would look like the definition
-shown in Listing 13-2. In this example, we’re defining a closure and storing it
-in a variable rather than defining the closure in the spot we pass it as an
-argument, as we did in Listing 13-1.
+변수처럼, 엄밀히 필요하지 않지만 장황해지는 대가로 명시성과 명확성을 높이고
+싶다면 타입 명시를 추가할 수 있습니다. 클로저에 타입을 명시하는 모습은 Listing
+13-2의 정의처럼 됩니다. 이 예제에서는 Listing 13-1처럼 인수로 전달하는 자리에
+클로저를 정의하는 대신, 클로저를 정의해 변수에 저장합니다.
 
-<Listing number="13-2" file-name="src/main.rs" caption="Adding optional type annotations of the parameter and return value types in the closure">
+<Listing number="13-2" file-name="src/main.rs" caption="클로저에서 매개변수와 반환 값 타입을 선택적으로 명시하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-02/src/main.rs:here}}
@@ -121,12 +111,10 @@ argument, as we did in Listing 13-1.
 
 </Listing>
 
-With type annotations added, the syntax of closures looks more similar to the
-syntax of functions. Here, we define a function that adds 1 to its parameter and
-a closure that has the same behavior, for comparison. We’ve added some spaces
-to line up the relevant parts. This illustrates how closure syntax is similar
-to function syntax except for the use of pipes and the amount of syntax that is
-optional:
+타입 명시를 추가하면, 클로저의 문법이 함수의 문법과 더 비슷해 보입니다. 여기서는
+매개변수에 1을 더하는 함수와, 같은 동작을 하는 클로저를 비교를 위해 정의합니다.
+관련된 부분을 맞추기 위해 공백을 추가했습니다. 이는 파이프 사용과 문법 일부가
+선택적이라는 점만 빼면 클로저 문법이 함수 문법과 얼마나 비슷한지 보여 줍니다.
 
 ```rust,ignore
 fn  add_one_v1   (x: u32) -> u32 { x + 1 }
@@ -135,26 +123,23 @@ let add_one_v3 = |x|             { x + 1 };
 let add_one_v4 = |x|               x + 1  ;
 ```
 
-The first line shows a function definition and the second line shows a fully
-annotated closure definition. In the third line, we remove the type annotations
-from the closure definition. In the fourth line, we remove the brackets, which
-are optional because the closure body has only one expression. These are all
-valid definitions that will produce the same behavior when they’re called. The
-`add_one_v3` and `add_one_v4` lines require the closures to be evaluated to be
-able to compile because the types will be inferred from their usage. This is
-similar to `let v = Vec::new();` needing either type annotations or values of
-some type to be inserted into the `Vec` for Rust to be able to infer the type.
+첫 번째 줄은 함수 정의를 보여 주고, 두 번째 줄은 완전히 애너테이트된 클로저
+정의를 보여 줍니다. 세 번째 줄에서는 클로저 정의에서 타입 명시를 제거합니다.
+네 번째 줄에서는 클로저 본문에 식이 하나뿐이므로 선택적인 중괄호를 제거합니다.
+이 모두는 유효한 정의이며, 호출될 때 동일한 동작을 만들어 냅니다. `add_one_v3`
+와 `add_one_v4` 줄은 사용처에서 타입이 추론되므로 컴파일되려면 클로저가 평가
+되어야 합니다. 이는 `let v = Vec::new();`가 러스트가 타입을 추론할 수 있도록
+타입 명시나 `Vec`에 삽입할 어떤 타입의 값이 필요한 것과 비슷합니다.
 
-For closure definitions, the compiler will infer one concrete type for each of
-their parameters and for their return value. For instance, Listing 13-3 shows
-the definition of a short closure that just returns the value it receives as a
-parameter. This closure isn’t very useful except for the purposes of this
-example. Note that we haven’t added any type annotations to the definition.
-Because there are no type annotations, we can call the closure with any type,
-which we’ve done here with `String` the first time. If we then try to call
-`example_closure` with an integer, we’ll get an error.
+클로저 정의에 대해, 컴파일러는 각 매개변수와 반환 값에 대해 하나의 구체적
+타입을 추론합니다. 예를 들어 Listing 13-3은 매개변수로 받은 값을 그대로 반환
+하는 짧은 클로저의 정의를 보여 줍니다. 이 예제 목적을 제외하면 이 클로저는
+그다지 유용하지 않습니다. 정의에 어떤 타입 명시도 추가하지 않았음에 유의
+하세요. 타입 명시가 없으므로 어떤 타입으로도 클로저를 호출할 수 있으며, 여기서는
+처음에 `String`으로 호출했습니다. 그런 다음 `example_closure`를 정수로
+호출하려 하면 오류가 납니다.
 
-<Listing number="13-3" file-name="src/main.rs" caption="Attempting to call a closure whose types are inferred with two different types">
+<Listing number="13-3" file-name="src/main.rs" caption="타입이 추론되는 클로저를 두 가지 다른 타입으로 호출하려는 시도">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-03/src/main.rs:here}}
@@ -162,30 +147,27 @@ which we’ve done here with `String` the first time. If we then try to call
 
 </Listing>
 
-The compiler gives us this error:
+컴파일러는 다음 오류를 줍니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-03/output.txt}}
 ```
 
-The first time we call `example_closure` with the `String` value, the compiler
-infers the type of `x` and the return type of the closure to be `String`. Those
-types are then locked into the closure in `example_closure`, and we get a type
-error when we next try to use a different type with the same closure.
+처음 `example_closure`를 `String` 값으로 호출하면, 컴파일러는 `x`의 타입과
+클로저의 반환 타입을 `String`으로 추론합니다. 그 타입들은 `example_closure`의
+클로저에 고정되며, 같은 클로저를 다른 타입으로 사용하려 하면 타입 오류가 납니다.
 
-### Capturing References or Moving Ownership
+### 참조를 캡처하거나 소유권 이동하기
 
-Closures can capture values from their environment in three ways, which
-directly map to the three ways a function can take a parameter: borrowing
-immutably, borrowing mutably, and taking ownership. The closure will decide
-which of these to use based on what the body of the function does with the
-captured values.
+클로저는 환경에서 값을 세 가지 방식으로 캡처할 수 있고, 이는 함수가 매개변수를
+받는 세 가지 방식에 직접 대응됩니다. 불변으로 빌리기, 가변으로 빌리기, 소유권
+가져가기입니다. 클로저는 함수 본문이 캡처된 값으로 무엇을 하는지에 따라 이 중
+어떤 방식을 쓸지 결정합니다.
 
-In Listing 13-4, we define a closure that captures an immutable reference to
-the vector named `list` because it only needs an immutable reference to print
-the value.
+Listing 13-4에서는 값을 출력하는 데 불변 참조만 필요하므로 `list`라는 벡터에
+대한 불변 참조를 캡처하는 클로저를 정의합니다.
 
-<Listing number="13-4" file-name="src/main.rs" caption="Defining and calling a closure that captures an immutable reference">
+<Listing number="13-4" file-name="src/main.rs" caption="불변 참조를 캡처하는 클로저 정의하고 호출하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-04/src/main.rs}}
@@ -193,23 +175,21 @@ the value.
 
 </Listing>
 
-This example also illustrates that a variable can bind to a closure definition,
-and we can later call the closure by using the variable name and parentheses as
-if the variable name were a function name.
+이 예제는 또한 변수가 클로저 정의에 바인딩될 수 있고, 나중에 변수 이름이
+함수 이름인 것처럼 변수 이름과 괄호를 써서 클로저를 호출할 수 있음을 보여 줍니다.
 
-Because we can have multiple immutable references to `list` at the same time,
-`list` is still accessible from the code before the closure definition, after
-the closure definition but before the closure is called, and after the closure
-is called. This code compiles, runs, and prints:
+같은 시각에 `list`에 대한 불변 참조가 여러 개 있을 수 있으므로, `list`는
+클로저 정의 이전 코드에서도, 클로저 정의 이후 호출 이전에도, 클로저 호출 이후
+에도 접근 가능합니다. 이 코드는 컴파일되고 실행되며 다음을 출력합니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-04/output.txt}}
 ```
 
-Next, in Listing 13-5, we change the closure body so that it adds an element to
-the `list` vector. The closure now captures a mutable reference.
+다음으로 Listing 13-5에서는 `list` 벡터에 요소를 추가하도록 클로저 본문을
+바꿉니다. 이제 클로저는 가변 참조를 캡처합니다.
 
-<Listing number="13-5" file-name="src/main.rs" caption="Defining and calling a closure that captures a mutable reference">
+<Listing number="13-5" file-name="src/main.rs" caption="가변 참조를 캡처하는 클로저 정의하고 호출하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-05/src/main.rs}}
@@ -217,32 +197,30 @@ the `list` vector. The closure now captures a mutable reference.
 
 </Listing>
 
-This code compiles, runs, and prints:
+이 코드는 컴파일되고 실행되며 다음을 출력합니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-05/output.txt}}
 ```
 
-Note that there’s no longer a `println!` between the definition and the call of
-the `borrows_mutably` closure: When `borrows_mutably` is defined, it captures a
-mutable reference to `list`. We don’t use the closure again after the closure
-is called, so the mutable borrow ends. Between the closure definition and the
-closure call, an immutable borrow to print isn’t allowed, because no other
-borrows are allowed when there’s a mutable borrow. Try adding a `println!`
-there to see what error message you get!
+이제 `borrows_mutably` 클로저의 정의와 호출 사이에 `println!`이 없음에
+유의하세요. `borrows_mutably`가 정의될 때 `list`에 대한 가변 참조를 캡처합니다.
+클로저가 호출된 뒤에는 클로저를 다시 쓰지 않으므로 가변 빌림이 끝납니다.
+클로저 정의와 클로저 호출 사이에는 출력을 위한 불변 빌림이 허용되지 않습니다.
+가변 빌림이 있을 때는 다른 빌림이 허용되지 않기 때문입니다. 거기에 `println!`
+을 추가해 어떤 오류 메시지를 받는지 시도해 보세요!
 
-If you want to force the closure to take ownership of the values it uses in the
-environment even though the body of the closure doesn’t strictly need
-ownership, you can use the `move` keyword before the parameter list.
+클로저 본문이 엄밀히 소유권을 필요로 하지 않더라도, 환경에서 사용하는 값의
+소유권을 클로저가 가져가게 강제하려면 매개변수 목록 앞에 `move` 키워드를
+사용할 수 있습니다.
 
-This technique is mostly useful when passing a closure to a new thread to move
-the data so that it’s owned by the new thread. We’ll discuss threads and why
-you would want to use them in detail in Chapter 16 when we talk about
-concurrency, but for now, let’s briefly explore spawning a new thread using a
-closure that needs the `move` keyword. Listing 13-6 shows Listing 13-4 modified
-to print the vector in a new thread rather than in the main thread.
+이 기법은 주로 새 스레드로 클로저를 전달하면서 데이터를 새 스레드가 소유하도록
+이동할 때 유용합니다. 스레드와 그것을 왜 사용하는지는 16장에서 동시성을
+이야기할 때 자세히 다루겠습니다. 지금은 `move` 키워드가 필요한 클로저로 새
+스레드를 시작하는 예를 간략히 살펴봅시다. Listing 13-6은 Listing 13-4를 메인
+스레드가 아닌 새 스레드에서 벡터를 출력하도록 변형한 것입니다.
 
-<Listing number="13-6" file-name="src/main.rs" caption="Using `move` to force the closure for the thread to take ownership of `list`">
+<Listing number="13-6" file-name="src/main.rs" caption="스레드용 클로저가 `list`의 소유권을 가져가도록 `move` 사용하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-06/src/main.rs}}
@@ -250,21 +228,18 @@ to print the vector in a new thread rather than in the main thread.
 
 </Listing>
 
-We spawn a new thread, giving the thread a closure to run as an argument. The
-closure body prints out the list. In Listing 13-4, the closure only captured
-`list` using an immutable reference because that's the least amount of access
-to `list` needed to print it. In this example, even though the closure body
-still only needs an immutable reference, we need to specify that `list` should
-be moved into the closure by putting the `move` keyword at the beginning of the
-closure definition. If the main thread performed more operations before calling
-`join` on the new thread, the new thread might finish before the rest of the
-main thread finishes, or the main thread might finish first. If the main thread
-maintained ownership of `list` but ended before the new thread and drops
-`list`, the immutable reference in the thread would be invalid. Therefore, the
-compiler requires that `list` be moved into the closure given to the new thread
-so that the reference will be valid. Try removing the `move` keyword or using
-`list` in the main thread after the closure is defined to see what compiler
-errors you get!
+새 스레드를 시작하고, 실행할 클로저를 인수로 전달합니다. 클로저 본문은 리스트를
+출력합니다. Listing 13-4에서는 `list`를 출력하는 데 필요한 최소한의 접근만
+필요했기 때문에 불변 참조로만 `list`를 캡처했습니다. 이 예제에서는 클로저
+본문이 여전히 불변 참조만 필요하더라도, 클로저 정의 맨 앞에 `move` 키워드를
+두어 `list`가 클로저로 이동되어야 함을 명시해야 합니다. 메인 스레드가 새
+스레드에 `join`을 호출하기 전에 더 많은 작업을 한다면, 새 스레드가 메인 스레드
+의 나머지가 끝나기 전에 끝날 수도 있고, 메인 스레드가 먼저 끝날 수도 있습니다.
+메인 스레드가 `list`의 소유권을 유지하다가 새 스레드보다 먼저 끝나 `list`를
+드롭하면, 스레드의 불변 참조는 유효하지 않게 됩니다. 따라서 컴파일러는 참조가
+유효하도록 `list`가 새 스레드에 주어진 클로저로 이동되도록 요구합니다. `move`
+키워드를 제거하거나 클로저 정의 이후 메인 스레드에서 `list`를 사용해 어떤
+컴파일러 오류를 받는지 시도해 보세요!
 
 <!-- Old headings. Do not remove or links may break. -->
 
@@ -273,38 +248,35 @@ errors you get!
 <a id="moving-captured-values-out-of-the-closure-and-the-fn-traits"></a>
 <a id="moving-captured-values-out-of-closures-and-the-fn-traits"></a>
 
-### Moving Captured Values Out of Closures
+### 캡처된 값을 클로저 밖으로 이동하기
 
-Once a closure has captured a reference or captured ownership of a value from
-the environment where the closure is defined (thus affecting what, if anything,
-is moved _into_ the closure), the code in the body of the closure defines what
-happens to the references or values when the closure is evaluated later (thus
-affecting what, if anything, is moved _out of_ the closure).
+클로저가 정의된 환경에서 참조를 캡처하거나 값의 소유권을 캡처하면(따라서
+클로저 _안으로_ 무엇이 이동되는지가 결정됨), 클로저 본문의 코드는 클로저가
+나중에 평가될 때 그 참조나 값에 무슨 일이 일어나는지를 정의합니다(따라서
+클로저 _밖으로_ 무엇이 이동되는지가 결정됨).
 
-A closure body can do any of the following: Move a captured value out of the
-closure, mutate the captured value, neither move nor mutate the value, or
-capture nothing from the environment to begin with.
+클로저 본문은 다음 중 어떤 것이든 할 수 있습니다. 캡처된 값을 클로저 밖으로
+이동하기, 캡처된 값을 변경하기, 값을 이동하지도 변경하지도 않기, 애초에
+환경에서 아무것도 캡처하지 않기.
 
-The way a closure captures and handles values from the environment affects
-which traits the closure implements, and traits are how functions and structs
-can specify what kinds of closures they can use. Closures will automatically
-implement one, two, or all three of these `Fn` traits, in an additive fashion,
-depending on how the closure’s body handles the values:
+클로저가 환경에서 값을 캡처하고 다루는 방식은 클로저가 구현하는 트레이트에
+영향을 줍니다. 그리고 함수와 구조체는 어떤 종류의 클로저를 사용할 수 있는지
+트레이트로 지정할 수 있습니다. 클로저는 본문이 값을 어떻게 다루는지에 따라,
+아래 세 `Fn` 트레이트 중 하나, 둘, 또는 세 개 모두를 누적적으로 자동으로
+구현합니다.
 
-* `FnOnce` applies to closures that can be called once. All closures implement
-  at least this trait because all closures can be called. A closure that moves
-  captured values out of its body will only implement `FnOnce` and none of the
-  other `Fn` traits because it can only be called once.
-* `FnMut` applies to closures that don’t move captured values out of their body
-  but might mutate the captured values. These closures can be called more than
-  once.
-* `Fn` applies to closures that don’t move captured values out of their body
-  and don’t mutate captured values, as well as closures that capture nothing
-  from their environment. These closures can be called more than once without
-  mutating their environment, which is important in cases such as calling a closure multiple times concurrently.
+* `FnOnce`는 한 번 호출될 수 있는 클로저에 적용됩니다. 모든 클로저는 최소한 이
+  트레이트를 구현합니다. 모든 클로저는 호출될 수 있기 때문입니다. 캡처된 값을
+  본문 밖으로 이동하는 클로저는 `FnOnce`만 구현하고 다른 `Fn` 트레이트는 구현
+  하지 않습니다. 한 번만 호출될 수 있기 때문입니다.
+* `FnMut`는 캡처된 값을 본문 밖으로 이동하지는 않지만 값을 변경할 수는 있는
+  클로저에 적용됩니다. 이런 클로저는 두 번 이상 호출될 수 있습니다.
+* `Fn`은 캡처된 값을 본문 밖으로 이동하지도 변경하지도 않는 클로저와, 환경에서
+  아무것도 캡처하지 않는 클로저에 적용됩니다. 이런 클로저는 환경을 변경하지
+  않고 두 번 이상 호출될 수 있는데, 이는 동시에 여러 번 클로저를 호출하는
+  경우처럼 중요한 상황에서 중요합니다.
 
-Let’s look at the definition of the `unwrap_or_else` method on `Option<T>` that
-we used in Listing 13-1:
+Listing 13-1에서 사용한 `Option<T>`의 `unwrap_or_else` 메서드 정의를 살펴봅시다.
 
 ```rust,ignore
 impl<T> Option<T> {
@@ -320,42 +292,38 @@ impl<T> Option<T> {
 }
 ```
 
-Recall that `T` is the generic type representing the type of the value in the
-`Some` variant of an `Option`. That type `T` is also the return type of the
-`unwrap_or_else` function: Code that calls `unwrap_or_else` on an
-`Option<String>`, for example, will get a `String`.
+`T`는 `Option`의 `Some` 배리언트에 있는 값의 타입을 나타내는 제네릭 타입
+이었음을 기억하세요. 그 타입 `T`는 `unwrap_or_else` 함수의 반환 타입이기도
+합니다. 예를 들어 `Option<String>`에 `unwrap_or_else`를 호출하는 코드는
+`String`을 얻습니다.
 
-Next, notice that the `unwrap_or_else` function has the additional generic type
-parameter `F`. The `F` type is the type of the parameter named `f`, which is
-the closure we provide when calling `unwrap_or_else`.
+다음으로, `unwrap_or_else` 함수에는 추가 제네릭 타입 매개변수 `F`가 있음에
+유의하세요. `F` 타입은 `f`라는 매개변수의 타입이며, `unwrap_or_else`를 호출할
+때 우리가 제공하는 클로저입니다.
 
-The trait bound specified on the generic type `F` is `FnOnce() -> T`, which
-means `F` must be able to be called once, take no arguments, and return a `T`.
-Using `FnOnce` in the trait bound expresses the constraint that
-`unwrap_or_else` will not call `f` more than once. In the body of
-`unwrap_or_else`, we can see that if the `Option` is `Some`, `f` won’t be
-called. If the `Option` is `None`, `f` will be called once. Because all
-closures implement `FnOnce`, `unwrap_or_else` accepts all three kinds of
-closures and is as flexible as it can be.
+제네릭 타입 `F`에 지정된 트레이트 경계는 `FnOnce() -> T`이며, 이는 `F`가 한
+번 호출될 수 있고, 인수를 받지 않으며, `T`를 반환할 수 있어야 한다는 뜻입니다.
+트레이트 경계에 `FnOnce`를 사용하는 것은 `unwrap_or_else`가 `f`를 한 번
+이상 호출하지 않는다는 제약을 표현합니다. `unwrap_or_else`의 본문을 보면,
+`Option`이 `Some`이면 `f`가 호출되지 않고, `Option`이 `None`이면 `f`가 한 번
+호출될 것임을 알 수 있습니다. 모든 클로저가 `FnOnce`를 구현하므로,
+`unwrap_or_else`는 세 종류의 클로저를 모두 받으며 가능한 한 유연합니다.
 
-> Note: If what we want to do doesn’t require capturing a value from the
-> environment, we can use the name of a function rather than a closure where we
-> need something that implements one of the `Fn` traits. For example, on an
-> `Option<Vec<T>>` value, we could call `unwrap_or_else(Vec::new)` to get a
-> new, empty vector if the value is `None`. The compiler automatically
-> implements whichever of the `Fn` traits is applicable for a function
-> definition.
+> 참고: 우리가 하려는 일이 환경에서 값을 캡처할 필요가 없다면, `Fn` 트레이트
+> 중 하나를 구현하는 무언가가 필요한 자리에 클로저 대신 함수의 이름을 사용할
+> 수 있습니다. 예를 들어 `Option<Vec<T>>` 값에서, 값이 `None`이면 새로운 빈
+> 벡터를 얻기 위해 `unwrap_or_else(Vec::new)`를 호출할 수 있습니다. 컴파일러는
+> 함수 정의에 해당하는 `Fn` 트레이트 중 적용 가능한 것을 자동으로 구현합니다.
 
-Now let’s look at the standard library method `sort_by_key`, defined on slices,
-to see how that differs from `unwrap_or_else` and why `sort_by_key` uses
-`FnMut` instead of `FnOnce` for the trait bound. The closure gets one argument
-in the form of a reference to the current item in the slice being considered,
-and it returns a value of type `K` that can be ordered. This function is useful
-when you want to sort a slice by a particular attribute of each item. In
-Listing 13-7, we have a list of `Rectangle` instances, and we use `sort_by_key`
-to order them by their `width` attribute from low to high.
+이제 슬라이스에 정의된 표준 라이브러리 메서드 `sort_by_key`를 살펴보며, 그것이
+`unwrap_or_else`와 어떻게 다르고, `sort_by_key`가 트레이트 경계로 `FnOnce`
+대신 `FnMut`를 사용하는 이유를 봅시다. 이 클로저는 슬라이스에서 현재 고려
+중인 항목에 대한 참조 형태의 인수 하나를 받고, 순서를 매길 수 있는 `K` 타입의
+값을 반환합니다. 이 함수는 각 항목의 특정 속성으로 슬라이스를 정렬하고 싶을
+때 유용합니다. Listing 13-7에서는 `Rectangle` 인스턴스 목록을 `width` 속성으로
+낮은 순에서 높은 순으로 정렬하기 위해 `sort_by_key`를 사용합니다.
 
-<Listing number="13-7" file-name="src/main.rs" caption="Using `sort_by_key` to order rectangles by width">
+<Listing number="13-7" file-name="src/main.rs" caption="`sort_by_key`로 사각형을 너비순으로 정렬하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-07/src/main.rs}}
@@ -363,22 +331,22 @@ to order them by their `width` attribute from low to high.
 
 </Listing>
 
-This code prints:
+이 코드는 다음을 출력합니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-07/output.txt}}
 ```
 
-The reason `sort_by_key` is defined to take an `FnMut` closure is that it calls
-the closure multiple times: once for each item in the slice. The closure `|r|
-r.width` doesn’t capture, mutate, or move anything out from its environment, so
-it meets the trait bound requirements.
+`sort_by_key`가 `FnMut` 클로저를 받도록 정의된 이유는 클로저를 여러 번, 즉
+슬라이스의 각 항목당 한 번씩 호출하기 때문입니다. 클로저 `|r| r.width`는
+환경에서 아무것도 캡처하거나 변경하거나 이동하지 않으므로 트레이트 경계
+요구 사항을 충족합니다.
 
-In contrast, Listing 13-8 shows an example of a closure that implements just
-the `FnOnce` trait, because it moves a value out of the environment. The
-compiler won’t let us use this closure with `sort_by_key`.
+반대로 Listing 13-8은 환경에서 값을 이동하므로 `FnOnce` 트레이트만 구현하는
+클로저의 예를 보여 줍니다. 컴파일러는 이 클로저를 `sort_by_key`에 사용하도록
+허용하지 않습니다.
 
-<Listing number="13-8" file-name="src/main.rs" caption="Attempting to use an `FnOnce` closure with `sort_by_key`">
+<Listing number="13-8" file-name="src/main.rs" caption="`FnOnce` 클로저를 `sort_by_key`에 사용하려는 시도">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-08/src/main.rs}}
@@ -386,31 +354,28 @@ compiler won’t let us use this closure with `sort_by_key`.
 
 </Listing>
 
-This is a contrived, convoluted way (that doesn’t work) to try to count the
-number of times `sort_by_key` calls the closure when sorting `list`. This code
-attempts to do this counting by pushing `value`—a `String` from the closure’s
-environment—into the `sort_operations` vector. The closure captures `value` and
-then moves `value` out of the closure by transferring ownership of `value` to
-the `sort_operations` vector. This closure can be called once; trying to call
-it a second time wouldn’t work, because `value` would no longer be in the
-environment to be pushed into `sort_operations` again! Therefore, this closure
-only implements `FnOnce`. When we try to compile this code, we get this error
-that `value` can’t be moved out of the closure because the closure must
-implement `FnMut`:
+이것은 `list`를 정렬할 때 `sort_by_key`가 클로저를 몇 번 호출하는지 세려는
+억지스럽고 복잡한(동작도 하지 않는) 방법입니다. 이 코드는 클로저의 환경에서
+온 `String`인 `value`를 `sort_operations` 벡터에 푸시하여 이 세기를 하려고
+합니다. 클로저는 `value`를 캡처한 다음, `value`의 소유권을 `sort_operations`
+벡터로 이전함으로써 `value`를 클로저 밖으로 이동합니다. 이 클로저는 한 번 호출
+될 수 있습니다. 두 번째 호출은 동작하지 않습니다. `value`가 환경에 더 이상
+존재하지 않아 다시 `sort_operations`에 푸시할 수 없기 때문입니다! 따라서 이
+클로저는 `FnOnce`만 구현합니다. 이 코드를 컴파일하려 하면, 클로저가 `FnMut`
+를 구현해야 하는데 `value`가 클로저 밖으로 이동될 수 없다는 다음 오류를 얻습니다.
 
 ```console
 {{#include ../listings/ch13-functional-features/listing-13-08/output.txt}}
 ```
 
-The error points to the line in the closure body that moves `value` out of the
-environment. To fix this, we need to change the closure body so that it doesn’t
-move values out of the environment. Keeping a counter in the environment and
-incrementing its value in the closure body is a more straightforward way to
-count the number of times the closure is called. The closure in Listing 13-9
-works with `sort_by_key` because it is only capturing a mutable reference to the
-`num_sort_operations` counter and can therefore be called more than once.
+오류는 `value`를 환경 밖으로 이동하는 클로저 본문 줄을 가리킵니다. 이를 고치
+려면 클로저 본문이 값을 환경 밖으로 이동하지 않도록 바꿔야 합니다. 환경에
+카운터를 두고 클로저 본문에서 그 값을 증가시키는 것은 클로저 호출 횟수를
+세는 더 직관적인 방법입니다. Listing 13-9의 클로저는 `num_sort_operations`
+카운터에 대한 가변 참조만 캡처하므로 두 번 이상 호출될 수 있어서 `sort_by_key`
+에 사용할 수 있습니다.
 
-<Listing number="13-9" file-name="src/main.rs" caption="Using an `FnMut` closure with `sort_by_key` is allowed.">
+<Listing number="13-9" file-name="src/main.rs" caption="`sort_by_key`와 함께 `FnMut` 클로저 사용은 허용됩니다.">
 
 ```rust
 {{#rustdoc_include ../listings/ch13-functional-features/listing-13-09/src/main.rs}}
@@ -418,9 +383,8 @@ works with `sort_by_key` because it is only capturing a mutable reference to the
 
 </Listing>
 
-The `Fn` traits are important when defining or using functions or types that
-make use of closures. In the next section, we’ll discuss iterators. Many
-iterator methods take closure arguments, so keep these closure details in mind
-as we continue!
+`Fn` 트레이트는 클로저를 활용하는 함수나 타입을 정의하거나 사용할 때 중요합니다.
+다음 절에서는 이터레이터를 다룹니다. 많은 이터레이터 메서드가 클로저를 인수로
+받으므로, 계속 진행하면서 이 클로저 세부 사항을 염두에 두세요!
 
 [unwrap-or-else]: ../std/option/enum.Option.html#method.unwrap_or_else

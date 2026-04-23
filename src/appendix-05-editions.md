@@ -1,59 +1,27 @@
-## Appendix E: Editions
+## 부록 E: 에디션
 
-In Chapter 1, you saw that `cargo new` adds a bit of metadata to your
-_Cargo.toml_ file about an edition. This appendix talks about what that means!
+1장에서 `cargo new`가 에디션에 대한 약간의 메타데이터를 _Cargo.toml_ 파일에 추가하는 것을 보았습니다. 이 부록은 그것이 무엇을 의미하는지 이야기합니다!
 
-The Rust language and compiler have a six-week release cycle, meaning users get
-a constant stream of new features. Other programming languages release larger
-changes less often; Rust releases smaller updates more frequently. After a
-while, all of these tiny changes add up. But from release to release, it can be
-difficult to look back and say, “Wow, between Rust 1.10 and Rust 1.31, Rust has
-changed a lot!”
+러스트 언어와 컴파일러는 6주 릴리스 주기를 가집니다. 즉, 사용자들은 새 기능의 끊임없는 흐름을 받습니다. 다른 프로그래밍 언어들은 더 큰 변경을 덜 자주 릴리스합니다. 러스트는 더 작은 업데이트를 더 자주 릴리스합니다. 시간이 지나면 이 모든 작은 변경들이 쌓입니다. 그러나 릴리스 사이를 보며 “와, 러스트 1.10과 러스트 1.31 사이에 러스트가 많이 바뀌었네!”라고 말하기는 어려울 수 있습니다.
 
-Every three years or so, the Rust team produces a new Rust _edition_. Each
-edition brings together the features that have landed into a clear package with
-fully updated documentation and tooling. New editions ship as part of the usual
-six-week release process.
+3년쯤마다 한 번씩, 러스트 팀은 새 러스트 _에디션(edition)_ 을 만들어 냅니다. 각 에디션은 완전히 갱신된 문서와 도구와 함께 적합된 기능들을 명확한 패키지로 모읍니다. 새 에디션은 평소의 6주 릴리스 과정의 일부로 배포됩니다.
 
-Editions serve different purposes for different people:
+에디션은 서로 다른 사람들에게 서로 다른 목적을 가집니다.
 
-- For active Rust users, a new edition brings together incremental changes into
-  an easy-to-understand package.
-- For non-users, a new edition signals that some major advancements have
-  landed, which might make Rust worth another look.
-- For those developing Rust, a new edition provides a rallying point for the
-  project as a whole.
+- 활발한 러스트 사용자에게 새 에디션은 점진적 변경을 이해하기 쉬운 패키지로 모아 줍니다.
+- 사용하지 않는 사람에게 새 에디션은 어떤 큰 진전이 있었다는 신호이며, 러스트를 다시 볼 가치가 있게 만들 수 있습니다.
+- 러스트를 개발하는 사람들에게 새 에디션은 프로젝트 전체에 대한 결집점을 제공합니다.
 
-At the time of this writing, four Rust editions are available: Rust 2015, Rust
-2018, Rust 2021, and Rust 2024. This book is written using Rust 2024 edition
-idioms.
+이 글을 쓰는 시점에 네 러스트 에디션이 사용 가능합니다. Rust 2015, Rust 2018, Rust 2021, Rust 2024입니다. 이 책은 Rust 2024 에디션의 관용구를 사용해 작성되었습니다.
 
-The `edition` key in _Cargo.toml_ indicates which edition the compiler should
-use for your code. If the key doesn’t exist, Rust uses `2015` as the edition
-value for backward compatibility reasons.
+_Cargo.toml_ 의 `edition` 키는 컴파일러가 여러분의 코드에 어떤 에디션을 사용해야 할지 나타냅니다. 키가 존재하지 않으면, 러스트는 하위 호환성을 위해 에디션 값으로 `2015`를 사용합니다.
 
-Each project can opt in to an edition other than the default 2015 edition.
-Editions can contain incompatible changes, such as including a new keyword that
-conflicts with identifiers in code. However, unless you opt in to those
-changes, your code will continue to compile even as you upgrade the Rust
-compiler version you use.
+각 프로젝트는 기본 2015 에디션이 아닌 에디션을 선택할 수 있습니다. 에디션은 코드의 식별자와 충돌하는 새 키워드를 포함하는 것과 같은 호환되지 않는 변경을 포함할 수 있습니다. 그러나 그런 변경에 옵트인하지 않는 한, 사용하는 러스트 컴파일러 버전을 업그레이드해도 코드는 계속 컴파일될 것입니다.
 
-All Rust compiler versions support any edition that existed prior to that
-compiler’s release, and they can link crates of any supported editions
-together. Edition changes only affect the way the compiler initially parses
-code. Therefore, if you’re using Rust 2015 and one of your dependencies uses
-Rust 2018, your project will compile and be able to use that dependency. The
-opposite situation, where your project uses Rust 2018 and a dependency uses
-Rust 2015, works as well.
+모든 러스트 컴파일러 버전은 그 컴파일러의 릴리스 전에 존재했던 어떤 에디션이든 지원하며, 지원되는 어떤 에디션의 크레이트든 함께 링크할 수 있습니다. 에디션 변경은 컴파일러가 처음에 코드를 파싱하는 방식에만 영향을 줍니다. 따라서 Rust 2015를 사용하고 있고 의존성 중 하나가 Rust 2018을 사용한다면, 프로젝트는 컴파일되고 그 의존성을 사용할 수 있습니다. 프로젝트가 Rust 2018을 사용하고 의존성이 Rust 2015를 사용하는 반대 상황도 잘 동작합니다.
 
-To be clear: Most features will be available on all editions. Developers using
-any Rust edition will continue to see improvements as new stable releases are
-made. However, in some cases, mainly when new keywords are added, some new
-features might only be available in later editions. You will need to switch
-editions if you want to take advantage of such features.
+분명히 해 두자면, 대부분의 기능은 모든 에디션에서 사용 가능할 것입니다. 어떤 러스트 에디션을 사용하는 개발자든 새로운 안정 릴리스가 만들어짐에 따라 계속 개선을 볼 것입니다. 그러나 주로 새 키워드가 추가될 때와 같은 어떤 경우에는, 일부 새 기능은 더 나중의 에디션에서만 사용 가능할 수 있습니다. 그런 기능의 이점을 취하고 싶다면 에디션을 전환해야 할 것입니다.
 
-For more details, see [_The Rust Edition Guide_][edition-guide]. This is a
-complete book that enumerates the differences between editions and explains how
-to automatically upgrade your code to a new edition via `cargo fix`.
+더 자세한 내용은 [_The Rust Edition Guide_][edition-guide]를 참고하세요. 이는 에디션 사이의 차이를 열거하고 `cargo fix`를 통해 코드를 새 에디션으로 자동 업그레이드하는 방법을 설명하는 완전한 책입니다.
 
 [edition-guide]: https://doc.rust-lang.org/stable/edition-guide

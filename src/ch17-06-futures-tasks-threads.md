@@ -1,68 +1,62 @@
-## Putting It All Together: Futures, Tasks, and Threads
+## 모두 합치기: Future, 태스크, 스레드
 
-As we saw in [Chapter 16][ch16]<!-- ignore -->, threads provide one approach to
-concurrency. We’ve seen another approach in this chapter: using async with
-futures and streams. If you’re wondering when to choose one method over the other,
-the answer is: it depends! And in many cases, the choice isn’t threads _or_
-async but rather threads _and_ async.
+[16장][ch16]<!-- ignore -->에서 본 것처럼 스레드는 동시성에 대한 한 접근 방식을
+제공합니다. 이 장에서 또 다른 접근 방식을 보았습니다. future와 stream을 async
+와 함께 사용하는 것입니다. 언제 한 방법을 다른 방법보다 선택할지 궁금하다면,
+대답은 경우에 따라 다릅니다! 그리고 많은 경우 선택은 스레드 _또는_ async가
+아니라 스레드 _와_ async입니다.
 
-Many operating systems have supplied threading-based concurrency models for
-decades now, and many programming languages support them as a result. However,
-these models are not without their tradeoffs. On many operating systems, they
-use a fair bit of memory for each thread. Threads are also only an option when
-your operating system and hardware support them. Unlike mainstream desktop and
-mobile computers, some embedded systems don’t have an OS at all, so they also
-don’t have threads.
+많은 운영체제가 수십 년 동안 스레드 기반 동시성 모델을 제공해 왔고, 그 결과
+많은 프로그래밍 언어가 그것을 지원합니다. 그러나 이 모델들은 트레이드오프
+없이 주어지지 않습니다. 많은 운영체제에서 각 스레드당 꽤 많은 메모리를
+사용합니다. 또한 스레드는 운영체제와 하드웨어가 지원할 때만 선택지입니다.
+주류 데스크톱과 모바일 컴퓨터와 달리 일부 임베디드 시스템은 OS가 아예 없으며,
+따라서 스레드도 없습니다.
 
-The async model provides a different—and ultimately complementary—set of
-tradeoffs. In the async model, concurrent operations don’t require their own
-threads. Instead, they can run on tasks, as when we used `trpl::spawn_task` to
-kick off work from a synchronous function in the streams section. A task is
-similar to a thread, but instead of being managed by the operating system, it’s
-managed by library-level code: the runtime.
+async 모델은 다른 — 그리고 궁극적으로 상호 보완적인 — 트레이드오프 집합을
+제공합니다. async 모델에서는 동시 연산에 자체 스레드가 필요하지 않습니다.
+대신 stream 절에서 `trpl::spawn_task`로 동기 함수에서 작업을 시작했을 때처럼
+태스크 위에서 실행될 수 있습니다. 태스크는 스레드와 유사하지만 운영체제가
+관리하는 대신 라이브러리 수준 코드 — 런타임 — 가 관리합니다.
 
-There’s a reason the APIs for spawning threads and spawning tasks are so
-similar. Threads act as a boundary for sets of synchronous operations;
-concurrency is possible _between_ threads. Tasks act as a boundary for sets of
-_asynchronous_ operations; concurrency is possible both _between_ and _within_
-tasks, because a task can switch between futures in its body. Finally, futures
-are Rust’s most granular unit of concurrency, and each future may represent a
-tree of other futures. The runtime—specifically, its executor—manages tasks,
-and tasks manage futures. In that regard, tasks are similar to lightweight,
-runtime-managed threads with added capabilities that come from being managed by
-a runtime instead of by the operating system.
+스레드 생성 API와 태스크 생성 API가 매우 비슷한 데에는 이유가 있습니다. 스레드
+는 동기 연산 집합의 경계로 작용합니다. 동시성은 스레드 _간_ 에 가능합니다.
+태스크는 _비동기_ 연산 집합의 경계로 작용합니다. 태스크는 본문의 future 간에
+전환할 수 있기 때문에 태스크 _간_ 과 _내부_ 모두에서 동시성이 가능합니다.
+마지막으로 future는 러스트에서 가장 세밀한 동시성 단위이며, 각 future는 다른
+future들의 트리를 나타낼 수 있습니다. 런타임 — 구체적으로 실행기(executor) —
+은 태스크를 관리하고, 태스크는 future를 관리합니다. 그런 면에서 태스크는
+운영체제가 아니라 런타임이 관리함으로써 얻는 추가 능력을 가진, 경량의 런타임
+관리 스레드와 유사합니다.
 
-This doesn’t mean that async tasks are always better than threads (or vice
-versa). Concurrency with threads is in some ways a simpler programming model
-than concurrency with `async`. That can be a strength or a weakness. Threads are
-somewhat “fire and forget”; they have no native equivalent to a future, so they
-simply run to completion without being interrupted except by the operating
-system itself.
+이는 async 태스크가 스레드보다 항상 낫다는(또는 그 반대라는) 의미가 아닙니다.
+스레드로 하는 동시성은 어떤 면에서 `async`로 하는 동시성보다 더 단순한 프로
+그래밍 모델입니다. 이는 강점이 될 수도, 약점이 될 수도 있습니다. 스레드는
+다소 “쏘고 잊어버리는” 식입니다. future와 같은 네이티브 대응물이 없으므로
+운영체제 자체가 아니면 중단 없이 단순히 완료까지 실행됩니다.
 
-And it turns out that threads and tasks often work
-very well together, because tasks can (at least in some runtimes) be moved
-around between threads. In fact, under the hood, the runtime we’ve been
-using—including the `spawn_blocking` and `spawn_task` functions—is multithreaded
-by default! Many runtimes use an approach called _work stealing_ to
-transparently move tasks around between threads, based on how the threads are
-currently being utilized, to improve the system’s overall performance. That
-approach actually requires threads _and_ tasks, and therefore futures.
+그리고 스레드와 태스크는 종종 매우 잘 함께 동작합니다. 태스크는 (적어도 일부
+런타임에서는) 스레드 간에 이동될 수 있기 때문입니다. 사실 내부적으로 우리가
+써 온 런타임은 — `spawn_blocking`과 `spawn_task` 함수를 포함해 — 기본적으로
+다중 스레드입니다! 많은 런타임은 현재 스레드가 어떻게 활용되고 있는지에 따라
+시스템의 전반 성능을 개선하도록 스레드 간에 태스크를 투명하게 이동하는 _작업
+훔치기(work stealing)_ 라는 접근을 씁니다. 그 접근은 실제로 스레드 _와_ 태스크,
+따라서 future를 요구합니다.
 
-When thinking about which method to use when, consider these rules of thumb:
+언제 어느 방법을 쓸지 생각할 때 다음 경험칙을 고려하세요.
 
-- If the work is _very parallelizable_ (that is, CPU-bound), such as processing
-  a bunch of data where each part can be processed separately, threads are a
-  better choice.
-- If the work is _very concurrent_ (that is, I/O-bound), such as handling
-  messages from a bunch of different sources that may come in at different
-  intervals or different rates, async is a better choice.
+- 작업이 _매우 병렬화 가능_ (즉 CPU 바운드)하다면, 예를 들어 각 부분이 개별적
+  으로 처리될 수 있는 많은 양의 데이터 처리라면 스레드가 더 나은 선택입니다.
+- 작업이 _매우 동시적_ (즉 I/O 바운드)하다면, 예를 들어 서로 다른 간격이나
+  비율로 들어올 수 있는 여러 다른 소스의 메시지를 처리하는 것이라면 async가
+  더 나은 선택입니다.
 
-And if you need both parallelism and concurrency, you don’t have to choose
-between threads and async. You can use them together freely, letting each
-play the part it’s best at. For example, Listing 17-25 shows a fairly common
-example of this kind of mix in real-world Rust code.
+그리고 병렬성과 동시성이 모두 필요하다면 스레드와 async 중에 선택할 필요가
+없습니다. 자유롭게 함께 쓰고 각자가 가장 잘하는 역할을 하게 할 수 있습니다.
+예를 들어 Listing 17-25는 실제 세계 러스트 코드에서 이런 종류의 혼합이 꽤
+흔한 예를 보여 줍니다.
 
-<Listing number="17-25" caption="Sending messages with blocking code in a thread and awaiting the messages in an async block" file-name="src/main.rs">
+<Listing number="17-25" caption="스레드에서 블로킹 코드로 메시지를 보내고 async 블록에서 메시지를 기다리기" file-name="src/main.rs">
 
 ```rust
 {{#rustdoc_include ../listings/ch17-async-await/listing-17-25/src/main.rs:all}}
@@ -70,34 +64,30 @@ example of this kind of mix in real-world Rust code.
 
 </Listing>
 
-We begin by creating an async channel, then spawning a thread that takes
-ownership of the sender side of the channel using the `move` keyword. Within
-the thread, we send the numbers 1 through 10, sleeping for a second between
-each. Finally, we run a future created with an async block passed to
-`trpl::block_on` just as we have throughout the chapter. In that future, we
-await those messages, just as in the other message-passing examples we have
-seen.
+async 채널을 만드는 것부터 시작한 다음, `move` 키워드를 사용해 채널의 송신자
+쪽의 소유권을 가져가는 스레드를 생성합니다. 스레드 내에서 1에서 10까지의 수를
+보내며 각 수 사이에 1초씩 잡니다. 마지막으로 이 장 전체에서 쓴 것처럼
+`trpl::block_on`에 전달된 async 블록으로 만든 future를 실행합니다. 그 future
+에서 우리가 본 다른 메시지 전달 예제처럼 그 메시지들을 기다립니다.
 
-To return to the scenario we opened the chapter with, imagine running a set of
-video encoding tasks using a dedicated thread (because video encoding is
-compute-bound) but notifying the UI that those operations are done with an
-async channel. There are countless examples of these kinds of combinations in
-real-world use cases.
+이 장을 열며 꺼낸 시나리오로 돌아가, 전용 스레드를 사용해 일련의 비디오
+인코딩 태스크를 실행하되(비디오 인코딩은 계산 바운드이기 때문), 그 연산이
+완료되었음을 async 채널로 UI에 알리는 것을 상상해 보세요. 실제 세계 사용
+사례에는 이런 종류의 조합의 셀 수 없는 예가 있습니다.
 
-## Summary
+## 요약
 
-This isn’t the last you’ll see of concurrency in this book. The project in
-[Chapter 21][ch21]<!-- ignore --> will apply these concepts in a more realistic
-situation than the simpler examples discussed here and compare problem-solving
-with threading versus tasks and futures more directly.
+이 책에서 동시성을 보는 것은 이것이 마지막이 아닙니다. [21장][ch21]<!-- ignore -->
+의 프로젝트는 여기서 논의한 더 단순한 예제보다 더 현실적인 상황에서 이 개념
+들을 적용하고, 스레딩 대 태스크와 future로 문제 해결을 더 직접적으로 비교할
+것입니다.
 
-No matter which of these approaches you choose, Rust gives you the tools you
-need to write safe, fast, concurrent code—whether for a high-throughput web
-server or an embedded operating system.
+이런 접근 방식 중 어느 것을 선택하든, 러스트는 고처리량 웹 서버든 임베디드
+운영체제든 안전하고 빠른 동시적 코드를 작성하는 데 필요한 도구를 제공합니다.
 
-Next, we’ll talk about idiomatic ways to model problems and structure solutions
-as your Rust programs get bigger. In addition, we’ll discuss how Rust’s idioms
-relate to those you might be familiar with from object-oriented programming.
+다음으로 러스트 프로그램이 커짐에 따라 문제를 모델링하고 해법을 구조화하는
+관용적인 방법에 대해 이야기하겠습니다. 또한 객체 지향 프로그래밍에서 익숙할
+수 있는 관용구와 러스트의 관용구가 어떻게 관련되는지도 논의하겠습니다.
 
 [ch16]: http://localhost:3000/ch16-00-concurrency.html
 [combining-futures]: ch17-03-more-futures.html#building-our-own-async-abstractions

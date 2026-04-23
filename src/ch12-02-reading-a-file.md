@@ -1,13 +1,12 @@
-## Reading a File
+## 파일 읽기
 
-Now we’ll add functionality to read the file specified in the `file_path`
-argument. First, we need a sample file to test it with: We’ll use a file with a
-small amount of text over multiple lines with some repeated words. Listing 12-3
-has an Emily Dickinson poem that will work well! Create a file called
-_poem.txt_ at the root level of your project, and enter the poem “I’m Nobody!
-Who are you?”
+이제 `file_path` 인수로 지정된 파일을 읽는 기능을 추가하겠습니다. 먼저 테스트에
+사용할 샘플 파일이 필요합니다. 여러 줄에 걸쳐 적은 양의 텍스트가 있고 반복되는
+단어가 몇 개 있는 파일을 사용하겠습니다. Listing 12-3에 잘 어울리는 에밀리
+디킨슨(Emily Dickinson)의 시가 있습니다! 프로젝트 루트 레벨에 _poem.txt_ 라는
+파일을 만들고, “I’m Nobody! Who are you?” 시를 입력하세요.
 
-<Listing number="12-3" file-name="poem.txt" caption="A poem by Emily Dickinson makes a good test case.">
+<Listing number="12-3" file-name="poem.txt" caption="에밀리 디킨슨의 시는 좋은 테스트 사례가 됩니다.">
 
 ```text
 {{#include ../listings/ch12-an-io-project/listing-12-03/poem.txt}}
@@ -15,10 +14,10 @@ Who are you?”
 
 </Listing>
 
-With the text in place, edit _src/main.rs_ and add code to read the file, as
-shown in Listing 12-4.
+텍스트가 준비되었으면 _src/main.rs_ 를 편집해서, Listing 12-4처럼 파일을 읽는
+코드를 추가하세요.
 
-<Listing number="12-4" file-name="src/main.rs" caption="Reading the contents of the file specified by the second argument">
+<Listing number="12-4" file-name="src/main.rs" caption="두 번째 인수로 지정된 파일의 내용 읽기">
 
 ```rust,should_panic,noplayground
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-04/src/main.rs:here}}
@@ -26,31 +25,27 @@ shown in Listing 12-4.
 
 </Listing>
 
-First, we bring in a relevant part of the standard library with a `use`
-statement: We need `std::fs` to handle files.
+먼저 `use` 구문으로 표준 라이브러리의 관련 부분을 가져옵니다. 파일을 다루려면
+`std::fs`가 필요합니다.
 
-In `main`, the new statement `fs::read_to_string` takes the `file_path`, opens
-that file, and returns a value of type `std::io::Result<String>` that contains
-the file’s contents.
+`main`에서 새 구문 `fs::read_to_string`은 `file_path`를 받아 그 파일을 열고,
+파일의 내용을 담은 `std::io::Result<String>` 타입의 값을 반환합니다.
 
-After that, we again add a temporary `println!` statement that prints the value
-of `contents` after the file is read so that we can check that the program is
-working so far.
+그 후, 파일을 읽은 뒤 `contents`의 값을 출력하는 임시 `println!` 구문을 다시
+추가해, 지금까지 프로그램이 동작하는지 확인할 수 있게 합니다.
 
-Let’s run this code with any string as the first command line argument (because
-we haven’t implemented the searching part yet) and the _poem.txt_ file as the
-second argument:
+이 코드를 첫 번째 명령행 인수로는 임의의 문자열을(검색 부분은 아직 구현하지
+않았으므로) 주고, 두 번째 인수로는 _poem.txt_ 파일을 줘서 실행해 봅시다.
 
 ```console
 {{#rustdoc_include ../listings/ch12-an-io-project/listing-12-04/output.txt}}
 ```
 
-Great! The code read and then printed the contents of the file. But the code
-has a few flaws. At the moment, the `main` function has multiple
-responsibilities: Generally, functions are clearer and easier to maintain if
-each function is responsible for only one idea. The other problem is that we’re
-not handling errors as well as we could. The program is still small, so these
-flaws aren’t a big problem, but as the program grows, it will be harder to fix
-them cleanly. It’s a good practice to begin refactoring early on when
-developing a program because it’s much easier to refactor smaller amounts of
-code. We’ll do that next.
+좋습니다! 코드가 파일을 읽고 그 내용을 출력했습니다. 하지만 이 코드에는 몇
+가지 결함이 있습니다. 지금 `main` 함수는 여러 책임을 지고 있습니다. 일반적으로
+함수는 각 함수가 하나의 아이디어에만 책임을 질 때 더 명확하고 유지보수하기
+쉽습니다. 또 다른 문제는 오류 처리를 충분히 잘하지 못하고 있다는 점입니다.
+프로그램이 아직 작으므로 이 결함들이 큰 문제는 아니지만, 프로그램이 커질수록
+깔끔하게 고치기가 더 어려워질 것입니다. 프로그램을 개발할 때 일찍부터 리팩터링을
+시작하는 것은 좋은 습관인데, 코드의 양이 적을 때 리팩터링하는 편이 훨씬 쉽기
+때문입니다. 다음으로 그것을 해 보겠습니다.

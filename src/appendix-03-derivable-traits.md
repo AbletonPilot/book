@@ -1,183 +1,88 @@
-## Appendix C: Derivable Traits
+## 부록 C: 파생 가능한 트레이트
 
-In various places in the book, we’ve discussed the `derive` attribute, which
-you can apply to a struct or enum definition. The `derive` attribute generates
-code that will implement a trait with its own default implementation on the
-type you’ve annotated with the `derive` syntax.
+이 책 곳곳에서 `derive` 어트리뷰트에 대해 논의했습니다. 이 어트리뷰트는 구조체나 열거형 정의에 적용할 수 있습니다. `derive` 어트리뷰트는 `derive` 문법으로 어노테이트한 타입에 자신의 기본 구현으로 트레이트를 구현하는 코드를 생성합니다.
 
-In this appendix, we provide a reference of all the traits in the standard
-library that you can use with `derive`. Each section covers:
+이 부록에서는 `derive`와 함께 사용할 수 있는 표준 라이브러리의 모든 트레이트에 대한 참고 자료를 제공합니다. 각 절은 다음을 다룹니다.
 
-- What operators and methods deriving this trait will enable
-- What the implementation of the trait provided by `derive` does
-- What implementing the trait signifies about the type
-- The conditions in which you’re allowed or not allowed to implement the trait
-- Examples of operations that require the trait
+- 이 트레이트를 파생하면 어떤 연산자와 메서드가 활성화되는지
+- `derive`가 제공하는 트레이트 구현이 무엇을 하는지
+- 트레이트를 구현한다는 것이 타입에 대해 무엇을 의미하는지
+- 트레이트를 구현할 수 있는 혹은 구현할 수 없는 조건
+- 트레이트를 필요로 하는 연산의 예시
 
-If you want different behavior from that provided by the `derive` attribute,
-consult the [standard library documentation](../std/index.html)<!-- ignore -->
-for each trait for details on how to manually implement them.
+`derive` 어트리뷰트가 제공하는 것과 다른 동작을 원한다면, 수동으로 구현하는 방법에 대한 세부 사항은 각 트레이트의 [표준 라이브러리 문서](../std/index.html)<!-- ignore -->를 참고하세요.
 
-The traits listed here are the only ones defined by the standard library that
-can be implemented on your types using `derive`. Other traits defined in the
-standard library don’t have sensible default behavior, so it’s up to you to
-implement them in the way that makes sense for what you’re trying to accomplish.
+여기 나열된 트레이트들은 `derive`를 사용해 여러분의 타입에 구현할 수 있는, 표준 라이브러리가 정의한 트레이트들의 전부입니다. 표준 라이브러리에 정의된 다른 트레이트들은 적당한 기본 동작이 없으므로, 달성하려는 목적에 맞는 방식으로 직접 구현해야 합니다.
 
-An example of a trait that can’t be derived is `Display`, which handles
-formatting for end users. You should always consider the appropriate way to
-display a type to an end user. What parts of the type should an end user be
-allowed to see? What parts would they find relevant? What format of the data
-would be most relevant to them? The Rust compiler doesn’t have this insight, so
-it can’t provide appropriate default behavior for you.
+파생할 수 없는 트레이트의 한 예는 최종 사용자에게 서식을 처리하는 `Display`입니다. 타입을 최종 사용자에게 어떻게 표시할지에 대해서는 항상 적절한 방식을 고려해야 합니다. 타입의 어떤 부분이 최종 사용자에게 보여져야 할까요? 그들이 어떤 부분을 관련 있다고 느낄까요? 어떤 데이터 형식이 그들에게 가장 관련 있을까요? 러스트 컴파일러는 이러한 통찰을 가지고 있지 않으므로 적절한 기본 동작을 제공해 줄 수 없습니다.
 
-The list of derivable traits provided in this appendix is not comprehensive:
-Libraries can implement `derive` for their own traits, making the list of
-traits you can use `derive` with truly open ended. Implementing `derive`
-involves using a procedural macro, which is covered in the [“Custom `derive`
-Macros”][custom-derive-macros]<!-- ignore --> section in Chapter 20.
+이 부록에서 제공하는 파생 가능 트레이트 목록이 포괄적인 것은 아닙니다. 라이브러리들은 자신의 트레이트에 대해 `derive`를 구현할 수 있으며, 이는 `derive`와 함께 사용할 수 있는 트레이트의 목록을 정말로 열린 끝으로 만듭니다. `derive`를 구현하는 것은 절차적 매크로를 사용하는 것을 포함하며, 이는 20장의 [“사용자 정의 `derive` 매크로”][custom-derive-macros]<!-- ignore --> 절에서 다룹니다.
 
-### `Debug` for Programmer Output
+### 프로그래머 출력을 위한 `Debug`
 
-The `Debug` trait enables debug formatting in format strings, which you
-indicate by adding `:?` within `{}` placeholders.
+`Debug` 트레이트는 포맷 문자열에서 디버그 포매팅을 가능하게 하며, `{}` 자리표시자 안에 `:?`를 추가하여 나타냅니다.
 
-The `Debug` trait allows you to print instances of a type for debugging
-purposes, so you and other programmers using your type can inspect an instance
-at a particular point in a program’s execution.
+`Debug` 트레이트는 타입의 인스턴스를 디버깅 목적으로 출력할 수 있게 해 주어, 여러분이나 그 타입을 사용하는 다른 프로그래머들이 프로그램 실행의 특정 시점에서 인스턴스를 살펴볼 수 있습니다.
 
-The `Debug` trait is required, for example, in the use of the `assert_eq!`
-macro. This macro prints the values of instances given as arguments if the
-equality assertion fails so that programmers can see why the two instances
-weren’t equal.
+`Debug` 트레이트는 예를 들어 `assert_eq!` 매크로의 사용에 필요합니다. 이 매크로는 동등성 단언이 실패하면 인수로 주어진 인스턴스의 값을 출력하므로, 프로그래머는 두 인스턴스가 왜 동등하지 않았는지 볼 수 있습니다.
 
-### `PartialEq` and `Eq` for Equality Comparisons
+### 동등성 비교를 위한 `PartialEq`와 `Eq`
 
-The `PartialEq` trait allows you to compare instances of a type to check for
-equality and enables use of the `==` and `!=` operators.
+`PartialEq` 트레이트는 타입의 인스턴스를 동등성 검사를 위해 비교할 수 있게 해 주고 `==`과 `!=` 연산자의 사용을 가능하게 합니다.
 
-Deriving `PartialEq` implements the `eq` method. When `PartialEq` is derived on
-structs, two instances are equal only if _all_ fields are equal, and the
-instances are not equal if _any_ fields are not equal. When derived on enums,
-each variant is equal to itself and not equal to the other variants.
+`PartialEq`를 파생하면 `eq` 메서드가 구현됩니다. 구조체에 대해 `PartialEq`를 파생하면, 두 인스턴스가 _모든_ 필드가 동등할 때만 동등하고, _어떤_ 필드라도 동등하지 않으면 동등하지 않습니다. 열거형에 대해 파생하면, 각 변형은 자기 자신과 동등하고 다른 변형과는 동등하지 않습니다.
 
-The `PartialEq` trait is required, for example, with the use of the
-`assert_eq!` macro, which needs to be able to compare two instances of a type
-for equality.
+`PartialEq` 트레이트는 예를 들어 두 인스턴스의 동등성을 비교할 수 있어야 하는 `assert_eq!` 매크로의 사용에 필요합니다.
 
-The `Eq` trait has no methods. Its purpose is to signal that for every value of
-the annotated type, the value is equal to itself. The `Eq` trait can only be
-applied to types that also implement `PartialEq`, although not all types that
-implement `PartialEq` can implement `Eq`. One example of this is floating-point
-number types: The implementation of floating-point numbers states that two
-instances of the not-a-number (`NaN`) value are not equal to each other.
+`Eq` 트레이트에는 메서드가 없습니다. 그 목적은 어노테이트된 타입의 모든 값에 대해 그 값이 자기 자신과 동등하다는 것을 신호하는 것입니다. `Eq` 트레이트는 `PartialEq`도 구현하는 타입에만 적용할 수 있지만, `PartialEq`를 구현하는 모든 타입이 `Eq`를 구현할 수 있는 것은 아닙니다. 이것의 한 예는 부동소수점 수 타입입니다. 부동소수점 수의 구현은 not-a-number(`NaN`) 값의 두 인스턴스가 서로 동등하지 않다고 명시합니다.
 
-An example of when `Eq` is required is for keys in a `HashMap<K, V>` so that
-the `HashMap<K, V>` can tell whether two keys are the same.
+`Eq`가 필요한 예는 `HashMap<K, V>`의 키로, `HashMap<K, V>`가 두 키가 같은지 구분할 수 있도록 합니다.
 
-### `PartialOrd` and `Ord` for Ordering Comparisons
+### 순서 비교를 위한 `PartialOrd`와 `Ord`
 
-The `PartialOrd` trait allows you to compare instances of a type for sorting
-purposes. A type that implements `PartialOrd` can be used with the `<`, `>`,
-`<=`, and `>=` operators. You can only apply the `PartialOrd` trait to types
-that also implement `PartialEq`.
+`PartialOrd` 트레이트는 타입의 인스턴스를 정렬 목적으로 비교할 수 있게 해 줍니다. `PartialOrd`를 구현하는 타입은 `<`, `>`, `<=`, `>=` 연산자와 함께 사용할 수 있습니다. `PartialOrd` 트레이트는 `PartialEq`도 구현하는 타입에만 적용할 수 있습니다.
 
-Deriving `PartialOrd` implements the `partial_cmp` method, which returns an
-`Option<Ordering>` that will be `None` when the values given don’t produce an
-ordering. An example of a value that doesn’t produce an ordering, even though
-most values of that type can be compared, is the `NaN` floating point value.
-Calling `partial_cmp` with any floating-point number and the `NaN`
-floating-point value will return `None`.
+`PartialOrd`를 파생하면 `partial_cmp` 메서드가 구현되는데, 주어진 값들이 순서를 만들어 내지 않을 때 `None`이 될 `Option<Ordering>`을 반환합니다. 그 타입의 대부분 값은 비교할 수 있더라도 순서를 만들어 내지 않는 값의 한 예는 `NaN` 부동소수점 값입니다. 어떤 부동소수점 숫자와 `NaN` 부동소수점 값으로 `partial_cmp`를 호출하면 `None`을 반환합니다.
 
-When derived on structs, `PartialOrd` compares two instances by comparing the
-value in each field in the order in which the fields appear in the struct
-definition. When derived on enums, variants of the enum declared earlier in the
-enum definition are considered less than the variants listed later.
+구조체에 대해 파생될 때, `PartialOrd`는 구조체 정의에서 필드가 나타나는 순서대로 각 필드의 값을 비교함으로써 두 인스턴스를 비교합니다. 열거형에 대해 파생될 때, 열거형 정의에서 더 앞서 선언된 변형이 나중에 나열된 변형보다 작다고 간주됩니다.
 
-The `PartialOrd` trait is required, for example, for the `gen_range` method
-from the `rand` crate that generates a random value in the range specified by a
-range expression.
+`PartialOrd` 트레이트는 예를 들어 범위 표현식으로 지정된 범위에서 임의의 값을 생성하는 `rand` 크레이트의 `gen_range` 메서드에 필요합니다.
 
-The `Ord` trait allows you to know that for any two values of the annotated
-type, a valid ordering will exist. The `Ord` trait implements the `cmp` method,
-which returns an `Ordering` rather than an `Option<Ordering>` because a valid
-ordering will always be possible. You can only apply the `Ord` trait to types
-that also implement `PartialOrd` and `Eq` (and `Eq` requires `PartialEq`). When
-derived on structs and enums, `cmp` behaves the same way as the derived
-implementation for `partial_cmp` does with `PartialOrd`.
+`Ord` 트레이트는 어노테이트된 타입의 어떤 두 값에 대해서든 유효한 순서가 존재할 것임을 알게 해 줍니다. `Ord` 트레이트는 `cmp` 메서드를 구현하는데, 유효한 순서가 항상 가능하므로 `Option<Ordering>`이 아니라 `Ordering`을 반환합니다. `Ord` 트레이트는 `PartialOrd`와 `Eq`도 구현하는 타입(그리고 `Eq`는 `PartialEq`를 필요로 함)에만 적용할 수 있습니다. 구조체와 열거형에 대해 파생될 때, `cmp`는 `PartialOrd`의 파생 구현이 `partial_cmp`에 대해 동작하는 것과 같은 방식으로 동작합니다.
 
-An example of when `Ord` is required is when storing values in a `BTreeSet<T>`,
-a data structure that stores data based on the sort order of the values.
+`Ord`가 필요한 예는 값의 정렬 순서를 기반으로 데이터를 저장하는 자료 구조인 `BTreeSet<T>`에 값을 저장할 때입니다.
 
-### `Clone` and `Copy` for Duplicating Values
+### 값 복제를 위한 `Clone`과 `Copy`
 
-The `Clone` trait allows you to explicitly create a deep copy of a value, and
-the duplication process might involve running arbitrary code and copying heap
-data. See the [“Variables and Data Interacting with
-Clone”][variables-and-data-interacting-with-clone]<!-- ignore --> section in
-Chapter 4 for more information on `Clone`.
+`Clone` 트레이트는 값의 깊은 복사본을 명시적으로 만들 수 있게 해 주며, 복제 과정은 임의의 코드를 실행하고 힙 데이터를 복사하는 것을 포함할 수 있습니다. `Clone`에 대한 더 자세한 내용은 4장의 [“변수와 데이터가 Clone과 상호작용하기”][variables-and-data-interacting-with-clone]<!-- ignore --> 절을 참고하세요.
 
-Deriving `Clone` implements the `clone` method, which when implemented for the
-whole type, calls `clone` on each of the parts of the type. This means all the
-fields or values in the type must also implement `Clone` to derive `Clone`.
+`Clone`을 파생하면 `clone` 메서드가 구현되는데, 타입 전체에 대해 구현될 때 타입의 각 부분에서 `clone`을 호출합니다. 즉, `Clone`을 파생하려면 타입의 모든 필드나 값도 `Clone`을 구현해야 합니다.
 
-An example of when `Clone` is required is when calling the `to_vec` method on a
-slice. The slice doesn’t own the type instances it contains, but the vector
-returned from `to_vec` will need to own its instances, so `to_vec` calls
-`clone` on each item. Thus, the type stored in the slice must implement `Clone`.
+`Clone`이 필요한 예는 슬라이스에서 `to_vec` 메서드를 호출할 때입니다. 슬라이스는 그 안에 담긴 타입 인스턴스들을 소유하지 않지만, `to_vec`에서 반환되는 벡터는 자신의 인스턴스를 소유해야 하므로 `to_vec`는 각 항목에 대해 `clone`을 호출합니다. 따라서 슬라이스에 저장된 타입은 `Clone`을 구현해야 합니다.
 
-The `Copy` trait allows you to duplicate a value by only copying bits stored on
-the stack; no arbitrary code is necessary. See the [“Stack-Only Data:
-Copy”][stack-only-data-copy]<!-- ignore --> section in Chapter 4 for more
-information on `Copy`.
+`Copy` 트레이트는 스택에 저장된 비트만 복사함으로써 값을 복제할 수 있게 해 줍니다. 임의의 코드는 필요하지 않습니다. `Copy`에 대한 더 자세한 내용은 4장의 [“스택 전용 데이터: Copy”][stack-only-data-copy]<!-- ignore --> 절을 참고하세요.
 
-The `Copy` trait doesn’t define any methods to prevent programmers from
-overloading those methods and violating the assumption that no arbitrary code
-is being run. That way, all programmers can assume that copying a value will be
-very fast.
+`Copy` 트레이트는 프로그래머가 그 메서드들을 오버로딩하여 임의의 코드가 실행되지 않는다는 가정을 위반하는 것을 막기 위해 어떤 메서드도 정의하지 않습니다. 이렇게 함으로써 모든 프로그래머는 값을 복사하는 것이 매우 빠르리라고 가정할 수 있습니다.
 
-You can derive `Copy` on any type whose parts all implement `Copy`. A type that
-implements `Copy` must also implement `Clone` because a type that implements
-`Copy` has a trivial implementation of `Clone` that performs the same task as
-`Copy`.
+부분들이 모두 `Copy`를 구현하는 어떤 타입에든 `Copy`를 파생할 수 있습니다. `Copy`를 구현하는 타입은 `Clone`도 구현해야 합니다. `Copy`를 구현하는 타입은 `Copy`와 같은 작업을 수행하는 `Clone`의 자명한 구현을 가지기 때문입니다.
 
-The `Copy` trait is rarely required; types that implement `Copy` have
-optimizations available, meaning you don’t have to call `clone`, which makes
-the code more concise.
+`Copy` 트레이트는 거의 필요하지 않습니다. `Copy`를 구현하는 타입은 최적화가 가능하다는 의미이며, 즉 `clone`을 호출할 필요가 없어 코드를 더 간결하게 만듭니다.
 
-Everything possible with `Copy` you can also accomplish with `Clone`, but the
-code might be slower or have to use `clone` in places.
+`Copy`로 가능한 모든 것은 `Clone`으로도 달성할 수 있지만, 코드가 더 느리거나 여러 곳에서 `clone`을 사용해야 할 수 있습니다.
 
-### `Hash` for Mapping a Value to a Value of Fixed Size
+### 값을 고정 크기 값으로 매핑하기 위한 `Hash`
 
-The `Hash` trait allows you to take an instance of a type of arbitrary size and
-map that instance to a value of fixed size using a hash function. Deriving
-`Hash` implements the `hash` method. The derived implementation of the `hash`
-method combines the result of calling `hash` on each of the parts of the type,
-meaning all fields or values must also implement `Hash` to derive `Hash`.
+`Hash` 트레이트는 임의 크기의 타입 인스턴스를 받아서 해시 함수를 사용해 그 인스턴스를 고정 크기 값으로 매핑할 수 있게 해 줍니다. `Hash`를 파생하면 `hash` 메서드가 구현됩니다. `hash` 메서드의 파생 구현은 타입의 각 부분에 대해 `hash`를 호출한 결과를 결합합니다. 즉, `Hash`를 파생하려면 모든 필드나 값이 `Hash`도 구현해야 합니다.
 
-An example of when `Hash` is required is in storing keys in a `HashMap<K, V>`
-to store data efficiently.
+`Hash`가 필요한 예는 데이터를 효율적으로 저장하기 위해 `HashMap<K, V>`의 키를 저장할 때입니다.
 
-### `Default` for Default Values
+### 기본값을 위한 `Default`
 
-The `Default` trait allows you to create a default value for a type. Deriving
-`Default` implements the `default` function. The derived implementation of the
-`default` function calls the `default` function on each part of the type,
-meaning all fields or values in the type must also implement `Default` to
-derive `Default`.
+`Default` 트레이트는 타입에 대한 기본값을 만들 수 있게 해 줍니다. `Default`를 파생하면 `default` 함수가 구현됩니다. `default` 함수의 파생 구현은 타입의 각 부분에 대해 `default` 함수를 호출합니다. 즉, `Default`를 파생하려면 타입의 모든 필드나 값도 `Default`를 구현해야 합니다.
 
-The `Default::default` function is commonly used in combination with the struct
-update syntax discussed in the [“Creating Instances from Other Instances with
-Struct Update
-Syntax”][creating-instances-from-other-instances-with-struct-update-syntax]<!--
-ignore --> section in Chapter 5. You can customize a few fields of a struct and
-then set and use a default value for the rest of the fields by using
-`..Default::default()`.
+`Default::default` 함수는 흔히 5장의 [“구조체 갱신 문법으로 다른 인스턴스로부터 인스턴스 만들기”][creating-instances-from-other-instances-with-struct-update-syntax]<!-- ignore --> 절에서 다룬 구조체 갱신 문법과 결합되어 사용됩니다. 구조체의 몇 필드를 사용자 정의하고 나머지 필드들에 대해서는 `..Default::default()`를 사용해 기본값을 설정해 사용할 수 있습니다.
 
-The `Default` trait is required when you use the method `unwrap_or_default` on
-`Option<T>` instances, for example. If the `Option<T>` is `None`, the method
-`unwrap_or_default` will return the result of `Default::default` for the type
-`T` stored in the `Option<T>`.
+`Default` 트레이트는 예를 들어 `Option<T>` 인스턴스에서 `unwrap_or_default` 메서드를 사용할 때 필요합니다. `Option<T>`가 `None`이면, `unwrap_or_default` 메서드는 `Option<T>`에 저장된 `T` 타입에 대한 `Default::default`의 결과를 반환합니다.
 
 [creating-instances-from-other-instances-with-struct-update-syntax]: ch05-01-defining-structs.html#creating-instances-from-other-instances-with-struct-update-syntax
 [stack-only-data-copy]: ch04-01-what-is-ownership.html#stack-only-data-copy

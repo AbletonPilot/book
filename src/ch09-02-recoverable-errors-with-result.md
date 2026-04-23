@@ -1,14 +1,13 @@
-## Recoverable Errors with `Result`
+## `Result`를 사용한 복구 가능한 에러
 
-Most errors aren’t serious enough to require the program to stop entirely.
-Sometimes when a function fails, it’s for a reason that you can easily interpret
-and respond to. For example, if you try to open a file and that operation fails
-because the file doesn’t exist, you might want to create the file instead of
-terminating the process.
+대부분의 에러는 프로그램을 완전히 멈춰야 할 만큼 심각하지는 않습니다. 때로는 함수가
+실패할 때 쉽게 해석하고 대응할 수 있는 이유 때문에 실패합니다. 예를 들어, 파일을
+열려고 했는데 파일이 존재하지 않아서 그 연산이 실패했다면, 프로세스를 종료하는
+대신 파일을 만들고 싶을 수 있습니다.
 
-Recall from [“Handling Potential Failure with `Result`”][handle_failure]<!--
-ignore --> in Chapter 2 that the `Result` enum is defined as having two
-variants, `Ok` and `Err`, as follows:
+2장의 [“`Result`로 잠재적 실패 다루기”][handle_failure]<!-- ignore -->에서 `Result`
+열거형이 다음과 같이 두 개의 배리언트 `Ok`와 `Err`로 정의되어 있다는 점을 떠올려
+보세요.
 
 ```rust
 enum Result<T, E> {
@@ -17,19 +16,17 @@ enum Result<T, E> {
 }
 ```
 
-The `T` and `E` are generic type parameters: We’ll discuss generics in more
-detail in Chapter 10. What you need to know right now is that `T` represents
-the type of the value that will be returned in a success case within the `Ok`
-variant, and `E` represents the type of the error that will be returned in a
-failure case within the `Err` variant. Because `Result` has these generic type
-parameters, we can use the `Result` type and the functions defined on it in
-many different situations where the success value and error value we want to
-return may differ.
+`T`와 `E`는 제네릭 타입 매개변수입니다. 제네릭은 10장에서 더 자세히 다룹니다. 지금
+알아야 할 것은, `T`가 성공한 경우 `Ok` 배리언트 안에서 반환될 값의 타입을 나타
+내고, `E`가 실패한 경우 `Err` 배리언트 안에서 반환될 에러의 타입을 나타낸다는
+것입니다. `Result`가 이런 제네릭 타입 매개변수를 가지기 때문에, 반환하고자 하는
+성공 값과 에러 값이 서로 다를 수 있는 많은 서로 다른 상황에서 `Result` 타입과 그
+위에 정의된 함수들을 사용할 수 있습니다.
 
-Let’s call a function that returns a `Result` value because the function could
-fail. In Listing 9-3, we try to open a file.
+함수가 실패할 수 있기 때문에 `Result` 값을 반환하는 함수를 호출해 봅시다. Listing
+9-3에서는 파일을 열어 봅니다.
 
-<Listing number="9-3" file-name="src/main.rs" caption="Opening a file">
+<Listing number="9-3" file-name="src/main.rs" caption="파일 열기">
 
 ```rust
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-03/src/main.rs}}
@@ -37,29 +34,24 @@ fail. In Listing 9-3, we try to open a file.
 
 </Listing>
 
-The return type of `File::open` is a `Result<T, E>`. The generic parameter `T`
-has been filled in by the implementation of `File::open` with the type of the
-success value, `std::fs::File`, which is a file handle. The type of `E` used in
-the error value is `std::io::Error`. This return type means the call to
-`File::open` might succeed and return a file handle that we can read from or
-write to. The function call also might fail: For example, the file might not
-exist, or we might not have permission to access the file. The `File::open`
-function needs to have a way to tell us whether it succeeded or failed and at
-the same time give us either the file handle or error information. This
-information is exactly what the `Result` enum conveys.
+`File::open`의 반환 타입은 `Result<T, E>`입니다. 제네릭 매개변수 `T`는 `File::open`
+의 구현에서 성공 값의 타입인 `std::fs::File`로 채워져 있습니다. 이는 파일 핸들
+입니다. 에러 값에 쓰이는 `E`의 타입은 `std::io::Error`입니다. 이 반환 타입은
+`File::open` 호출이 성공해서 우리가 읽거나 쓸 수 있는 파일 핸들을 반환할 수도
+있다는 뜻입니다. 함수 호출은 실패할 수도 있습니다. 예를 들어, 파일이 존재하지
+않거나 파일에 접근할 권한이 없을 수 있습니다. `File::open` 함수는 성공했는지 실패
+했는지 알려 주면서 동시에 파일 핸들이든 에러 정보든 둘 중 하나를 우리에게 제공할
+방법이 필요합니다. 이 정보가 정확히 `Result` 열거형이 전달하는 것입니다.
 
-In the case where `File::open` succeeds, the value in the variable
-`greeting_file_result` will be an instance of `Ok` that contains a file handle.
-In the case where it fails, the value in `greeting_file_result` will be an
-instance of `Err` that contains more information about the kind of error that
-occurred.
+`File::open`이 성공한 경우 변수 `greeting_file_result`에 있는 값은 파일 핸들을
+담은 `Ok` 인스턴스가 됩니다. 실패한 경우 `greeting_file_result`의 값은 어떤 종류의
+에러가 일어났는지에 대한 더 많은 정보를 담은 `Err` 인스턴스가 됩니다.
 
-We need to add to the code in Listing 9-3 to take different actions depending
-on the value `File::open` returns. Listing 9-4 shows one way to handle the
-`Result` using a basic tool, the `match` expression that we discussed in
-Chapter 6.
+`File::open`이 반환하는 값에 따라 다른 동작을 취하도록 Listing 9-3의 코드에 내용을
+추가해야 합니다. Listing 9-4는 6장에서 논의한 기본 도구인 `match` 표현식을 사용해
+`Result`를 처리하는 한 가지 방법을 보여 줍니다.
 
-<Listing number="9-4" file-name="src/main.rs" caption="Using a `match` expression to handle the `Result` variants that might be returned">
+<Listing number="9-4" file-name="src/main.rs" caption="반환될 수 있는 `Result` 배리언트들을 처리하기 위한 `match` 표현식 사용하기">
 
 ```rust,should_panic
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-04/src/main.rs}}
@@ -67,37 +59,35 @@ Chapter 6.
 
 </Listing>
 
-Note that, like the `Option` enum, the `Result` enum and its variants have been
-brought into scope by the prelude, so we don’t need to specify `Result::`
-before the `Ok` and `Err` variants in the `match` arms.
+`Option` 열거형처럼, `Result` 열거형과 그 배리언트들이 프렐류드에 의해 스코프로
+가져와져 있다는 점에 유의하세요. 그래서 `match` 갈래에서 `Ok`와 `Err` 배리언트 앞에
+`Result::`를 지정할 필요가 없습니다.
 
-When the result is `Ok`, this code will return the inner `file` value out of
-the `Ok` variant, and we then assign that file handle value to the variable
-`greeting_file`. After the `match`, we can use the file handle for reading or
-writing.
+결과가 `Ok`일 때, 이 코드는 `Ok` 배리언트에서 내부 `file` 값을 꺼내 반환합니다.
+그런 다음 그 파일 핸들 값을 변수 `greeting_file`에 할당합니다. `match` 이후에는
+읽기나 쓰기를 위해 그 파일 핸들을 사용할 수 있습니다.
 
-The other arm of the `match` handles the case where we get an `Err` value from
-`File::open`. In this example, we’ve chosen to call the `panic!` macro. If
-there’s no file named _hello.txt_ in our current directory and we run this
-code, we’ll see the following output from the `panic!` macro:
+`match`의 다른 갈래는 `File::open`에서 `Err` 값을 얻은 경우를 처리합니다. 이 예
+에서는 `panic!` 매크로를 호출하기로 선택했습니다. 현재 디렉터리에 *hello.txt*
+라는 파일이 없고 이 코드를 실행하면, `panic!` 매크로의 다음과 같은 출력을 볼 수
+있습니다.
 
 ```console
 {{#include ../listings/ch09-error-handling/listing-09-04/output.txt}}
 ```
 
-As usual, this output tells us exactly what has gone wrong.
+늘 그렇듯, 이 출력은 무엇이 잘못되었는지 정확히 알려 줍니다.
 
-### Matching on Different Errors
+### 서로 다른 에러에 대해 매칭하기
 
-The code in Listing 9-4 will `panic!` no matter why `File::open` failed.
-However, we want to take different actions for different failure reasons. If
-`File::open` failed because the file doesn’t exist, we want to create the file
-and return the handle to the new file. If `File::open` failed for any other
-reason—for example, because we didn’t have permission to open the file—we still
-want the code to `panic!` in the same way it did in Listing 9-4. For this, we
-add an inner `match` expression, shown in Listing 9-5.
+Listing 9-4의 코드는 `File::open`이 실패한 이유가 무엇이든 `panic!`합니다. 그러나
+실패 이유에 따라 다른 동작을 취하고 싶다고 해 봅시다. 파일이 존재하지 않아서
+`File::open`이 실패했다면 파일을 만들고 새 파일의 핸들을 반환하고 싶습니다. 어떤
+다른 이유(예: 파일을 열 권한이 없음)로 `File::open`이 실패했다면, 코드가 Listing
+9-4에서 그랬던 것처럼 `panic!`하기를 원합니다. 이를 위해 Listing 9-5에 보이듯
+내부 `match` 표현식을 추가합니다.
 
-<Listing number="9-5" file-name="src/main.rs" caption="Handling different kinds of errors in different ways">
+<Listing number="9-5" file-name="src/main.rs" caption="서로 다른 종류의 에러를 서로 다른 방식으로 처리하기">
 
 <!-- ignore this test because otherwise it creates hello.txt which causes other
 tests to fail lol -->
@@ -108,32 +98,30 @@ tests to fail lol -->
 
 </Listing>
 
-The type of the value that `File::open` returns inside the `Err` variant is
-`io::Error`, which is a struct provided by the standard library. This struct
-has a method, `kind`, that we can call to get an `io::ErrorKind` value. The
-enum `io::ErrorKind` is provided by the standard library and has variants
-representing the different kinds of errors that might result from an `io`
-operation. The variant we want to use is `ErrorKind::NotFound`, which indicates
-the file we’re trying to open doesn’t exist yet. So, we match on
-`greeting_file_result`, but we also have an inner match on `error.kind()`.
+`File::open`이 `Err` 배리언트 안에 반환하는 값의 타입은 `io::Error`이며, 표준
+라이브러리가 제공하는 구조체입니다. 이 구조체에는 `io::ErrorKind` 값을 얻기 위해
+호출할 수 있는 `kind` 메서드가 있습니다. 표준 라이브러리가 제공하는 `io::ErrorKind`
+열거형은 `io` 연산에서 발생할 수 있는 서로 다른 종류의 에러를 나타내는 배리언트들
+을 가집니다. 우리가 사용하고 싶은 배리언트는 `ErrorKind::NotFound`로, 열려는
+파일이 아직 존재하지 않음을 나타냅니다. 그래서 `greeting_file_result`에 매칭
+하면서 `error.kind()`에도 내부 매칭을 합니다.
 
-The condition we want to check in the inner match is whether the value returned
-by `error.kind()` is the `NotFound` variant of the `ErrorKind` enum. If it is,
-we try to create the file with `File::create`. However, because `File::create`
-could also fail, we need a second arm in the inner `match` expression. When the
-file can’t be created, a different error message is printed. The second arm of
-the outer `match` stays the same, so the program panics on any error besides
-the missing file error.
+내부 match에서 확인하고 싶은 조건은, `error.kind()`가 반환한 값이 `ErrorKind`
+열거형의 `NotFound` 배리언트인지 여부입니다. 만약 그렇다면 `File::create`로 파일
+을 만들려고 시도합니다. 그러나 `File::create`도 실패할 수 있기 때문에, 내부
+`match` 표현식에 두 번째 갈래가 필요합니다. 파일을 만들 수 없을 때에는 다른 에러
+메시지가 출력됩니다. 외부 `match`의 두 번째 갈래는 그대로이므로, 파일이 없는 에러
+를 제외한 어떤 에러에서도 프로그램은 패닉합니다.
 
-> #### Alternatives to Using `match` with `Result<T, E>`
+> #### `Result<T, E>`에 `match`를 사용하는 것에 대한 대안
 >
-> That’s a lot of `match`! The `match` expression is very useful but also very
-> much a primitive. In Chapter 13, you’ll learn about closures, which are used
-> with many of the methods defined on `Result<T, E>`. These methods can be more
-> concise than using `match` when handling `Result<T, E>` values in your code.
+> `match`가 많네요! `match` 표현식은 매우 유용하지만 매우 원시적이기도 합니다.
+> 13장에서는 `Result<T, E>`에 정의된 많은 메서드와 함께 사용되는 클로저에 대해
+> 배우게 됩니다. 코드에서 `Result<T, E>` 값을 처리할 때, 이 메서드들을 사용하면
+> `match`를 사용하는 것보다 더 간결할 수 있습니다.
 >
-> For example, here’s another way to write the same logic as shown in Listing
-> 9-5, this time using closures and the `unwrap_or_else` method:
+> 예를 들어, 다음은 Listing 9-5와 같은 로직을 클로저와 `unwrap_or_else` 메서드를
+> 사용해 쓰는 또 다른 방법입니다.
 >
 > <!-- CAN'T EXTRACT SEE https://github.com/rust-lang/mdBook/issues/1127 -->
 >
@@ -154,25 +142,24 @@ the missing file error.
 > }
 > ```
 >
-> Although this code has the same behavior as Listing 9-5, it doesn’t contain
-> any `match` expressions and is cleaner to read. Come back to this example
-> after you’ve read Chapter 13 and look up the `unwrap_or_else` method in the
-> standard library documentation. Many more of these methods can clean up huge,
-> nested `match` expressions when you’re dealing with errors.
+> 이 코드는 Listing 9-5와 같은 동작이지만, `match` 표현식을 하나도 담고 있지
+> 않고 읽기에 더 깔끔합니다. 13장을 읽은 뒤 이 예제로 돌아와 표준 라이브러리
+> 문서에서 `unwrap_or_else` 메서드를 찾아보세요. 에러를 다룰 때, 이런 많은 메서드
+> 들이 거대하고 중첩된 `match` 표현식을 정리해 줄 수 있습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="shortcuts-for-panic-on-error-unwrap-and-expect"></a>
 
-#### Shortcuts for Panic on Error
+#### 에러 시 패닉을 위한 지름길
 
-Using `match` works well enough, but it can be a bit verbose and doesn’t always
-communicate intent well. The `Result<T, E>` type has many helper methods
-defined on it to do various, more specific tasks. The `unwrap` method is a
-shortcut method implemented just like the `match` expression we wrote in
-Listing 9-4. If the `Result` value is the `Ok` variant, `unwrap` will return
-the value inside the `Ok`. If the `Result` is the `Err` variant, `unwrap` will
-call the `panic!` macro for us. Here is an example of `unwrap` in action:
+`match`를 사용하는 것은 충분히 잘 동작하지만, 다소 장황할 수 있고 의도를 늘 잘
+전달하지는 않습니다. `Result<T, E>` 타입에는 다양하고 더 구체적인 작업을 위한
+여러 헬퍼 메서드가 정의되어 있습니다. `unwrap` 메서드는 Listing 9-4에서 우리가
+작성한 `match` 표현식과 똑같이 구현된 지름길 메서드입니다. `Result` 값이 `Ok`
+배리언트라면 `unwrap`은 `Ok` 안의 값을 반환합니다. `Result`가 `Err` 배리언트라면
+`unwrap`은 우리 대신 `panic!` 매크로를 호출합니다. 다음은 실제로 동작하는 `unwrap`
+의 예입니다.
 
 <Listing file-name="src/main.rs">
 
@@ -182,8 +169,8 @@ call the `panic!` macro for us. Here is an example of `unwrap` in action:
 
 </Listing>
 
-If we run this code without a _hello.txt_ file, we’ll see an error message from
-the `panic!` call that the `unwrap` method makes:
+*hello.txt* 파일 없이 이 코드를 실행하면, `unwrap` 메서드가 수행하는 `panic!`
+호출의 에러 메시지를 보게 됩니다.
 
 <!-- manual-regeneration
 cd listings/ch09-error-handling/no-listing-04-unwrap
@@ -196,10 +183,10 @@ thread 'main' panicked at src/main.rs:4:49:
 called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ```
 
-Similarly, the `expect` method lets us also choose the `panic!` error message.
-Using `expect` instead of `unwrap` and providing good error messages can convey
-your intent and make tracking down the source of a panic easier. The syntax of
-`expect` looks like this:
+비슷하게, `expect` 메서드는 `panic!` 에러 메시지도 선택할 수 있게 해 줍니다.
+`unwrap` 대신 `expect`를 사용하고 좋은 에러 메시지를 제공하면 의도를 전달할 수
+있고, 패닉의 원인을 추적하기 더 쉬워집니다. `expect`의 문법은 다음과 같이 생겼
+습니다.
 
 <Listing file-name="src/main.rs">
 
@@ -209,10 +196,10 @@ your intent and make tracking down the source of a panic easier. The syntax of
 
 </Listing>
 
-We use `expect` in the same way as `unwrap`: to return the file handle or call
-the `panic!` macro. The error message used by `expect` in its call to `panic!`
-will be the parameter that we pass to `expect`, rather than the default
-`panic!` message that `unwrap` uses. Here’s what it looks like:
+`expect`를 `unwrap`과 같은 방식으로 사용합니다. 파일 핸들을 반환하거나 `panic!`
+매크로를 호출하는 것입니다. `expect`가 `panic!` 호출에서 사용하는 에러 메시지는,
+`unwrap`이 사용하는 기본 `panic!` 메시지가 아니라, 우리가 `expect`에 전달하는
+매개변수가 됩니다. 모습은 다음과 같습니다.
 
 <!-- manual-regeneration
 cd listings/ch09-error-handling/no-listing-05-expect
@@ -225,25 +212,23 @@ thread 'main' panicked at src/main.rs:5:10:
 hello.txt should be included in this project: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ```
 
-In production-quality code, most Rustaceans choose `expect` rather than
-`unwrap` and give more context about why the operation is expected to always
-succeed. That way, if your assumptions are ever proven wrong, you have more
-information to use in debugging.
+프로덕션 품질의 코드에서는, 대부분의 러스타시안이 `unwrap` 대신 `expect`를 선택해
+연산이 항상 성공할 것으로 기대되는 이유에 대한 더 많은 맥락을 제공합니다. 그렇게
+하면 여러분의 가정이 틀렸음이 드러나더라도 디버깅에 쓸 더 많은 정보를 갖게 됩니다.
 
-### Propagating Errors
+### 에러 전파하기
 
-When a function’s implementation calls something that might fail, instead of
-handling the error within the function itself, you can return the error to the
-calling code so that it can decide what to do. This is known as _propagating_
-the error and gives more control to the calling code, where there might be more
-information or logic that dictates how the error should be handled than what
-you have available in the context of your code.
+함수의 구현이 실패할 수 있는 어떤 것을 호출할 때, 함수 자체에서 에러를 처리하는
+대신 호출하는 코드로 에러를 반환해 그쪽이 무엇을 할지 결정하게 할 수 있습니다. 이를
+에러를 *전파(propagating)*한다고 합니다. 이는 호출하는 코드에 더 많은 제어를
+주는데, 그곳에는 여러분의 코드 맥락에서 가질 수 있는 것보다 에러 처리 방식을 지시
+할 수 있는 정보나 로직이 더 많을 수도 있습니다.
 
-For example, Listing 9-6 shows a function that reads a username from a file. If
-the file doesn’t exist or can’t be read, this function will return those errors
-to the code that called the function.
+예를 들어, Listing 9-6은 파일에서 사용자 이름을 읽는 함수를 보여 줍니다. 파일이
+존재하지 않거나 읽을 수 없다면, 이 함수는 그 에러를 함수를 호출한 코드로 반환
+합니다.
 
-<Listing number="9-6" file-name="src/main.rs" caption="A function that returns errors to the calling code using `match`">
+<Listing number="9-6" file-name="src/main.rs" caption="`match`를 사용해 호출하는 코드로 에러를 반환하는 함수">
 
 <!-- Deliberately not using rustdoc_include here; the `main` function in the
 file panics. We do want to include it for reader experimentation purposes, but
@@ -255,68 +240,57 @@ don't want to include it for rustdoc testing purposes. -->
 
 </Listing>
 
-This function can be written in a much shorter way, but we’re going to start by
-doing a lot of it manually in order to explore error handling; at the end,
-we’ll show the shorter way. Let’s look at the return type of the function
-first: `Result<String, io::Error>`. This means the function is returning a
-value of the type `Result<T, E>`, where the generic parameter `T` has been
-filled in with the concrete type `String` and the generic type `E` has been
-filled in with the concrete type `io::Error`.
+이 함수는 훨씬 더 짧게 쓸 수 있지만, 에러 처리를 탐구하기 위해 많은 부분을 수동
+으로 하면서 시작하고 끝에 가서 더 짧은 방법을 보여 드리겠습니다. 먼저 함수의 반환
+타입부터 살펴봅시다. `Result<String, io::Error>`입니다. 이는 함수가 `Result<T, E>`
+타입의 값을 반환한다는 뜻이며, 제네릭 매개변수 `T`는 구체적 타입 `String`으로,
+제네릭 타입 `E`는 구체적 타입 `io::Error`로 채워져 있습니다.
 
-If this function succeeds without any problems, the code that calls this
-function will receive an `Ok` value that holds a `String`—the `username` that
-this function read from the file. If this function encounters any problems, the
-calling code will receive an `Err` value that holds an instance of `io::Error`
-that contains more information about what the problems were. We chose
-`io::Error` as the return type of this function because that happens to be the
-type of the error value returned from both of the operations we’re calling in
-this function’s body that might fail: the `File::open` function and the
-`read_to_string` method.
+이 함수가 아무 문제 없이 성공하면, 이 함수를 호출하는 코드는 이 함수가 파일에서
+읽은 `username`인 `String`을 담은 `Ok` 값을 받게 됩니다. 이 함수가 어떤 문제를
+마주치면, 호출하는 코드는 문제가 무엇이었는지에 대한 더 많은 정보를 담은 `io::Error`
+인스턴스를 담은 `Err` 값을 받게 됩니다. 이 함수의 반환 타입으로 `io::Error`를
+선택한 이유는, 이 함수 본문에서 호출하는 실패할 수 있는 두 연산인 `File::open`
+함수와 `read_to_string` 메서드 모두에서 반환되는 에러 값의 타입이기 때문입니다.
 
-The body of the function starts by calling the `File::open` function. Then, we
-handle the `Result` value with a `match` similar to the `match` in Listing 9-4.
-If `File::open` succeeds, the file handle in the pattern variable `file`
-becomes the value in the mutable variable `username_file` and the function
-continues. In the `Err` case, instead of calling `panic!`, we use the `return`
-keyword to return early out of the function entirely and pass the error value
-from `File::open`, now in the pattern variable `e`, back to the calling code as
-this function’s error value.
+함수 본문은 `File::open` 함수를 호출하는 것으로 시작합니다. 그런 다음 Listing 9-4의
+`match`와 비슷한 `match`로 `Result` 값을 처리합니다. `File::open`이 성공하면,
+패턴 변수 `file`의 파일 핸들이 가변 변수 `username_file`의 값이 되고 함수는 계속
+진행됩니다. `Err` 경우에는 `panic!`을 호출하는 대신 `return` 키워드를 사용해 함수
+에서 일찍 반환하고, 이제 패턴 변수 `e`에 있는 `File::open`의 에러 값을 이 함수의
+에러 값으로 호출하는 코드에 돌려줍니다.
 
-So, if we have a file handle in `username_file`, the function then creates a
-new `String` in variable `username` and calls the `read_to_string` method on
-the file handle in `username_file` to read the contents of the file into
-`username`. The `read_to_string` method also returns a `Result` because it
-might fail, even though `File::open` succeeded. So, we need another `match` to
-handle that `Result`: If `read_to_string` succeeds, then our function has
-succeeded, and we return the username from the file that’s now in `username`
-wrapped in an `Ok`. If `read_to_string` fails, we return the error value in the
-same way that we returned the error value in the `match` that handled the
-return value of `File::open`. However, we don’t need to explicitly say
-`return`, because this is the last expression in the function.
+그래서 `username_file`에 파일 핸들이 있다면, 함수는 변수 `username`에 새 `String`
+을 만들고 `username_file`의 파일 핸들에 `read_to_string` 메서드를 호출해 파일의
+내용을 `username`에 읽어 들입니다. `read_to_string` 메서드도 `File::open`이 성공
+했더라도 실패할 수 있기 때문에 `Result`를 반환합니다. 그래서 그 `Result`를
+처리하기 위한 또 다른 `match`가 필요합니다. `read_to_string`이 성공하면 우리 함수는
+성공한 것이고, 파일에서 읽어 이제 `username`에 있는 사용자 이름을 `Ok`로 감싸
+반환합니다. `read_to_string`이 실패하면, `File::open`의 반환값을 처리한 `match`
+에서 에러 값을 반환했던 것과 같은 방식으로 에러 값을 반환합니다. 그러나 이것이
+함수의 마지막 표현식이므로 명시적으로 `return`이라고 적을 필요는 없습니다.
 
-The code that calls this code will then handle getting either an `Ok` value
-that contains a username or an `Err` value that contains an `io::Error`. It’s
-up to the calling code to decide what to do with those values. If the calling
-code gets an `Err` value, it could call `panic!` and crash the program, use a
-default username, or look up the username from somewhere other than a file, for
-example. We don’t have enough information on what the calling code is actually
-trying to do, so we propagate all the success or error information upward for
-it to handle appropriately.
+이 코드를 호출하는 코드는 그 뒤에 사용자 이름을 담은 `Ok` 값이나 `io::Error`를
+담은 `Err` 값 중 하나를 받아 처리하게 됩니다. 그 값들로 무엇을 할지는 호출하는
+코드가 결정합니다. 호출하는 코드가 `Err` 값을 받으면, 예를 들어 `panic!`을 호출해
+프로그램을 크래시시키거나, 기본 사용자 이름을 사용하거나, 파일이 아닌 다른 곳에서
+사용자 이름을 조회할 수 있습니다. 호출하는 코드가 실제로 하려는 일에 대한 정보가
+충분하지 않으므로, 모든 성공 또는 에러 정보를 위로 전파해서 그쪽이 적절히 처리
+하게 합니다.
 
-This pattern of propagating errors is so common in Rust that Rust provides the
-question mark operator `?` to make this easier.
+러스트에서는 이런 에러 전파 패턴이 너무나 흔하기 때문에, 러스트는 이를 더 쉽게
+만드는 물음표 연산자 `?`를 제공합니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="a-shortcut-for-propagating-errors-the--operator"></a>
 
-#### The `?` Operator Shortcut
+#### `?` 연산자 지름길
 
-Listing 9-7 shows an implementation of `read_username_from_file` that has the
-same functionality as in Listing 9-6, but this implementation uses the `?`
-operator.
+Listing 9-7은 Listing 9-6과 같은 기능을 하는 `read_username_from_file`의 구현을
+보여 주지만, 이 구현은 `?` 연산자를 사용합니다.
 
-<Listing number="9-7" file-name="src/main.rs" caption="A function that returns errors to the calling code using the `?` operator">
+<Listing number="9-7" file-name="src/main.rs" caption="`?` 연산자로 호출하는 코드에 에러를 반환하는 함수">
 
 <!-- Deliberately not using rustdoc_include here; the `main` function in the
 file panics. We do want to include it for reader experimentation purposes, but
@@ -328,42 +302,36 @@ don't want to include it for rustdoc testing purposes. -->
 
 </Listing>
 
-The `?` placed after a `Result` value is defined to work in almost the same way
-as the `match` expressions that we defined to handle the `Result` values in
-Listing 9-6. If the value of the `Result` is an `Ok`, the value inside the `Ok`
-will get returned from this expression, and the program will continue. If the
-value is an `Err`, the `Err` will be returned from the whole function as if we
-had used the `return` keyword so that the error value gets propagated to the
-calling code.
+`Result` 값 뒤에 붙은 `?`는, Listing 9-6에서 `Result` 값을 처리하기 위해 정의한
+`match` 표현식과 거의 같은 방식으로 동작하도록 정의되어 있습니다. `Result`의 값이
+`Ok`라면 `Ok` 안의 값이 이 표현식에서 반환되고 프로그램은 계속됩니다. 값이 `Err`
+라면, `return` 키워드를 사용한 것처럼 `Err`가 전체 함수에서 반환되어 에러 값이
+호출하는 코드로 전파됩니다.
 
-There is a difference between what the `match` expression from Listing 9-6 does
-and what the `?` operator does: Error values that have the `?` operator called
-on them go through the `from` function, defined in the `From` trait in the
-standard library, which is used to convert values from one type into another.
-When the `?` operator calls the `from` function, the error type received is
-converted into the error type defined in the return type of the current
-function. This is useful when a function returns one error type to represent
-all the ways a function might fail, even if parts might fail for many different
-reasons.
+Listing 9-6의 `match` 표현식과 `?` 연산자가 하는 일에는 차이가 있습니다. `?` 연산
+자가 호출된 에러 값은 표준 라이브러리의 `From` 트레이트에 정의된, 한 타입의 값을
+다른 타입으로 변환하는 데 쓰이는 `from` 함수를 거쳐갑니다. `?` 연산자가 `from`
+함수를 호출하면, 받은 에러 타입이 현재 함수의 반환 타입에 정의된 에러 타입으로
+변환됩니다. 이는 함수가 실패할 수 있는 많은 방식을 하나의 에러 타입으로 표현하기
+위해 함수가 하나의 에러 타입을 반환할 때 유용합니다. 각 부분이 여러 다른 이유로
+실패할 수 있더라도 말이죠.
 
-For example, we could change the `read_username_from_file` function in Listing
-9-7 to return a custom error type named `OurError` that we define. If we also
-define `impl From<io::Error> for OurError` to construct an instance of
-`OurError` from an `io::Error`, then the `?` operator calls in the body of
-`read_username_from_file` will call `from` and convert the error types without
-needing to add any more code to the function.
+예를 들어, Listing 9-7의 `read_username_from_file` 함수를, 우리가 정의하는 커스텀
+에러 타입 `OurError`를 반환하도록 바꿀 수 있습니다. `io::Error`로부터 `OurError`
+인스턴스를 만들기 위해 `impl From<io::Error> for OurError`도 정의한다면,
+`read_username_from_file` 본문의 `?` 연산자 호출들이 함수에 추가 코드를 더하지
+않고도 `from`을 호출해 에러 타입을 변환합니다.
 
-In the context of Listing 9-7, the `?` at the end of the `File::open` call will
-return the value inside an `Ok` to the variable `username_file`. If an error
-occurs, the `?` operator will return early out of the whole function and give
-any `Err` value to the calling code. The same thing applies to the `?` at the
-end of the `read_to_string` call.
+Listing 9-7의 맥락에서, `File::open` 호출 끝의 `?`는 `Ok` 안의 값을 변수
+`username_file`로 반환합니다. 에러가 발생하면 `?` 연산자는 전체 함수에서 일찍
+반환해 `Err` 값을 호출하는 코드에 돌려줍니다. `read_to_string` 호출 끝의 `?`에도
+같은 것이 적용됩니다.
 
-The `?` operator eliminates a lot of boilerplate and makes this function’s
-implementation simpler. We could even shorten this code further by chaining
-method calls immediately after the `?`, as shown in Listing 9-8.
+`?` 연산자는 많은 보일러플레이트를 없애고 이 함수의 구현을 더 간단하게 만듭니다.
+Listing 9-8에 보이듯 `?` 뒤에 메서드 호출을 바로 이어 체이닝해서 이 코드를 더
+짧게 할 수도 있습니다.
 
-<Listing number="9-8" file-name="src/main.rs" caption="Chaining method calls after the `?` operator">
+<Listing number="9-8" file-name="src/main.rs" caption="`?` 연산자 뒤에 메서드 호출 체이닝하기">
 
 <!-- Deliberately not using rustdoc_include here; the `main` function in the
 file panics. We do want to include it for reader experimentation purposes, but
@@ -375,18 +343,17 @@ don't want to include it for rustdoc testing purposes. -->
 
 </Listing>
 
-We’ve moved the creation of the new `String` in `username` to the beginning of
-the function; that part hasn’t changed. Instead of creating a variable
-`username_file`, we’ve chained the call to `read_to_string` directly onto the
-result of `File::open("hello.txt")?`. We still have a `?` at the end of the
-`read_to_string` call, and we still return an `Ok` value containing `username`
-when both `File::open` and `read_to_string` succeed rather than returning
-errors. The functionality is again the same as in Listing 9-6 and Listing 9-7;
-this is just a different, more ergonomic way to write it.
+`username`의 새 `String` 생성을 함수 시작 부분으로 옮겼습니다. 그 부분은 변하지
+않았습니다. 변수 `username_file`을 만드는 대신, `read_to_string` 호출을
+`File::open("hello.txt")?`의 결과에 바로 체이닝했습니다. 여전히 `read_to_string`
+호출 끝에 `?`가 있고, 여전히 `File::open`과 `read_to_string`이 모두 성공하면
+에러를 반환하는 대신 `username`을 담은 `Ok` 값을 반환합니다. 기능은 여전히 Listing
+9-6, 9-7과 같습니다. 이것은 단지 더 다르고 더 편안한 작성 방식일 뿐입니다.
 
-Listing 9-9 shows a way to make this even shorter using `fs::read_to_string`.
+Listing 9-9는 `fs::read_to_string`을 사용해 이것을 훨씬 더 짧게 만드는 방법을 보여
+줍니다.
 
-<Listing number="9-9" file-name="src/main.rs" caption="Using `fs::read_to_string` instead of opening and then reading the file">
+<Listing number="9-9" file-name="src/main.rs" caption="파일을 열어 읽는 대신 `fs::read_to_string` 사용하기">
 
 <!-- Deliberately not using rustdoc_include here; the `main` function in the
 file panics. We do want to include it for reader experimentation purposes, but
@@ -398,32 +365,27 @@ don't want to include it for rustdoc testing purposes. -->
 
 </Listing>
 
-Reading a file into a string is a fairly common operation, so the standard
-library provides the convenient `fs::read_to_string` function that opens the
-file, creates a new `String`, reads the contents of the file, puts the contents
-into that `String`, and returns it. Of course, using `fs::read_to_string`
-doesn’t give us the opportunity to explain all the error handling, so we did it
-the longer way first.
+파일을 문자열로 읽는 것은 꽤 흔한 연산이므로, 표준 라이브러리는 편리한
+`fs::read_to_string` 함수를 제공합니다. 이 함수는 파일을 열고, 새 `String`을 만들고,
+파일의 내용을 읽어 그 `String`에 넣고 반환합니다. 물론 `fs::read_to_string`을
+사용하면 모든 에러 처리를 설명할 기회가 없으므로, 먼저 더 긴 방식으로 했습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="where-the--operator-can-be-used"></a>
 
-#### Where to Use the `?` Operator
+#### `?` 연산자는 어디에서 사용할 수 있나
 
-The `?` operator can only be used in functions whose return type is compatible
-with the value the `?` is used on. This is because the `?` operator is defined
-to perform an early return of a value out of the function, in the same manner
-as the `match` expression we defined in Listing 9-6. In Listing 9-6, the
-`match` was using a `Result` value, and the early return arm returned an
-`Err(e)` value. The return type of the function has to be a `Result` so that
-it’s compatible with this `return`.
+`?` 연산자는 그 `?`가 사용되는 값과 호환되는 반환 타입을 가진 함수에서만 사용할
+수 있습니다. 이는 `?` 연산자가 Listing 9-6에서 정의한 `match` 표현식과 같은 방식
+으로, 함수에서 값을 일찍 반환하도록 정의되어 있기 때문입니다. Listing 9-6에서
+`match`는 `Result` 값을 사용하고 있었고, 일찍 반환하는 갈래는 `Err(e)` 값을 반환
+했습니다. 이 `return`과 호환되려면 함수의 반환 타입이 `Result`여야 합니다.
 
-In Listing 9-10, let’s look at the error we’ll get if we use the `?` operator
-in a `main` function with a return type that is incompatible with the type of
-the value we use `?` on.
+Listing 9-10에서는, `?`를 사용하는 값의 타입과 호환되지 않는 반환 타입을 가진
+`main` 함수에서 `?` 연산자를 사용할 때 어떤 에러가 나는지 살펴봅시다.
 
-<Listing number="9-10" file-name="src/main.rs" caption="Attempting to use the `?` in the `main` function that returns `()` won’t compile.">
+<Listing number="9-10" file-name="src/main.rs" caption="`()`를 반환하는 `main` 함수에서 `?`를 사용하려는 시도는 컴파일되지 않습니다.">
 
 ```rust,ignore,does_not_compile
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-10/src/main.rs}}
@@ -431,36 +393,31 @@ the value we use `?` on.
 
 </Listing>
 
-This code opens a file, which might fail. The `?` operator follows the `Result`
-value returned by `File::open`, but this `main` function has the return type of
-`()`, not `Result`. When we compile this code, we get the following error
-message:
+이 코드는 파일을 여는데, 이는 실패할 수 있습니다. `?` 연산자는 `File::open`이
+반환하는 `Result` 값을 따르지만, 이 `main` 함수는 반환 타입이 `Result`가 아닌
+`()`입니다. 이 코드를 컴파일하면 다음 에러 메시지를 받습니다.
 
 ```console
 {{#include ../listings/ch09-error-handling/listing-09-10/output.txt}}
 ```
 
-This error points out that we’re only allowed to use the `?` operator in a
-function that returns `Result`, `Option`, or another type that implements
-`FromResidual`.
+이 에러는 `?` 연산자를 `Result`, `Option` 또는 `FromResidual`을 구현하는 다른
+타입을 반환하는 함수에서만 쓸 수 있음을 지적합니다.
 
-To fix the error, you have two choices. One choice is to change the return type
-of your function to be compatible with the value you’re using the `?` operator
-on as long as you have no restrictions preventing that. The other choice is to
-use a `match` or one of the `Result<T, E>` methods to handle the `Result<T, E>`
-in whatever way is appropriate.
+이 에러를 고치려면 두 가지 선택지가 있습니다. 한 가지 선택지는, 이를 막는 제약이
+없는 한 함수의 반환 타입을 여러분이 `?` 연산자를 사용하는 값과 호환되도록 바꾸는
+것입니다. 다른 선택지는 `match` 또는 `Result<T, E>` 메서드 중 하나를 사용해
+적절한 어떤 방식으로든 `Result<T, E>`를 처리하는 것입니다.
 
-The error message also mentioned that `?` can be used with `Option<T>` values
-as well. As with using `?` on `Result`, you can only use `?` on `Option` in a
-function that returns an `Option`. The behavior of the `?` operator when called
-on an `Option<T>` is similar to its behavior when called on a `Result<T, E>`:
-If the value is `None`, the `None` will be returned early from the function at
-that point. If the value is `Some`, the value inside the `Some` is the
-resultant value of the expression, and the function continues. Listing 9-11 has
-an example of a function that finds the last character of the first line in the
-given text.
+에러 메시지는 또한 `?`를 `Option<T>` 값과도 함께 쓸 수 있음을 언급했습니다.
+`Result`에서 `?`를 쓰는 것과 마찬가지로, `Option`에서는 `Option`을 반환하는
+함수에서만 `?`를 쓸 수 있습니다. `Option<T>`에서 호출했을 때의 `?` 연산자의 동작은
+`Result<T, E>`에서 호출했을 때의 동작과 비슷합니다. 값이 `None`이면, 그 지점에서
+함수에서 `None`이 일찍 반환됩니다. 값이 `Some`이면 `Some` 안의 값이 그 표현식의
+결과값이 되고 함수는 계속됩니다. Listing 9-11에는 주어진 텍스트의 첫 줄의 마지막
+문자를 찾는 함수의 예가 있습니다.
 
-<Listing number="9-11" caption="Using the `?` operator on an `Option<T>` value">
+<Listing number="9-11" caption="`Option<T>` 값에 `?` 연산자 사용하기">
 
 ```rust
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-11/src/main.rs:here}}
@@ -468,45 +425,39 @@ given text.
 
 </Listing>
 
-This function returns `Option<char>` because it’s possible that there is a
-character there, but it’s also possible that there isn’t. This code takes the
-`text` string slice argument and calls the `lines` method on it, which returns
-an iterator over the lines in the string. Because this function wants to
-examine the first line, it calls `next` on the iterator to get the first value
-from the iterator. If `text` is the empty string, this call to `next` will
-return `None`, in which case we use `?` to stop and return `None` from
-`last_char_of_first_line`. If `text` is not the empty string, `next` will
-return a `Some` value containing a string slice of the first line in `text`.
+이 함수는 거기에 문자가 있을 가능성도 있고 없을 가능성도 있기 때문에 `Option<char>`
+를 반환합니다. 이 코드는 `text` 문자열 슬라이스 인자를 받아 그 위에 `lines` 메서드
+를 호출하는데, 이는 문자열의 줄에 대한 이터레이터를 반환합니다. 이 함수는 첫 줄을
+살피려 하므로, 이터레이터에서 첫 값을 얻기 위해 `next`를 호출합니다. `text`가 빈
+문자열이면 이 `next` 호출은 `None`을 반환하고, 그 경우 우리는 `?`를 사용해 멈추고
+`last_char_of_first_line`에서 `None`을 반환합니다. `text`가 빈 문자열이 아니면
+`next`는 `text`의 첫 줄에 대한 문자열 슬라이스를 담은 `Some` 값을 반환합니다.
 
-The `?` extracts the string slice, and we can call `chars` on that string slice
-to get an iterator of its characters. We’re interested in the last character in
-this first line, so we call `last` to return the last item in the iterator.
-This is an `Option` because it’s possible that the first line is the empty
-string; for example, if `text` starts with a blank line but has characters on
-other lines, as in `"\nhi"`. However, if there is a last character on the first
-line, it will be returned in the `Some` variant. The `?` operator in the middle
-gives us a concise way to express this logic, allowing us to implement the
-function in one line. If we couldn’t use the `?` operator on `Option`, we’d
-have to implement this logic using more method calls or a `match` expression.
+`?`가 문자열 슬라이스를 꺼내 주고, 그 문자열 슬라이스에 `chars`를 호출해 그 문자
+들의 이터레이터를 얻을 수 있습니다. 이 첫 줄의 마지막 문자에 관심이 있으므로,
+이터레이터의 마지막 아이템을 반환하기 위해 `last`를 호출합니다. 이는 첫 줄이
+빈 문자열일 가능성이 있기 때문에 `Option`입니다. 예를 들어 `"\nhi"`처럼 `text`가
+빈 줄로 시작하지만 다른 줄에는 문자가 있는 경우입니다. 그러나 첫 줄에 마지막
+문자가 있다면 그것은 `Some` 배리언트로 반환됩니다. 중간의 `?` 연산자는 이 로직을
+간결하게 표현할 수 있게 해 주며, 이 함수를 한 줄로 구현할 수 있게 합니다. `Option`
+에 `?` 연산자를 사용할 수 없었다면 더 많은 메서드 호출이나 `match` 표현식으로 이
+로직을 구현해야 했을 것입니다.
 
-Note that you can use the `?` operator on a `Result` in a function that returns
-`Result`, and you can use the `?` operator on an `Option` in a function that
-returns `Option`, but you can’t mix and match. The `?` operator won’t
-automatically convert a `Result` to an `Option` or vice versa; in those cases,
-you can use methods like the `ok` method on `Result` or the `ok_or` method on
-`Option` to do the conversion explicitly.
+`Result`를 반환하는 함수에서 `Result`에 대해 `?`를 쓸 수 있고, `Option`을 반환
+하는 함수에서 `Option`에 대해 `?`를 쓸 수 있지만, 섞어 쓸 수는 없다는 점에 유의
+하세요. `?` 연산자는 `Result`를 `Option`이나 그 반대로 자동 변환해 주지 않습니다.
+그런 경우에는 `Result`의 `ok` 메서드나 `Option`의 `ok_or` 메서드 같은 메서드로
+명시적으로 변환할 수 있습니다.
 
-So far, all the `main` functions we’ve used return `()`. The `main` function is
-special because it’s the entry point and exit point of an executable program,
-and there are restrictions on what its return type can be for the program to
-behave as expected.
+지금까지 우리가 사용한 모든 `main` 함수는 `()`를 반환했습니다. `main` 함수는
+실행 가능한 프로그램의 진입점이자 종료점이기 때문에 특별하며, 프로그램이 기대대로
+동작하도록 반환 타입에 제한이 있습니다.
 
-Luckily, `main` can also return a `Result<(), E>`. Listing 9-12 has the code
-from Listing 9-10, but we’ve changed the return type of `main` to be
-`Result<(), Box<dyn Error>>` and added a return value `Ok(())` to the end. This
-code will now compile.
+다행히도 `main`은 `Result<(), E>`를 반환할 수도 있습니다. Listing 9-12에는 Listing
+9-10의 코드가 있지만, `main`의 반환 타입을 `Result<(), Box<dyn Error>>`로 바꾸고
+끝에 반환값 `Ok(())`를 추가했습니다. 이 코드는 이제 컴파일됩니다.
 
-<Listing number="9-12" file-name="src/main.rs" caption="Changing `main` to return `Result<(), E>` allows the use of the `?` operator on `Result` values.">
+<Listing number="9-12" file-name="src/main.rs" caption="`main`이 `Result<(), E>`를 반환하도록 바꾸면 `Result` 값에 `?` 연산자를 사용할 수 있습니다.">
 
 ```rust,ignore
 {{#rustdoc_include ../listings/ch09-error-handling/listing-09-12/src/main.rs}}
@@ -514,32 +465,29 @@ code will now compile.
 
 </Listing>
 
-The `Box<dyn Error>` type is a trait object, which we’ll talk about in [“Using
-Trait Objects to Abstract over Shared Behavior”][trait-objects]<!-- ignore -->
-in Chapter 18. For now, you can read `Box<dyn Error>` to mean “any kind of
-error.” Using `?` on a `Result` value in a `main` function with the error type
-`Box<dyn Error>` is allowed because it allows any `Err` value to be returned
-early. Even though the body of this `main` function will only ever return
-errors of type `std::io::Error`, by specifying `Box<dyn Error>`, this signature
-will continue to be correct even if more code that returns other errors is
-added to the body of `main`.
+`Box<dyn Error>` 타입은 트레이트 객체이며, 18장의 [“트레이트 객체로 공유 동작
+추상화하기”][trait-objects]<!-- ignore -->에서 이야기할 것입니다. 지금은
+`Box<dyn Error>`를 “어떤 종류의 에러든”으로 읽을 수 있습니다. 에러 타입이
+`Box<dyn Error>`인 `main` 함수에서 `Result` 값에 `?`를 사용하는 것은 허용됩니다.
+어떤 `Err` 값이든 일찍 반환될 수 있게 해 주기 때문입니다. 이 `main` 함수의 본문은
+오직 `std::io::Error` 타입의 에러만 반환하겠지만, `Box<dyn Error>`를 지정함으로써,
+다른 에러를 반환하는 코드가 `main` 본문에 추가되어도 이 시그니처는 계속 올바르게
+유지됩니다.
 
-When a `main` function returns a `Result<(), E>`, the executable will exit with
-a value of `0` if `main` returns `Ok(())` and will exit with a nonzero value if
-`main` returns an `Err` value. Executables written in C return integers when
-they exit: Programs that exit successfully return the integer `0`, and programs
-that error return some integer other than `0`. Rust also returns integers from
-executables to be compatible with this convention.
+`main` 함수가 `Result<(), E>`를 반환하면, `main`이 `Ok(())`를 반환할 때 실행 파일은
+값 `0`으로 종료되고, `main`이 `Err` 값을 반환할 때는 0이 아닌 값으로 종료됩니다.
+C로 작성된 실행 파일은 종료할 때 정수를 반환합니다. 성공적으로 종료하는 프로그램은
+정수 `0`을 반환하고, 에러가 난 프로그램은 `0`이 아닌 어떤 정수를 반환합니다.
+러스트도 이 관례와 호환되도록 실행 파일에서 정수를 반환합니다.
 
-The `main` function may return any types that implement [the
-`std::process::Termination` trait][termination]<!-- ignore -->, which contains
-a function `report` that returns an `ExitCode`. Consult the standard library
-documentation for more information on implementing the `Termination` trait for
-your own types.
+`main` 함수는 [`std::process::Termination`
+트레이트][termination]<!-- ignore -->를 구현하는 어떤 타입이든 반환할 수 있는데,
+이 트레이트는 `ExitCode`를 반환하는 `report` 함수를 담고 있습니다. 여러분의 타입에
+`Termination` 트레이트를 구현하는 방법에 대한 더 많은 정보는 표준 라이브러리
+문서를 참고하세요.
 
-Now that we’ve discussed the details of calling `panic!` or returning `Result`,
-let’s return to the topic of how to decide which is appropriate to use in which
-cases.
+이제 `panic!`을 호출하거나 `Result`를 반환하는 세부 사항을 논의했으니, 어떤 경우에
+어느 쪽을 쓰는 것이 적절한지 결정하는 주제로 돌아가 봅시다.
 
 [handle_failure]: ch02-00-guessing-game-tutorial.html#handling-potential-failure-with-result
 [trait-objects]: ch18-02-trait-objects.html#using-trait-objects-to-abstract-over-shared-behavior

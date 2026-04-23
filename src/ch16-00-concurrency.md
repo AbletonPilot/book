@@ -1,49 +1,43 @@
-# Fearless Concurrency
+# 겁 없는 동시성
 
-Handling concurrent programming safely and efficiently is another of Rust’s
-major goals. _Concurrent programming_, in which different parts of a program
-execute independently, and _parallel programming_, in which different parts of
-a program execute at the same time, are becoming increasingly important as more
-computers take advantage of their multiple processors. Historically,
-programming in these contexts has been difficult and error-prone. Rust hopes to
-change that.
+동시성 프로그래밍을 안전하고 효율적으로 다루는 것은 러스트의 또 다른 주요
+목표입니다. 프로그램의 서로 다른 부분이 독립적으로 실행되는 _동시성 프로그래밍
+(concurrent programming)_ 과, 프로그램의 서로 다른 부분이 같은 시각에 실행
+되는 _병렬 프로그래밍(parallel programming)_ 은 다중 프로세서를 활용하는
+컴퓨터가 많아지면서 점점 더 중요해지고 있습니다. 역사적으로 이런 맥락의
+프로그래밍은 어렵고 오류가 나기 쉬웠습니다. 러스트는 그 상황을 바꾸고자 합니다.
 
-Initially, the Rust team thought that ensuring memory safety and preventing
-concurrency problems were two separate challenges to be solved with different
-methods. Over time, the team discovered that the ownership and type systems are
-a powerful set of tools to help manage memory safety _and_ concurrency
-problems! By leveraging ownership and type checking, many concurrency errors
-are compile-time errors in Rust rather than runtime errors. Therefore, rather
-than making you spend lots of time trying to reproduce the exact circumstances
-under which a runtime concurrency bug occurs, incorrect code will refuse to
-compile and present an error explaining the problem. As a result, you can fix
-your code while you’re working on it rather than potentially after it has been
-shipped to production. We’ve nicknamed this aspect of Rust _fearless
-concurrency_. Fearless concurrency allows you to write code that is free of
-subtle bugs and is easy to refactor without introducing new bugs.
+처음에 러스트 팀은 메모리 안전성을 보장하는 것과 동시성 문제를 예방하는 것이
+서로 다른 방법으로 풀어야 할 두 개의 별개 과제라고 생각했습니다. 시간이
+지나면서 팀은 소유권과 타입 시스템이 메모리 안전성 _과_ 동시성 문제를 관리
+하는 데 도움이 되는 강력한 도구 집합이라는 것을 발견했습니다! 소유권과 타입
+검사를 활용해, 많은 동시성 오류가 러스트에서는 런타임 오류가 아니라 컴파일
+타임 오류가 됩니다. 따라서 런타임 동시성 버그가 발생하는 정확한 상황을
+재현하려 애쓰는 데 시간을 쓰는 대신, 잘못된 코드는 컴파일을 거부하고 문제를
+설명하는 오류를 제시합니다. 결과적으로 여러분은 프로덕션에 배포한 뒤가 아니라
+작업 중에 코드를 고칠 수 있습니다. 우리는 러스트의 이 측면을 _겁 없는
+동시성(fearless concurrency)_ 이라고 별명 붙였습니다. 겁 없는 동시성 덕분에
+여러분은 미묘한 버그가 없는 코드를 작성할 수 있고, 새 버그를 끌어들이지 않고
+쉽게 리팩터링할 수 있습니다.
 
-> Note: For simplicity’s sake, we’ll refer to many of the problems as
-> _concurrent_ rather than being more precise by saying _concurrent and/or
-> parallel_. For this chapter, please mentally substitute _concurrent and/or
-> parallel_ whenever we use _concurrent_. In the next chapter, where the
-> distinction matters more, we’ll be more specific.
+> 참고: 단순함을 위해 _동시적 및/또는 병렬적(concurrent and/or parallel)_ 이라고
+> 더 정확히 표현하는 대신 많은 문제를 _동시적_ 이라고만 칭합니다. 이 장에서는
+> _동시적_ 이라고 쓸 때마다 마음속으로 _동시적 및/또는 병렬적_ 으로 대체해
+> 보세요. 구분이 더 중요해지는 다음 장에서는 더 구체적으로 쓰겠습니다.
 
-Many languages are dogmatic about the solutions they offer for handling
-concurrent problems. For example, Erlang has elegant functionality for
-message-passing concurrency but has only obscure ways to share state between
-threads. Supporting only a subset of possible solutions is a reasonable
-strategy for higher-level languages because a higher-level language promises
-benefits from giving up some control to gain abstractions. However, lower-level
-languages are expected to provide the solution with the best performance in any
-given situation and have fewer abstractions over the hardware. Therefore, Rust
-offers a variety of tools for modeling problems in whatever way is appropriate
-for your situation and requirements.
+많은 언어가 동시성 문제 처리에 제공하는 해법에 대해 교조적입니다. 예를 들어
+얼랭(Erlang)은 메시지 전달 동시성에 대한 우아한 기능을 갖추고 있지만, 스레드
+간 상태 공유는 난해한 방법만 제공합니다. 가능한 해법의 일부만 지원하는 것은
+더 상위 수준의 언어에서 합리적인 전략인데, 상위 수준 언어는 일부 제어를
+포기해 추상화를 얻는 이점을 약속하기 때문입니다. 그러나 하위 수준 언어는 어떤
+상황에서든 최고 성능의 해법을 제공해야 하고, 하드웨어 위의 추상화가 더 적을
+것으로 기대됩니다. 따라서 러스트는 여러분의 상황과 요구 사항에 적절한 어떤
+방식으로든 문제를 모델링할 수 있는 다양한 도구를 제공합니다.
 
-Here are the topics we’ll cover in this chapter:
+이 장에서 다룰 주제는 다음과 같습니다.
 
-- How to create threads to run multiple pieces of code at the same time
-- _Message-passing_ concurrency, where channels send messages between threads
-- _Shared-state_ concurrency, where multiple threads have access to some piece
-  of data
-- The `Sync` and `Send` traits, which extend Rust’s concurrency guarantees to
-  user-defined types as well as types provided by the standard library
+- 여러 코드 조각을 같은 시각에 실행하기 위해 스레드 만드는 방법
+- 채널로 스레드 간에 메시지를 보내는 _메시지 전달(message-passing)_ 동시성
+- 여러 스레드가 어떤 데이터에 접근할 수 있는 _공유 상태(shared-state)_ 동시성
+- 러스트의 동시성 보장을 표준 라이브러리가 제공하는 타입뿐만 아니라 사용자
+  정의 타입에도 확장하는 `Sync`와 `Send` 트레이트

@@ -1,167 +1,153 @@
-# Fundamentals of Asynchronous Programming: Async, Await, Futures, and Streams
+# 비동기 프로그래밍의 기초: Async, Await, Future, Stream
 
-Many operations we ask the computer to do can take a while to finish. It would
-be nice if we could do something else while we’re waiting for those
-long-running processes to complete. Modern computers offer two techniques for
-working on more than one operation at a time: parallelism and concurrency. Our
-programs’ logic, however, is written in a mostly linear fashion. We’d like to
-be able to specify the operations a program should perform and points at which
-a function could pause and some other part of the program could run instead,
-without needing to specify up front exactly the order and manner in which each
-bit of code should run. _Asynchronous programming_ is an abstraction that lets
-us express our code in terms of potential pausing points and eventual results
-that takes care of the details of coordination for us.
+우리가 컴퓨터에 시키는 많은 작업은 완료되기까지 시간이 걸릴 수 있습니다. 오래
+걸리는 프로세스가 완료되기를 기다리는 동안 다른 일을 할 수 있다면 좋을
+것입니다. 현대 컴퓨터는 한 번에 한 가지 이상의 작업을 하는 두 가지 기법 —
+병렬성과 동시성 — 을 제공합니다. 그러나 우리 프로그램의 로직은 대부분 선형
+방식으로 작성됩니다. 우리는 각 코드 조각이 정확히 어떤 순서와 방식으로
+실행되어야 하는지 미리 지정할 필요 없이, 프로그램이 수행해야 하는 작업과
+함수가 일시 중단되고 프로그램의 다른 부분이 대신 실행될 수 있는 지점을 명시할
+수 있기를 원합니다. _비동기 프로그래밍(asynchronous programming)_ 은 우리가
+잠재적 일시 중단 지점과 최종 결과의 관점에서 코드를 표현할 수 있게 해 주며,
+조율의 세부 사항은 알아서 처리해 주는 추상화입니다.
 
-This chapter builds on Chapter 16’s use of threads for parallelism and
-concurrency by introducing an alternative approach to writing code: Rust’s
-futures, streams, and the `async` and `await` syntax that let us express how
-operations could be asynchronous, and the third-party crates that implement
-asynchronous runtimes: code that manages and coordinates the execution of
-asynchronous operations.
+이 장은 16장의 병렬성과 동시성을 위한 스레드 사용 위에, 코드를 작성하는 대안
+적 접근 방식을 소개하며 쌓아 올립니다. 러스트의 future, stream과, 연산이
+어떻게 비동기적일 수 있는지 표현하게 해 주는 `async` 및 `await` 문법, 그리고
+비동기 런타임 — 비동기 연산의 실행을 관리하고 조율하는 코드 — 을 구현하는
+서드파티 크레이트입니다.
 
-Let’s consider an example. Say you’re exporting a video you’ve created of a
-family celebration, an operation that could take anywhere from minutes to
-hours. The video export will use as much CPU and GPU power as it can. If you
-had only one CPU core and your operating system didn’t pause that export until
-it completed—that is, if it executed the export _synchronously_—you couldn’t do
-anything else on your computer while that task was running. That would be a
-pretty frustrating experience. Fortunately, your computer’s operating system
-can, and does, invisibly interrupt the export often enough to let you get other
-work done simultaneously.
+예를 들어 봅시다. 가족 축하 행사에서 만든 영상을 내보내는 중이라고 해 봅시다.
+이는 몇 분에서 몇 시간까지 걸릴 수 있는 작업입니다. 영상 내보내기는 최대한
+CPU와 GPU 성능을 사용할 것입니다. 만약 CPU 코어가 하나뿐이고 운영체제가 그
+내보내기가 완료될 때까지 멈추지 않는다면 — 즉 _동기적으로_ 실행한다면 — 그
+작업이 실행되는 동안 컴퓨터에서 다른 아무것도 할 수 없을 것입니다. 꽤 답답한
+경험이 될 것입니다. 다행히 컴퓨터의 운영체제는 내보내기를 충분히 자주
+보이지 않게 중단시켜 다른 작업을 동시에 할 수 있도록 해 줄 수 있고, 실제로
+그렇게 합니다.
 
-Now say you’re downloading a video shared by someone else, which can also take
-a while but does not take up as much CPU time. In this case, the CPU has to
-wait for data to arrive from the network. While you can start reading the data
-once it starts to arrive, it might take some time for all of it to show up.
-Even once the data is all present, if the video is quite large, it could take
-at least a second or two to load it all. That might not sound like much, but
-it’s a very long time for a modern processor, which can perform billions of
-operations every second. Again, your operating system will invisibly interrupt
-your program to allow the CPU to perform other work while waiting for the
-network call to finish.
+이제 다른 사람이 공유한 영상을 다운로드하고 있다고 해 봅시다. 이것도 시간이
+좀 걸릴 수 있지만 CPU 시간을 그렇게 많이 차지하지는 않습니다. 이 경우 CPU는
+네트워크로부터 데이터가 도착하기를 기다려야 합니다. 데이터가 도착하기 시작
+하면 읽기 시작할 수 있지만, 전부 나타나기까지는 시간이 걸릴 수 있습니다.
+데이터가 모두 있더라도, 영상이 꽤 크다면 전부 불러오는 데 적어도 1~2초는
+걸릴 수 있습니다. 그리 길지 않게 들릴 수 있지만, 초당 수십억 번의 연산을 할
+수 있는 현대 프로세서에게는 매우 긴 시간입니다. 다시 운영체제는 네트워크 호출
+이 끝나기를 기다리는 동안 CPU가 다른 작업을 수행할 수 있도록 프로그램을 보이지
+않게 중단시킬 것입니다.
 
-The video export is an example of a _CPU-bound_ or _compute-bound_ operation.
-It’s limited by the computer’s potential data processing speed within the CPU
-or GPU, and how much of that speed it can dedicate to the operation. The video
-download is an example of an _I/O-bound_ operation, because it’s limited by the
-speed of the computer’s _input and output_; it can only go as fast as the data
-can be sent across the network.
+영상 내보내기는 _CPU 바운드(CPU-bound)_ 또는 _계산 바운드(compute-bound)_
+연산의 예입니다. CPU나 GPU 내에서 컴퓨터의 잠재적 데이터 처리 속도와, 그
+속도 중 얼마를 그 연산에 할당할 수 있는지에 의해 제한됩니다. 영상 다운로드는
+_I/O 바운드(I/O-bound)_ 연산의 예입니다. 컴퓨터의 _입출력(input and output)_
+속도에 의해 제한되기 때문입니다. 네트워크를 통해 데이터가 보내지는 속도만큼만
+진행할 수 있습니다.
 
-In both of these examples, the operating system’s invisible interrupts provide
-a form of concurrency. That concurrency happens only at the level of the entire
-program, though: the operating system interrupts one program to let other
-programs get work done. In many cases, because we understand our programs at a
-much more granular level than the operating system does, we can spot
-opportunities for concurrency that the operating system can’t see.
+이 두 예시 모두에서 운영체제의 보이지 않는 중단(interrupt)은 일종의 동시성을
+제공합니다. 그러나 그 동시성은 전체 프로그램 수준에서만 일어납니다. 운영체제는
+한 프로그램을 중단시켜 다른 프로그램이 작업을 할 수 있게 합니다. 많은 경우
+우리는 운영체제보다 훨씬 더 세밀한 수준으로 프로그램을 이해하기 때문에,
+운영체제가 볼 수 없는 동시성 기회를 발견할 수 있습니다.
 
-For example, if we’re building a tool to manage file downloads, we should be
-able to write our program so that starting one download won’t lock up the UI,
-and users should be able to start multiple downloads at the same time. Many
-operating system APIs for interacting with the network are _blocking_, though;
-that is, they block the program’s progress until the data they’re processing is
-completely ready.
+예를 들어 파일 다운로드를 관리하는 도구를 만든다면, 하나의 다운로드를 시작
+해도 UI가 잠기지 않도록 프로그램을 작성할 수 있어야 하고, 사용자는 여러 다운
+로드를 동시에 시작할 수 있어야 합니다. 그러나 네트워크와 상호작용하는 많은
+운영체제 API는 _블로킹(blocking)_ 입니다. 즉 처리 중인 데이터가 완전히 준비될
+때까지 프로그램의 진행을 막습니다.
 
-> Note: This is how _most_ function calls work, if you think about it. However,
-> the term _blocking_ is usually reserved for function calls that interact with
-> files, the network, or other resources on the computer, because those are the
-> cases where an individual program would benefit from the operation being
-> _non_-blocking.
+> 참고: 생각해 보면, _대부분의_ 함수 호출이 이렇게 동작합니다. 그러나
+> _블로킹_ 이라는 용어는 보통 파일, 네트워크, 또는 컴퓨터의 다른 자원과
+> 상호작용하는 함수 호출에 국한됩니다. 그런 경우야말로 개별 프로그램이 그
+> 연산이 _비_ 블로킹이 되는 데서 이득을 보는 경우이기 때문입니다.
 
-We could avoid blocking our main thread by spawning a dedicated thread to
-download each file. However, the overhead of the system resources used by those
-threads would eventually become a problem. It would be preferable if the call
-didn’t block in the first place, and instead we could define a number of tasks
-that we’d like our program to complete and allow the runtime to choose the best
-order and manner in which to run them.
+각 파일을 다운로드할 전용 스레드를 생성하여 메인 스레드를 블로킹하지 않도록
+할 수 있을 것입니다. 그러나 이 스레드들이 사용하는 시스템 자원의 오버헤드가
+결국 문제가 될 것입니다. 호출이 애초에 블로킹되지 않고, 대신 프로그램이
+완료하고 싶은 여러 작업을 정의하고 런타임이 그것들을 실행할 최적의 순서와
+방식을 선택하도록 하는 편이 바람직할 것입니다.
 
-That is exactly what Rust’s _async_ (short for _asynchronous_) abstraction
-gives us. In this chapter, you’ll learn all about async as we cover the
-following topics:
+그것이 바로 러스트의 _async_(_asynchronous_ 의 줄임말) 추상화가 제공하는
+것입니다. 이 장에서는 다음 주제들을 다루면서 async에 관한 모든 것을 배우게
+됩니다.
 
-- How to use Rust’s `async` and `await` syntax and execute asynchronous
-  functions with a runtime
-- How to use the async model to solve some of the same challenges we looked at
-  in Chapter 16
-- How multithreading and async provide complementary solutions that you can
-  combine in many cases
+- 러스트의 `async`와 `await` 문법을 사용하고 런타임으로 비동기 함수를 실행하는
+  방법
+- 16장에서 살펴본 것과 같은 도전 중 일부를 풀기 위해 async 모델을 사용하는 방법
+- 다중 스레딩과 async가 많은 경우에 조합할 수 있는 상호 보완적인 해법을
+  제공하는 방식
 
-Before we see how async works in practice, though, we need to take a short
-detour to discuss the differences between parallelism and concurrency.
+그러나 async가 실전에서 어떻게 동작하는지 보기 전에, 병렬성과 동시성의 차이를
+논의하는 짧은 우회를 해야 합니다.
 
-## Parallelism and Concurrency
+## 병렬성과 동시성
 
-We’ve treated parallelism and concurrency as mostly interchangeable so far. Now
-we need to distinguish between them more precisely, because the differences
-will show up as we start working.
+지금까지 우리는 병렬성과 동시성을 대체로 교체 가능한 것으로 다뤘습니다. 이제
+그 차이를 더 정확히 구분할 필요가 있습니다. 작업을 시작하면서 그 차이가 드러날
+것이기 때문입니다.
 
-Consider the different ways a team could split up work on a software project.
-You could assign a single member multiple tasks, assign each member one task,
-or use a mix of the two approaches.
+팀이 소프트웨어 프로젝트의 작업을 나누는 여러 방법을 생각해 봅시다. 한 사람
+에게 여러 작업을 할당할 수도, 각자에게 하나씩 할당할 수도, 두 방식을 혼합할
+수도 있습니다.
 
-When an individual works on several different tasks before any of them is
-complete, this is _concurrency_. One way to implement concurrency is similar to
-having two different projects checked out on your computer, and when you get
-bored or stuck on one project, you switch to the other. You’re just one person,
-so you can’t make progress on both tasks at the exact same time, but you can
-multitask, making progress on one at a time by switching between them (see
-Figure 17-1).
+한 사람이 여러 다른 작업을 어느 하나가 완료되기 전에 작업할 때, 이것이
+_동시성(concurrency)_ 입니다. 동시성을 구현하는 한 방법은 컴퓨터에 두 개의
+다른 프로젝트가 체크아웃되어 있고, 한 프로젝트가 지루하거나 막히면 다른
+프로젝트로 전환하는 것과 비슷합니다. 한 사람이라 두 작업에서 정확히 같은
+시각에 진행을 할 수는 없지만, 번갈아 진행하면서 멀티태스킹할 수 있습니다
+(그림 17-1 참고).
 
 <figure>
 
-<img src="img/trpl17-01.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. Arrows point from A1 to B1, B1 to A2, A2 to B2, B2 to A3, A3 to A4, and A4 to B3. The arrows between the subtasks cross the boxes between Task A and Task B." />
+<img src="img/trpl17-01.svg" class="center" alt="Task A와 Task B라는 레이블이 붙은 쌓인 상자들과, 그 안에 하위 작업을 나타내는 다이아몬드들이 있는 다이어그램. 화살표는 A1에서 B1으로, B1에서 A2로, A2에서 B2로, B2에서 A3으로, A3에서 A4로, A4에서 B3으로 향합니다. 하위 작업들 간 화살표는 Task A와 Task B의 상자 사이를 넘나듭니다." />
 
-<figcaption>Figure 17-1: A concurrent workflow, switching between Task A and Task B</figcaption>
+<figcaption>그림 17-1: 동시적 워크플로, Task A와 Task B 사이를 전환</figcaption>
 
 </figure>
 
-When the team splits up a group of tasks by having each member take one task
-and work on it alone, this is _parallelism_. Each person on the team can make
-progress at the exact same time (see Figure 17-2).
+팀이 각자 하나의 작업을 맡아 혼자 작업하도록 작업 그룹을 나눌 때, 이것이
+_병렬성(parallelism)_ 입니다. 팀의 각 사람은 정확히 같은 시각에 진행할 수
+있습니다(그림 17-2 참고).
 
 <figure>
 
-<img src="img/trpl17-02.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. Arrows point from A1 to A2, A2 to A3, A3 to A4, B1 to B2, and B2 to B3. No arrows cross between the boxes for Task A and Task B." />
+<img src="img/trpl17-02.svg" class="center" alt="Task A와 Task B라는 레이블이 붙은 쌓인 상자들과, 그 안에 하위 작업을 나타내는 다이아몬드들이 있는 다이어그램. 화살표는 A1에서 A2로, A2에서 A3으로, A3에서 A4로, B1에서 B2로, B2에서 B3으로 향합니다. Task A와 Task B의 상자 사이를 넘나드는 화살표는 없습니다." />
 
-<figcaption>Figure 17-2: A parallel workflow, where work happens on Task A and Task B independently</figcaption>
+<figcaption>그림 17-2: 병렬 워크플로, Task A와 Task B에서 작업이 독립적으로 진행됩니다</figcaption>
 
 </figure>
 
-In both of these workflows, you might have to coordinate between different
-tasks. Maybe you thought the task assigned to one person was totally
-independent from everyone else’s work, but it actually requires another person
-on the team to finish their task first. Some of the work could be done in
-parallel, but some of it was actually _serial_: it could only happen in a
-series, one task after the other, as in Figure 17-3.
+이 두 워크플로 모두에서, 다른 작업들 간에 조율해야 할 수 있습니다. 어쩌면
+한 사람에게 할당된 작업이 다른 모든 사람의 작업과 완전히 독립적이라고 생각
+했는데, 실제로는 팀의 다른 사람이 먼저 자기 작업을 마쳐야 할 수도 있습니다.
+일부 작업은 병렬로 수행될 수 있지만, 일부는 실제로는 _직렬(serial)_, 즉 한
+작업 다음 다른 작업 순으로만 진행될 수 있습니다. 그림 17-3처럼요.
 
 <figure>
 
-<img src="img/trpl17-03.svg" class="center" alt="A diagram with stacked boxes labeled Task A and Task B, with diamonds in them representing subtasks. In Task A, arrows point from A1 to A2, from A2 to a pair of thick vertical lines like a “pause” symbol, and from that symbol to A3. In task B, arrows point from B1 to B2, from B2 to B3, from B3 to A3, and from B3 to B4." />
+<img src="img/trpl17-03.svg" class="center" alt="Task A와 Task B라는 레이블이 붙은 쌓인 상자들과, 그 안에 하위 작업을 나타내는 다이아몬드들이 있는 다이어그램. Task A에서 화살표는 A1에서 A2로, A2에서 두 개의 굵은 수직선(일시 정지 기호처럼)을 향하고, 그 기호에서 A3으로 향합니다. Task B에서 화살표는 B1에서 B2로, B2에서 B3으로, B3에서 A3으로, 그리고 B3에서 B4로 향합니다." />
 
-<figcaption>Figure 17-3: A partially parallel workflow, where work happens on Task A and Task B independently until Task A3 is blocked on the results of Task B3.</figcaption>
+<figcaption>그림 17-3: 부분적으로 병렬인 워크플로. Task A와 Task B에서 작업이 독립적으로 진행되다가 Task A3이 Task B3의 결과에 블록됩니다.</figcaption>
 
 </figure>
 
-Likewise, you might realize that one of your own tasks depends on another of
-your tasks. Now your concurrent work has also become serial.
+마찬가지로 여러분 자신의 작업 중 하나가 다른 작업에 의존한다는 것을 깨달을
+수도 있습니다. 이제 여러분의 동시적 작업도 직렬이 되었습니다.
 
-Parallelism and concurrency can intersect with each other, too. If you learn
-that a colleague is stuck until you finish one of your tasks, you’ll probably
-focus all your efforts on that task to “unblock” your colleague. You and your
-coworker are no longer able to work in parallel, and you’re also no longer able
-to work concurrently on your own tasks.
+병렬성과 동시성은 서로 교차할 수도 있습니다. 동료가 여러분의 작업 중 하나를
+끝낼 때까지 막혀 있다고 알게 되면, 동료의 “블록을 풀기” 위해 그 작업에
+모든 노력을 집중할 것입니다. 여러분과 동료는 더 이상 병렬로 작업할 수도,
+여러분 자신의 작업에 동시적으로 작업할 수도 없게 됩니다.
 
-The same basic dynamics come into play with software and hardware. On a machine
-with a single CPU core, the CPU can perform only one operation at a time, but
-it can still work concurrently. Using tools such as threads, processes, and
-async, the computer can pause one activity and switch to others before
-eventually cycling back to that first activity again. On a machine with
-multiple CPU cores, it can also do work in parallel. One core can be performing
-one task while another core performs a completely unrelated one, and those
-operations actually happen at the same time.
+같은 기본 동역학이 소프트웨어와 하드웨어에서도 나타납니다. 단일 CPU 코어
+머신에서는 CPU가 한 번에 하나의 연산만 수행할 수 있지만, 여전히 동시적으로
+작업할 수 있습니다. 스레드, 프로세스, async 같은 도구를 사용해 컴퓨터는 한
+활동을 일시 중지하고 다른 활동으로 전환한 뒤, 결국 그 첫 활동으로 다시
+돌아올 수 있습니다. 여러 CPU 코어 머신에서는 병렬로 작업할 수도 있습니다.
+한 코어가 한 작업을 수행하는 동안 다른 코어가 완전히 관련 없는 작업을 수행
+할 수 있고, 그 연산들은 실제로 같은 시각에 일어납니다.
 
-Running async code in Rust usually happens concurrently. Depending on the
-hardware, the operating system, and the async runtime we are using (more on
-async runtimes shortly), that concurrency may also use parallelism under the
-hood.
+러스트에서 async 코드를 실행하는 것은 보통 동시적으로 일어납니다. 하드웨어,
+운영체제, 우리가 사용하는 async 런타임에 따라(async 런타임에 대해서는 곧 더
+이야기하겠습니다) 그 동시성은 내부에서 병렬성을 사용할 수도 있습니다.
 
-Now, let’s dive into how async programming in Rust actually works.
+이제 러스트의 async 프로그래밍이 실제로 어떻게 동작하는지 깊이 들어가 봅시다.

@@ -1,45 +1,44 @@
-## Packages and Crates
+## 패키지와 크레이트
 
-The first parts of the module system we’ll cover are packages and crates.
+모듈 시스템에서 먼저 다룰 부분은 패키지와 크레이트입니다.
 
-A _crate_ is the smallest amount of code that the Rust compiler considers at a
-time. Even if you run `rustc` rather than `cargo` and pass a single source code
-file (as we did all the way back in [“Rust Program Basics”][basics]<!-- ignore
---> in Chapter 1), the compiler considers that file to be a crate. Crates can
-contain modules, and the modules may be defined in other files that get
-compiled with the crate, as we’ll see in the coming sections.
+*크레이트(crate)*는 러스트 컴파일러가 한 번에 고려하는 가장 작은 단위의 코드입니다.
+`cargo` 대신 `rustc`를 실행하고 (1장의 [“러스트 프로그램 기본”][basics]<!-- ignore
+-->에서 했던 것처럼) 단일 소스 코드 파일을 전달하더라도, 컴파일러는 그 파일을 하나의
+크레이트로 간주합니다. 크레이트는 모듈을 포함할 수 있고, 모듈은 곧이어 살펴보듯이
+크레이트와 함께 컴파일되는 다른 파일에 정의될 수도 있습니다.
 
-A crate can come in one of two forms: a binary crate or a library crate.
-_Binary crates_ are programs you can compile to an executable that you can run,
-such as a command line program or a server. Each must have a function called
-`main` that defines what happens when the executable runs. All the crates we’ve
-created so far have been binary crates.
+크레이트는 두 가지 형태 중 하나일 수 있습니다. 바이너리 크레이트(binary crate) 또는
+라이브러리 크레이트(library crate)입니다. *바이너리 크레이트*는 여러분이 실행할 수
+있는 실행 파일로 컴파일할 수 있는 프로그램으로, 명령줄 프로그램이나 서버 같은
+것들이 해당됩니다. 각각은 실행 파일이 실행될 때 어떤 일이 일어나는지를 정의하는
+`main`이라는 함수를 가져야 합니다. 우리가 지금까지 만든 모든 크레이트는 바이너리
+크레이트였습니다.
 
-_Library crates_ don’t have a `main` function, and they don’t compile to an
-executable. Instead, they define functionality intended to be shared with
-multiple projects. For example, the `rand` crate we used in [Chapter
-2][rand]<!-- ignore --> provides functionality that generates random numbers.
-Most of the time when Rustaceans say “crate,” they mean library crate, and they
-use “crate” interchangeably with the general programming concept of a “library.”
+*라이브러리 크레이트*에는 `main` 함수가 없고, 실행 파일로 컴파일되지 않습니다.
+대신 여러 프로젝트에서 공유되도록 의도된 기능을 정의합니다. 예를 들어, [2장][rand]
+<!-- ignore -->에서 사용한 `rand` 크레이트는 난수를 생성하는 기능을 제공합니다.
+러스타시안들이 “크레이트”라고 말할 때 대부분은 라이브러리 크레이트를 의미하며,
+“크레이트”를 일반적인 프로그래밍 개념인 “라이브러리”와 같은 의미로 혼용해 사용
+합니다.
 
-The _crate root_ is a source file that the Rust compiler starts from and makes
-up the root module of your crate (we’ll explain modules in depth in [“Control
-Scope and Privacy with Modules”][modules]<!-- ignore -->).
+*크레이트 루트(crate root)*는 러스트 컴파일러가 시작하는 소스 파일이며, 여러분
+크레이트의 루트 모듈을 구성합니다(모듈은 [“모듈로 스코프와 비공개성 제어하기”]
+[modules]<!-- ignore -->에서 자세히 설명합니다).
 
-A _package_ is a bundle of one or more crates that provides a set of
-functionality. A package contains a _Cargo.toml_ file that describes how to
-build those crates. Cargo is actually a package that contains the binary crate
-for the command line tool you’ve been using to build your code. The Cargo
-package also contains a library crate that the binary crate depends on. Other
-projects can depend on the Cargo library crate to use the same logic the Cargo
-command line tool uses.
+*패키지(package)*는 일련의 기능을 제공하는 하나 이상의 크레이트 묶음입니다.
+패키지는 그 크레이트들을 어떻게 빌드해야 하는지를 기술하는 *Cargo.toml* 파일을
+담고 있습니다. Cargo는 사실 여러분이 코드를 빌드하는 데 사용해 온 명령줄 도구의
+바이너리 크레이트를 담은 패키지입니다. Cargo 패키지에는 그 바이너리 크레이트가
+의존하는 라이브러리 크레이트도 들어 있습니다. 다른 프로젝트들은 Cargo 라이브러리
+크레이트에 의존해 Cargo 명령줄 도구와 같은 로직을 사용할 수 있습니다.
 
-A package can contain as many binary crates as you like, but at most only one
-library crate. A package must contain at least one crate, whether that’s a
-library or binary crate.
+패키지는 원하는 만큼 많은 바이너리 크레이트를 포함할 수 있지만, 라이브러리 크레
+이트는 최대 하나만 포함할 수 있습니다. 패키지는 라이브러리든 바이너리든 적어도
+하나의 크레이트는 포함해야 합니다.
 
-Let’s walk through what happens when we create a package. First, we enter the
-command `cargo new my-project`:
+패키지를 만들 때 일어나는 일을 살펴봅시다. 먼저 `cargo new my-project` 명령을
+입력합니다.
 
 ```console
 $ cargo new my-project
@@ -51,21 +50,22 @@ $ ls my-project/src
 main.rs
 ```
 
-After we run `cargo new my-project`, we use `ls` to see what Cargo creates. In
-the _my-project_ directory, there’s a _Cargo.toml_ file, giving us a package.
-There’s also a _src_ directory that contains _main.rs_. Open _Cargo.toml_ in
-your text editor and note that there’s no mention of _src/main.rs_. Cargo
-follows a convention that _src/main.rs_ is the crate root of a binary crate
-with the same name as the package. Likewise, Cargo knows that if the package
-directory contains _src/lib.rs_, the package contains a library crate with the
-same name as the package, and _src/lib.rs_ is its crate root. Cargo passes the
-crate root files to `rustc` to build the library or binary.
+`cargo new my-project`를 실행한 뒤, `ls`로 Cargo가 무엇을 만들었는지 확인합니다.
+*my-project* 디렉터리에는 *Cargo.toml* 파일이 있어 패키지가 만들어진 것을 알려
+줍니다. 또한 *main.rs*를 담고 있는 *src* 디렉터리도 있습니다. 텍스트 에디터로
+*Cargo.toml*을 열어 보면 *src/main.rs*에 대한 언급이 없다는 점을 알 수 있습니다.
+Cargo는 *src/main.rs*가 패키지와 같은 이름의 바이너리 크레이트의 크레이트 루트
+라는 관례를 따릅니다. 마찬가지로 Cargo는 패키지 디렉터리에 *src/lib.rs*가 있다면
+그 패키지가 패키지와 같은 이름의 라이브러리 크레이트를 포함하며, *src/lib.rs*가
+그 크레이트 루트라는 것을 압니다. Cargo는 크레이트 루트 파일을 `rustc`에 전달해
+라이브러리 또는 바이너리를 빌드합니다.
 
-Here, we have a package that only contains _src/main.rs_, meaning it only
-contains a binary crate named `my-project`. If a package contains _src/main.rs_
-and _src/lib.rs_, it has two crates: a binary and a library, both with the same
-name as the package. A package can have multiple binary crates by placing files
-in the _src/bin_ directory: Each file will be a separate binary crate.
+여기서는 *src/main.rs*만 포함한 패키지를 가지고 있으며, 이는 `my-project`라는
+이름의 바이너리 크레이트 하나만 포함한다는 뜻입니다. 패키지가 *src/main.rs*와
+*src/lib.rs*를 둘 다 가지고 있다면, 두 크레이트를 가집니다. 바이너리와 라이브러리
+이며 둘 다 패키지와 같은 이름을 갖습니다. 패키지는 *src/bin* 디렉터리에 파일을
+두어 여러 바이너리 크레이트를 가질 수 있습니다. 각 파일이 별도의 바이너리 크레
+이트가 됩니다.
 
 [basics]: ch01-02-hello-world.html#rust-program-basics
 [modules]: ch07-02-defining-modules-to-control-scope-and-privacy.html

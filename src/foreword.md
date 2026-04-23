@@ -1,47 +1,42 @@
-# Foreword
+# 서문
 
-The Rust programming language has come a long way in a few short years, from
-its creation and incubation by a small and nascent community of enthusiasts, to
-becoming one of the most loved and in-demand programming languages in the
-world. Looking back, it was inevitable that the power and promise of Rust would
-turn heads and gain a foothold in systems programming. What was not inevitable
-was the global growth in interest and innovation that permeated through open
-source communities and catalyzed wide-scale adoption across industries.
+러스트 프로그래밍 언어는 몇 년이라는 짧은 시간 동안 아주 먼 길을 걸어왔습니다.
+작고 이제 막 싹을 틔운 애호가 커뮤니티에서 잉태되고 자라난 이 언어는, 오늘날 세계에서
+가장 사랑받고 수요가 높은 프로그래밍 언어 중 하나가 되었습니다. 돌이켜 보면, 러스트가
+지닌 강력함과 가능성이 시스템 프로그래밍 영역에서 주목을 받고 자리를 잡은 것은 어쩌면
+당연한 수순이었습니다. 그러나 오픈 소스 커뮤니티 전반에 퍼져 여러 산업에 걸쳐 광범위한
+도입을 이끌어 낸 세계적인 관심과 혁신의 물결까지 예견된 일은 아니었습니다.
 
-At this point in time, it is easy to point to the wonderful features that Rust
-has to offer to explain this explosion in interest and adoption. Who doesn’t
-want memory safety, *and* fast performance, *and* a friendly compiler, *and*
-great tooling, among a host of other wonderful features? The Rust language you
-see today combines years of research in systems programming with the practical
-wisdom of a vibrant and passionate community. This language was designed with
-purpose and crafted with care, offering developers a tool that makes it easier
-to write safe, fast, and reliable code.
+오늘날 러스트가 이토록 폭발적인 관심과 도입을 이끌어 낸 이유를, 러스트가 제공하는
+훌륭한 기능들을 통해 설명하기란 어렵지 않습니다. 메모리 안전성, *그리고* 빠른 성능,
+*게다가* 친절한 컴파일러, *또한* 훌륭한 도구까지, 이런 멋진 특징들을 마다할 사람이
+어디 있을까요? 오늘날 우리가 보는 러스트 언어는 시스템 프로그래밍 분야의 오랜 연구와
+열정적이고 활력 넘치는 커뮤니티의 실전 경험이 결합된 결과물입니다. 이 언어는 목적을
+가지고 설계되었고 세심하게 다듬어졌으며, 개발자들에게 안전하고 빠르며 신뢰할 수 있는
+코드를 보다 쉽게 작성할 수 있는 도구를 제공합니다.
 
-But what makes Rust truly special is its roots in empowering you, the user, to
-achieve your goals. This is a language that wants you to succeed, and the
-principle of empowerment runs through the core of the community that builds,
-maintains, and advocates for this language. Since the previous edition of this
-definitive text, Rust has further developed into a truly global and trusted
-language. The Rust Project is now robustly supported by the Rust Foundation,
-which also invests in key initiatives to ensure that Rust is secure, stable,
-and sustainable.
+하지만 러스트를 진정으로 특별하게 만드는 것은, 사용자인 여러분이 원하는 목표를 이룰
+수 있도록 힘을 실어 주겠다는 그 뿌리에 있습니다. 러스트는 여러분이 성공하기를 바라는
+언어이며, 이 언어를 만들고 유지하며 알리는 커뮤니티의 중심에도 바로 그 역량 강화의
+원칙이 흐르고 있습니다. 이 결정판의 이전 에디션이 출간된 이후, 러스트는 한층 더 진정한
+의미의 전 세계적이고 신뢰할 수 있는 언어로 성장했습니다. 러스트 프로젝트는 이제 Rust
+Foundation의 든든한 지원을 받고 있으며, Rust Foundation은 러스트가 안전하고
+안정적이며 지속 가능하도록 보장하기 위한 주요 사업에도 투자하고 있습니다.
 
-This edition of *The Rust Programming Language* is a comprehensive update,
-reflecting the language’s evolution over the years and providing valuable new
-information. But it is not just a guide to syntax and libraries—it’s an
-invitation to join a community that values quality, performance, and thoughtful
-design. Whether you’re a seasoned developer looking to explore Rust for the
-first time or an experienced Rustacean looking to refine your skills, this
-edition offers something for everyone.
+이번 에디션의 *The Rust Programming Language*는 지난 수년간 러스트가 진화해 온
+모습을 반영하고 귀중한 새로운 정보를 담아 낸 종합적인 개정판입니다. 하지만 단순히
+문법과 라이브러리에 대한 안내서가 아니라, 품질과 성능, 그리고 사려 깊은 설계를
+소중히 여기는 커뮤니티에 합류하라는 초대장이기도 합니다. 러스트를 처음 접하는 경험
+많은 개발자든, 자신의 실력을 한층 더 다듬고 싶은 노련한 러스타시안(Rustacean)이든,
+이번 에디션에는 모두를 위한 내용이 담겨 있습니다.
 
-The Rust journey has been one of collaboration, learning, and iteration. The
-growth of the language and its ecosystem is a direct reflection of the vibrant,
-diverse community behind it. The contributions of thousands of developers, from
-core language designers to casual contributors, are what make Rust such a
-unique and powerful tool. By picking up this book, you’re not just learning a
-new programming language—you’re joining a movement to make software better,
-safer, and more enjoyable to work with.
+러스트의 여정은 협업과 배움, 그리고 반복된 개선의 여정이었습니다. 이 언어와 생태계의
+성장은 그 뒤에 서 있는 활기차고 다양한 커뮤니티의 직접적인 반영입니다. 핵심 언어
+설계자부터 가벼운 기여자에 이르기까지 수천 명의 개발자들이 보낸 기여가, 러스트를 이토록
+독특하고 강력한 도구로 만들고 있습니다. 여러분이 이 책을 집어든 순간, 단순히 새로운
+프로그래밍 언어를 배우기 시작한 것이 아니라, 소프트웨어를 더 낫고, 더 안전하고, 더
+즐겁게 다룰 수 있도록 만들려는 움직임에 합류하게 된 것입니다.
 
-Welcome to the Rust community!
+러스트 커뮤니티에 오신 것을 환영합니다!
 
-- Bec Rumbul, Executive Director of the Rust Foundation
+- Bec Rumbul, Rust Foundation 총괄 이사(Executive Director)

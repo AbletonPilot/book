@@ -3,99 +3,89 @@
 <a id="extensible-concurrency-with-the-sync-and-send-traits"></a>
 <a id="extensible-concurrency-with-the-send-and-sync-traits"></a>
 
-## Extensible Concurrency with `Send` and `Sync`
+## `Send`와 `Sync`로 확장 가능한 동시성
 
-Interestingly, almost every concurrency feature we’ve talked about so far in
-this chapter has been part of the standard library, not the language. Your
-options for handling concurrency are not limited to the language or the
-standard library; you can write your own concurrency features or use those
-written by others.
+흥미롭게도 이 장에서 지금까지 이야기한 거의 모든 동시성 기능은 언어가 아니라
+표준 라이브러리의 일부였습니다. 동시성 처리 옵션은 언어나 표준 라이브러리에
+국한되지 않습니다. 여러분만의 동시성 기능을 작성하거나 다른 사람들이 작성한
+것을 사용할 수 있습니다.
 
-However, among the key concurrency concepts that are embedded in the language
-rather than the standard library are the `std::marker` traits `Send` and `Sync`.
+그러나 표준 라이브러리가 아닌 언어에 내장된 핵심 동시성 개념 중에는
+`std::marker` 트레이트 `Send`와 `Sync`가 있습니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="allowing-transference-of-ownership-between-threads-with-send"></a>
 
-### Transferring Ownership Between Threads
+### 스레드 간에 소유권 이전하기
 
-The `Send` marker trait indicates that ownership of values of the type
-implementing `Send` can be transferred between threads. Almost every Rust type
-implements `Send`, but there are some exceptions, including `Rc<T>`: This
-cannot implement `Send` because if you cloned an `Rc<T>` value and tried to
-transfer ownership of the clone to another thread, both threads might update
-the reference count at the same time. For this reason, `Rc<T>` is implemented
-for use in single-threaded situations where you don’t want to pay the
-thread-safe performance penalty.
+`Send` 마커 트레이트는 `Send`를 구현한 타입의 값의 소유권이 스레드 간에 이전될
+수 있음을 나타냅니다. 거의 모든 러스트 타입이 `Send`를 구현하지만 `Rc<T>`를
+포함한 예외도 있습니다. `Rc<T>`는 `Send`를 구현할 수 없는데, `Rc<T>` 값을
+복제하고 그 복제본의 소유권을 다른 스레드로 이전하려 하면 두 스레드가 같은
+시각에 참조 카운트를 업데이트할 수 있기 때문입니다. 이 이유로 `Rc<T>`는 스레드
+안전 성능 벌점을 지불하고 싶지 않은 단일 스레드 상황에서 사용되도록 구현
+되었습니다.
 
-Therefore, Rust’s type system and trait bounds ensure that you can never
-accidentally send an `Rc<T>` value across threads unsafely. When we tried to do
-this in Listing 16-14, we got the error `` the trait `Send` is not implemented
-for `Rc<Mutex<i32>>` ``. When we switched to `Arc<T>`, which does implement
-`Send`, the code compiled.
+따라서 러스트의 타입 시스템과 트레이트 경계는 `Rc<T>` 값을 안전하지 않게
+스레드 간에 실수로 보낼 수 없도록 보장합니다. Listing 16-14에서 이를 시도
+했을 때 `` the trait `Send` is not implemented for `Rc<Mutex<i32>>` `` 오류를
+얻었습니다. `Send`를 구현하는 `Arc<T>`로 전환하자 코드가 컴파일되었습니다.
 
-Any type composed entirely of `Send` types is automatically marked as `Send` as
-well. Almost all primitive types are `Send`, aside from raw pointers, which
-we’ll discuss in Chapter 20.
+전체가 `Send` 타입으로 구성된 어떤 타입도 자동으로 `Send`로 표시됩니다. 거의
+모든 원시 타입은 `Send`이지만, 20장에서 논의할 원시 포인터는 예외입니다.
 
 <!-- Old headings. Do not remove or links may break. -->
 
 <a id="allowing-access-from-multiple-threads-with-sync"></a>
 
-### Accessing from Multiple Threads
+### 여러 스레드에서 접근하기
 
-The `Sync` marker trait indicates that it is safe for the type implementing
-`Sync` to be referenced from multiple threads. In other words, any type `T`
-implements `Sync` if `&T` (an immutable reference to `T`) implements `Send`,
-meaning the reference can be sent safely to another thread. Similar to `Send`,
-primitive types all implement `Sync`, and types composed entirely of types that
-implement `Sync` also implement `Sync`.
+`Sync` 마커 트레이트는 `Sync`를 구현한 타입이 여러 스레드에서 참조되어도
+안전함을 나타냅니다. 다시 말해, 어떤 타입 `T`는 `&T`(`T`에 대한 불변 참조)가
+`Send`를 구현하면 `Sync`를 구현하며, 이는 참조가 다른 스레드로 안전하게 보내질
+수 있음을 뜻합니다. `Send`와 마찬가지로 원시 타입은 모두 `Sync`를 구현하고,
+전체가 `Sync`를 구현하는 타입으로 구성된 타입도 `Sync`를 구현합니다.
 
-The smart pointer `Rc<T>` also doesn’t implement `Sync` for the same reasons
-that it doesn’t implement `Send`. The `RefCell<T>` type (which we talked about
-in Chapter 15) and the family of related `Cell<T>` types don’t implement
-`Sync`. The implementation of borrow checking that `RefCell<T>` does at runtime
-is not thread-safe. The smart pointer `Mutex<T>` implements `Sync` and can be
-used to share access with multiple threads, as you saw in [“Shared Access to
-`Mutex<T>`”][shared-access]<!-- ignore -->.
+스마트 포인터 `Rc<T>`도 `Send`를 구현하지 않는 것과 같은 이유로 `Sync`를
+구현하지 않습니다. `RefCell<T>` 타입(15장에서 이야기함)과 관련된 `Cell<T>`
+계열 타입도 `Sync`를 구현하지 않습니다. `RefCell<T>`가 런타임에 수행하는
+빌림 검사 구현은 스레드 안전하지 않습니다. 스마트 포인터 `Mutex<T>`는 `Sync`
+를 구현하며, [“`Mutex<T>`의 공유 접근”][shared-access]<!-- ignore -->에서
+본 것처럼 여러 스레드와 접근을 공유하는 데 사용될 수 있습니다.
 
-### Implementing `Send` and `Sync` Manually Is Unsafe
+### `Send`와 `Sync`를 수동으로 구현하는 것은 안전하지 않습니다
 
-Because types composed entirely of other types that implement the `Send` and
-`Sync` traits also automatically implement `Send` and `Sync`, we don’t have to
-implement those traits manually. As marker traits, they don’t even have any
-methods to implement. They’re just useful for enforcing invariants related to
-concurrency.
+`Send`와 `Sync` 트레이트를 구현하는 다른 타입들만으로 구성된 타입은 자동으로
+`Send`와 `Sync`를 구현하므로, 그 트레이트들을 수동으로 구현할 필요가 없습니다.
+마커 트레이트로서 구현할 메서드조차 없습니다. 동시성과 관련된 불변식을 강제
+하는 데만 유용합니다.
 
-Manually implementing these traits involves implementing unsafe Rust code.
-We’ll talk about using unsafe Rust code in Chapter 20; for now, the important
-information is that building new concurrent types not made up of `Send` and
-`Sync` parts requires careful thought to uphold the safety guarantees. [“The
-Rustonomicon”][nomicon] has more information about these guarantees and how to
-uphold them.
+이 트레이트를 수동으로 구현하는 것은 안전하지 않은 러스트 코드를 구현하는
+것을 포함합니다. 안전하지 않은 러스트 코드 사용은 20장에서 이야기하겠습니다.
+지금은 `Send`와 `Sync` 부분으로 구성되지 않은 새 동시성 타입을 만드는 것은
+안전 보장을 유지하기 위해 신중한 사고가 필요하다는 중요한 정보만 알아 두세요.
+[“러스토노미콘(The Rustonomicon)”][nomicon]에 이 보장과 그것을 유지하는 방법에
+대한 더 많은 정보가 있습니다.
 
-## Summary
+## 요약
 
-This isn’t the last you’ll see of concurrency in this book: The next chapter
-focuses on async programming, and the project in Chapter 21 will use the
-concepts in this chapter in a more realistic situation than the smaller
-examples discussed here.
+이 책에서 동시성을 보는 것은 이것이 마지막이 아닙니다. 다음 장은 async
+프로그래밍에 집중하고, 21장의 프로젝트는 여기서 논의한 작은 예제보다 더 현실적
+인 상황에서 이 장의 개념을 사용할 것입니다.
 
-As mentioned earlier, because very little of how Rust handles concurrency is
-part of the language, many concurrency solutions are implemented as crates.
-These evolve more quickly than the standard library, so be sure to search
-online for the current, state-of-the-art crates to use in multithreaded
-situations.
+앞서 언급했듯이 러스트의 동시성 처리 중 언어의 일부인 것은 매우 적으므로,
+많은 동시성 해법이 크레이트로 구현되어 있습니다. 이들은 표준 라이브러리보다
+더 빠르게 진화하므로, 다중 스레드 상황에서 사용할 현재의, 최신의 크레이트를
+온라인에서 검색해 보세요.
 
-The Rust standard library provides channels for message passing and smart
-pointer types, such as `Mutex<T>` and `Arc<T>`, that are safe to use in
-concurrent contexts. The type system and the borrow checker ensure that the
-code using these solutions won’t end up with data races or invalid references.
-Once you get your code to compile, you can rest assured that it will happily
-run on multiple threads without the kinds of hard-to-track-down bugs common in
-other languages. Concurrent programming is no longer a concept to be afraid of:
-Go forth and make your programs concurrent, fearlessly!
+러스트 표준 라이브러리는 메시지 전달을 위한 채널과 `Mutex<T>`, `Arc<T>` 같은
+동시성 맥락에서 안전하게 사용할 수 있는 스마트 포인터 타입을 제공합니다.
+타입 시스템과 빌림 검사기는 이 해법을 사용하는 코드가 데이터 경합이나 유효
+하지 않은 참조로 끝나지 않도록 보장합니다. 일단 코드가 컴파일되면 다른 언어
+에서 흔한, 추적하기 어려운 버그 없이 여러 스레드에서 즐겁게 실행될 것임을
+안심해도 됩니다. 동시성 프로그래밍은 더 이상 두려운 개념이 아닙니다. 두려움
+없이 프로그램을 동시적으로 만들어 보세요!
 
 [shared-access]: ch16-03-shared-state.html#shared-access-to-mutext
 [nomicon]: ../nomicon/index.html

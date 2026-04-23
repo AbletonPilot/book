@@ -1,14 +1,14 @@
-# More About Cargo and Crates.io
+# 카고와 Crates.io 더 알아보기
 
-So far, we’ve used only the most basic features of Cargo to build, run, and
-test our code, but it can do a lot more. In this chapter, we’ll discuss some of
-its other, more advanced features to show you how to do the following:
+지금까지 우리는 코드를 빌드, 실행, 테스트하는 가장 기본적인 카고 기능만
+사용해 왔지만, 카고는 훨씬 더 많은 일을 할 수 있습니다. 이 장에서는 다음과
+같은 일들을 어떻게 하는지 보여 주기 위해 카고의 더 고급 기능 몇 가지를 다룹니다.
 
-- Customize your build through release profiles.
-- Publish libraries on [crates.io](https://crates.io/)<!-- ignore -->.
-- Organize large projects with workspaces.
-- Install binaries from [crates.io](https://crates.io/)<!-- ignore -->.
-- Extend Cargo using custom commands.
+- 릴리스 프로필로 빌드 커스터마이즈하기
+- [crates.io](https://crates.io/)<!-- ignore -->에 라이브러리 게시하기
+- 워크스페이스로 큰 프로젝트 구성하기
+- [crates.io](https://crates.io/)<!-- ignore -->에서 바이너리 설치하기
+- 사용자 정의 명령으로 카고 확장하기
 
-Cargo can do even more than the functionality we cover in this chapter, so for
-a full explanation of all its features, see [its documentation](https://doc.rust-lang.org/cargo/).
+카고는 이 장에서 다루는 기능보다 훨씬 더 많은 일을 할 수 있으므로, 모든 기능에
+대한 완전한 설명은 [카고 문서](https://doc.rust-lang.org/cargo/)를 참고하세요.

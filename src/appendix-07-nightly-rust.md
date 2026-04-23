@@ -1,50 +1,30 @@
-## Appendix G - How Rust is Made and “Nightly Rust”
+## 부록 G - 러스트는 어떻게 만들어지는가와 “Nightly Rust”
 
-This appendix is about how Rust is made and how that affects you as a Rust
-developer.
+이 부록은 러스트가 어떻게 만들어지는지, 그리고 그것이 러스트 개발자로서 여러분에게 어떤 영향을 미치는지에 관한 것입니다.
 
-### Stability Without Stagnation
+### 정체 없는 안정성
 
-As a language, Rust cares a _lot_ about the stability of your code. We want
-Rust to be a rock-solid foundation you can build on, and if things were
-constantly changing, that would be impossible. At the same time, if we can’t
-experiment with new features, we may not find out important flaws until after
-their release, when we can no longer change things.
+언어로서 러스트는 코드의 안정성을 _매우_ 중요하게 여깁니다. 러스트가 위에 쌓아 올릴 수 있는 바위처럼 단단한 토대가 되기를 원하며, 만약 것들이 끊임없이 변한다면 그것은 불가능할 것입니다. 동시에, 새 기능을 실험할 수 없다면 그 기능을 변경할 수 없는 릴리스 후에야 중요한 결함을 발견할 수도 있습니다.
 
-Our solution to this problem is what we call “stability without stagnation”,
-and our guiding principle is this: you should never have to fear upgrading to a
-new version of stable Rust. Each upgrade should be painless, but should also
-bring you new features, fewer bugs, and faster compile times.
+이 문제에 대한 우리의 해법은 “정체 없는 안정성(stability without stagnation)”이라고 부르는 것이며, 우리의 안내 원칙은 다음과 같습니다. 새 안정 러스트 버전으로 업그레이드하는 것을 결코 두려워할 필요가 없어야 합니다. 각 업그레이드는 고통이 없어야 하지만 새 기능과 더 적은 버그, 더 빠른 컴파일 시간을 가져와야 합니다.
 
-### Choo, Choo! Release Channels and Riding the Trains
+### 칙칙폭폭! 릴리스 채널과 열차 타기
 
-Rust development operates on a _train schedule_. That is, all development is
-done in the main branch of the Rust repository. Releases follow a software
-release train model, which has been used by Cisco IOS and other software
-projects. There are three _release channels_ for Rust:
+러스트 개발은 _열차 일정(train schedule)_ 으로 운영됩니다. 즉 모든 개발은 러스트 저장소의 main 브랜치에서 이루어집니다. 릴리스는 Cisco IOS와 다른 소프트웨어 프로젝트에서 사용된 소프트웨어 릴리스 열차 모델을 따릅니다. 러스트에는 세 개의 _릴리스 채널_ 이 있습니다.
 
 - Nightly
 - Beta
 - Stable
 
-Most Rust developers primarily use the stable channel, but those who want to
-try out experimental new features may use nightly or beta.
+대부분의 러스트 개발자는 주로 stable 채널을 사용하지만, 실험적인 새 기능을 시도해 보고 싶은 사람들은 nightly나 beta를 사용할 수 있습니다.
 
-Here’s an example of how the development and release process works: let’s
-assume that the Rust team is working on the release of Rust 1.5. That release
-happened in December of 2015, but it will provide us with realistic version
-numbers. A new feature is added to Rust: a new commit lands on the main
-branch. Each night, a new nightly version of Rust is produced. Every day is a
-release day, and these releases are created by our release infrastructure
-automatically. So as time passes, our releases look like this, once a night:
+개발과 릴리스 과정이 어떻게 작동하는지에 대한 예시입니다. Rust 팀이 Rust 1.5의 릴리스를 작업하고 있다고 가정합시다. 그 릴리스는 2015년 12월에 일어났지만, 현실적인 버전 번호를 제공할 것입니다. Rust에 새 기능이 추가됩니다. 새 커밋이 main 브랜치에 도달합니다. 매일 밤 새 nightly 버전의 Rust가 만들어집니다. 매일이 릴리스 날이며, 이 릴리스들은 우리 릴리스 인프라에 의해 자동으로 만들어집니다. 그래서 시간이 지남에 따라 우리의 릴리스는 매일 밤 다음과 같이 보입니다.
 
 ```text
 nightly: * - - * - - *
 ```
 
-Every six weeks, it’s time to prepare a new release! The `beta` branch of the
-Rust repository branches off from the main branch used by nightly. Now,
-there are two releases:
+6주마다 새 릴리스를 준비할 시간입니다! Rust 저장소의 `beta` 브랜치가 nightly에서 사용하는 main 브랜치에서 갈라집니다. 이제 두 릴리스가 있습니다.
 
 ```text
 nightly: * - - * - - *
@@ -52,9 +32,7 @@ nightly: * - - * - - *
 beta:                *
 ```
 
-Most Rust users do not use beta releases actively, but test against beta in
-their CI system to help Rust discover possible regressions. In the meantime,
-there’s still a nightly release every night:
+대부분의 Rust 사용자는 beta 릴리스를 적극적으로 사용하지는 않지만, Rust가 가능한 회귀를 발견하는 것을 돕기 위해 자신의 CI 시스템에서 beta에 대해 테스트합니다. 그 동안에도 매일 밤 여전히 nightly 릴리스가 있습니다.
 
 ```text
 nightly: * - - * - - * - - * - - *
@@ -62,10 +40,7 @@ nightly: * - - * - - * - - * - - *
 beta:                *
 ```
 
-Let’s say a regression is found. Good thing we had some time to test the beta
-release before the regression snuck into a stable release! The fix is applied
-to the main branch, so that nightly is fixed, and then the fix is backported to
-the `beta` branch, and a new release of beta is produced:
+회귀가 발견되었다고 합시다. 회귀가 안정 릴리스로 슬쩍 들어가기 전에 beta 릴리스를 테스트할 시간이 있어서 다행입니다! 수정이 main 브랜치에 적용되어 nightly가 고쳐지고, 그런 다음 수정이 `beta` 브랜치로 백포트되어 beta의 새 릴리스가 만들어집니다.
 
 ```text
 nightly: * - - * - - * - - * - - * - - *
@@ -73,8 +48,7 @@ nightly: * - - * - - * - - * - - * - - *
 beta:                * - - - - - - - - *
 ```
 
-Six weeks after the first beta was created, it’s time for a stable release! The
-`stable` branch is produced from the `beta` branch:
+첫 beta가 만들어진 지 6주 후, 안정 릴리스 시간입니다! `stable` 브랜치는 `beta` 브랜치에서 만들어집니다.
 
 ```text
 nightly: * - - * - - * - - * - - * - - * - * - *
@@ -84,10 +58,7 @@ beta:                * - - - - - - - - *
 stable:                                *
 ```
 
-Hooray! Rust 1.5 is done! However, we’ve forgotten one thing: because the six
-weeks have gone by, we also need a new beta of the _next_ version of Rust, 1.6.
-So after `stable` branches off of `beta`, the next version of `beta` branches
-off of `nightly` again:
+만세! Rust 1.5가 완성되었습니다! 그러나 우리가 한 가지 잊은 것이 있습니다. 6주가 지났기 때문에 _다음_ 버전의 Rust, 1.6의 새 beta도 필요합니다. 그래서 `stable`이 `beta`에서 갈라진 후, `beta`의 다음 버전이 다시 `nightly`에서 갈라집니다.
 
 ```text
 nightly: * - - * - - * - - * - - * - - * - * - *
@@ -97,63 +68,33 @@ beta:                * - - - - - - - - *       *
 stable:                                *
 ```
 
-This is called the “train model” because every six weeks, a release “leaves the
-station”, but still has to take a journey through the beta channel before it
-arrives as a stable release.
+이것은 “열차 모델(train model)”이라고 불리는데, 6주마다 릴리스가 “역을 떠나지만”, 안정 릴리스로 도착하기 전에 beta 채널을 통해 여행을 해야 하기 때문입니다.
 
-Rust releases every six weeks, like clockwork. If you know the date of one Rust
-release, you can know the date of the next one: it’s six weeks later. A nice
-aspect of having releases scheduled every six weeks is that the next train is
-coming soon. If a feature happens to miss a particular release, there’s no need
-to worry: another one is happening in a short time! This helps reduce pressure
-to sneak possibly unpolished features in close to the release deadline.
+Rust는 시계처럼 6주마다 릴리스됩니다. 한 Rust 릴리스의 날짜를 알면 다음 날짜를 알 수 있습니다. 6주 뒤입니다. 6주마다 릴리스가 예정되어 있다는 것의 좋은 점은, 다음 열차가 곧 온다는 것입니다. 기능이 특정 릴리스를 놓쳐도 걱정할 필요가 없습니다. 다른 릴리스가 곧 있을 테니까요! 이는 릴리스 마감일 근처에 아직 다듬어지지 않은 기능을 슬쩍 집어넣으려는 압력을 줄이는 데 도움이 됩니다.
 
-Thanks to this process, you can always check out the next build of Rust and
-verify for yourself that it’s easy to upgrade to: if a beta release doesn’t
-work as expected, you can report it to the team and get it fixed before the
-next stable release happens! Breakage in a beta release is relatively rare, but
-`rustc` is still a piece of software, and bugs do exist.
+이 과정 덕분에 Rust의 다음 빌드를 항상 확인하고 업그레이드가 쉽다는 것을 직접 확인할 수 있습니다. beta 릴리스가 예상대로 동작하지 않으면 팀에 보고하고 다음 안정 릴리스가 일어나기 전에 고칠 수 있습니다! beta 릴리스의 파손은 상대적으로 드물지만, `rustc`는 여전히 소프트웨어의 한 조각이고 버그는 존재합니다.
 
-### Maintenance time
+### 유지보수 기간
 
-The Rust project supports the most recent stable version. When a new stable
-version is released, the old version reaches its end of life (EOL). This means
-each version is supported for six weeks.
+Rust 프로젝트는 가장 최근의 안정 버전을 지원합니다. 새 안정 버전이 릴리스되면 옛 버전은 수명을 다합니다(EOL). 즉 각 버전은 6주 동안 지원됩니다.
 
-### Unstable Features
+### 불안정 기능
 
-There’s one more catch with this release model: unstable features. Rust uses a
-technique called “feature flags” to determine what features are enabled in a
-given release. If a new feature is under active development, it lands on the
-main branch, and therefore, in nightly, but behind a _feature flag_. If you, as
-a user, wish to try out the work-in-progress feature, you can, but you must be
-using a nightly release of Rust and annotate your source code with the
-appropriate flag to opt in.
+이 릴리스 모델에는 한 가지 추가 사항이 있습니다. 불안정 기능입니다. Rust는 주어진 릴리스에서 어떤 기능이 활성화되어 있는지 결정하기 위해 “feature flags”라는 기법을 사용합니다. 새 기능이 활발하게 개발 중이라면 main 브랜치에, 따라서 nightly에 도달하지만 _feature flag_ 뒤에 있습니다. 사용자로서 진행 중인 기능을 시도해 보고 싶다면 그럴 수 있지만, Rust의 nightly 릴리스를 사용하고 옵트인하기 위해 적절한 플래그로 소스 코드에 어노테이트해야 합니다.
 
-If you’re using a beta or stable release of Rust, you can’t use any feature
-flags. This is the key that allows us to get practical use with new features
-before we declare them stable forever. Those who wish to opt into the bleeding
-edge can do so, and those who want a rock-solid experience can stick with
-stable and know that their code won’t break. Stability without stagnation.
+Rust의 beta나 stable 릴리스를 사용하고 있다면 어떤 feature flag도 사용할 수 없습니다. 이것이 새 기능을 영원히 안정화하기 전에 실제 사용해 볼 수 있게 해 주는 열쇠입니다. 최첨단에 옵트인하고 싶은 사람들은 그렇게 할 수 있고, 바위처럼 단단한 경험을 원하는 사람들은 stable에 머무르며 자신의 코드가 깨지지 않을 것임을 알 수 있습니다. 정체 없는 안정성입니다.
 
-This book only contains information about stable features, as in-progress
-features are still changing, and surely they’ll be different between when this
-book was written and when they get enabled in stable builds. You can find
-documentation for nightly-only features online.
+이 책은 안정 기능에 대한 정보만 담고 있습니다. 진행 중인 기능들은 여전히 바뀌고 있으며, 이 책이 작성될 때와 안정 빌드에서 활성화될 때 사이에 분명 달라질 것이기 때문입니다. nightly 전용 기능에 대한 문서는 온라인에서 찾을 수 있습니다.
 
-### Rustup and the Role of Rust Nightly
+### Rustup과 Rust Nightly의 역할
 
-Rustup makes it easy to change between different release channels of Rust, on a
-global or per-project basis. By default, you’ll have stable Rust installed. To
-install nightly, for example:
+Rustup은 전역 또는 프로젝트별로 Rust의 서로 다른 릴리스 채널 사이를 쉽게 전환할 수 있게 해 줍니다. 기본적으로 stable Rust가 설치되어 있을 것입니다. 예를 들어 nightly를 설치하려면
 
 ```console
 $ rustup toolchain install nightly
 ```
 
-You can see all of the _toolchains_ (releases of Rust and associated
-components) you have installed with `rustup` as well. Here’s an example on one
-of your authors’ Windows computer:
+`rustup`으로 설치한 모든 _툴체인(toolchains)_ (Rust의 릴리스와 연관된 구성 요소)도 볼 수 있습니다. 저자 중 한 명의 Windows 컴퓨터의 예는 다음과 같습니다.
 
 ```powershell
 > rustup toolchain list
@@ -162,45 +103,21 @@ beta-x86_64-pc-windows-msvc
 nightly-x86_64-pc-windows-msvc
 ```
 
-As you can see, the stable toolchain is the default. Most Rust users use stable
-most of the time. You might want to use stable most of the time, but use
-nightly on a specific project, because you care about a cutting-edge feature.
-To do so, you can use `rustup override` in that project’s directory to set the
-nightly toolchain as the one `rustup` should use when you’re in that directory:
+보다시피 stable 툴체인이 기본값입니다. 대부분의 Rust 사용자는 대부분의 경우 stable을 사용합니다. 대부분의 경우 stable을 사용하고 싶지만 최신 기능에 관심이 있어 특정 프로젝트에는 nightly를 사용하고 싶을 수도 있습니다. 그렇게 하려면, 그 프로젝트의 디렉터리에서 `rustup override`를 사용해 그 디렉터리에 있을 때 `rustup`이 사용해야 할 툴체인으로 nightly를 설정할 수 있습니다.
 
 ```console
 $ cd ~/projects/needs-nightly
 $ rustup override set nightly
 ```
 
-Now, every time you call `rustc` or `cargo` inside of
-_~/projects/needs-nightly_, `rustup` will make sure that you are using nightly
-Rust, rather than your default of stable Rust. This comes in handy when you
-have a lot of Rust projects!
+이제 _~/projects/needs-nightly_ 안에서 `rustc`나 `cargo`를 호출할 때마다, `rustup`은 기본값인 stable Rust 대신 nightly Rust를 사용하도록 보장합니다. 이는 많은 Rust 프로젝트가 있을 때 유용합니다!
 
-### The RFC Process and Teams
+### RFC 과정과 팀
 
-So how do you learn about these new features? Rust’s development model follows
-a _Request For Comments (RFC) process_. If you’d like an improvement in Rust,
-you can write up a proposal, called an RFC.
+그렇다면 이 새 기능들에 대해 어떻게 알게 될까요? Rust의 개발 모델은 _Request For Comments (RFC) 과정_ 을 따릅니다. Rust의 개선을 원한다면 RFC라고 부르는 제안을 작성할 수 있습니다.
 
-Anyone can write RFCs to improve Rust, and the proposals are reviewed and
-discussed by the Rust team, which is comprised of many topic subteams. There’s
-a full list of the teams [on Rust’s website](https://www.rust-lang.org/governance), which includes teams for
-each area of the project: language design, compiler implementation,
-infrastructure, documentation, and more. The appropriate team reads the
-proposal and the comments, writes some comments of their own, and eventually,
-there’s consensus to accept or reject the feature.
+누구나 Rust를 개선하는 RFC를 작성할 수 있으며, 제안은 많은 주제 서브팀으로 구성된 Rust 팀이 검토하고 논의합니다. [Rust 웹사이트](https://www.rust-lang.org/governance)에 모든 팀의 전체 목록이 있으며, 여기에는 프로젝트의 각 영역에 대한 팀—언어 설계, 컴파일러 구현, 인프라, 문서 등—이 포함됩니다. 적절한 팀이 제안과 주석을 읽고 자신의 주석을 작성하며, 결국 기능을 받아들이거나 거절하자는 합의가 이루어집니다.
 
-If the feature is accepted, an issue is opened on the Rust repository, and
-someone can implement it. The person who implements it very well may not be the
-person who proposed the feature in the first place! When the implementation is
-ready, it lands on the main branch behind a feature gate, as we discussed in
-the [“Unstable Features”](#unstable-features)<!-- ignore --> section.
+기능이 받아들여지면 Rust 저장소에 이슈가 열리고, 누군가 그것을 구현할 수 있습니다. 그것을 구현하는 사람은 애초에 기능을 제안한 사람이 아닐 수도 있습니다! 구현이 준비되면, [“불안정 기능”](#unstable-features)<!-- ignore --> 절에서 논의한 대로 feature gate 뒤에 main 브랜치에 도달합니다.
 
-After some time, once Rust developers who use nightly releases have been able
-to try out the new feature, team members will discuss the feature, how it’s
-worked out on nightly, and decide if it should make it into stable Rust or not.
-If the decision is to move forward, the feature gate is removed, and the
-feature is now considered stable! It rides the trains into a new stable release
-of Rust.
+시간이 지나고 nightly 릴리스를 사용하는 Rust 개발자들이 새 기능을 시도할 수 있게 된 뒤, 팀원들은 그 기능, nightly에서 어떻게 작동했는지를 논의하고 안정 Rust에 들어가야 할지 결정합니다. 앞으로 나아가기로 결정되면 feature gate가 제거되고, 기능은 이제 안정된 것으로 간주됩니다! 열차를 타고 새 안정 Rust 릴리스로 들어갑니다.
